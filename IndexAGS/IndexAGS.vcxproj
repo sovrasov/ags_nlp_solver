@@ -81,10 +81,11 @@
     <ClInclude Include="CoreUtils.hpp" />
     <ClInclude Include="HookeJeevesLocalMethod.hpp" />
     <ClInclude Include="LocalMethodCommon.hpp" />
+    <ClInclude Include="OptimizerMultiMap.hpp" />
     <ClInclude Include="OptimizerDataStructures.hpp" />
     <ClInclude Include="OptimizerFunction.hpp" />
     <ClInclude Include="OptimizerAlgorithm.hpp" />
-    <ClInclude Include="Map.h" />
+    <ClInclude Include="Map.hpp" />
     <ClInclude Include="OptimizerCoreGlobal.hpp" />
     <ClInclude Include="OptimizerResult.hpp" />
     <ClInclude Include="OptimizerSearchInformationStorage.hpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="OptimizerDataStructures.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OptimizerAlgorithm.cpp" />
+    <ClCompile Include="OptimizerMultiMap.cpp" />
     <ClCompile Include="OptimizerResult.cpp" />
     <ClCompile Include="OptimizerSearchInformationStorage.cpp" />
     <ClCompile Include="OptimizerSearchSequence.cpp" />

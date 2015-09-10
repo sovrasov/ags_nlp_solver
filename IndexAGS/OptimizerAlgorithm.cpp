@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cassert>
 #include "OptimizerAlgorithm.hpp"
-#include "Map.h"
+#include "Map.hpp"
 #include "CoreUtils.hpp"
 #include "HookeJeevesLocalMethod.hpp"
 

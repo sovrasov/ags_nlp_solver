@@ -1,5 +1,5 @@
-#include <math.h>
-#include "map.h"
+#include <cmath>
+#include "Map.hpp"
 
 extern int n1,nexp,l,iq,iu[10],iv[10];
 
@@ -80,7 +80,7 @@ __declspec(dllexport) void invmad(int m, double xp[], int kp,
 	/* calculate kx preimage p node */
 	/*   node type mapping m level  */
 
-	double mne, d1, dd, x, dr, del, convers;
+	double mne, d1, dd, x, dr, del;// , convers;
 	double r, d, u[10], y[10];
 	int i, k, kx, nexp;
 	void xyd(double *, int, double *, int);

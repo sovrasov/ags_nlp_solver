@@ -3,7 +3,7 @@
 
 #include "OptimizerCoreGlobal.hpp"
 #include "OptimizerDataStructures.hpp"
-#include "Map.h"
+#include "Map.hpp"
 #include "OptimizerSpaceTransformation.hpp"
 #include <set>
 

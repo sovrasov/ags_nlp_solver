@@ -1,7 +1,7 @@
 #include "OptimizerSearchSequence.hpp"
 #include "CoreUtils.hpp"
 #include "OptimizerCoreGlobal.hpp"
-#include "Map.h"
+#include "Map.hpp"
 #include <cassert>
 
 using namespace optimizercore;

@@ -1,5 +1,5 @@
-#include <math.h>
-#include "map.h"
+#include <cmath>
+#include "Map.hpp"
 
 int n1,nexp,l,iq,iu[10],iv[10];
 

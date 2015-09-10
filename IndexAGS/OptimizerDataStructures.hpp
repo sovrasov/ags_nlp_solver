@@ -1,7 +1,7 @@
 #ifndef OPTIMIZER_DATA_STRUCTURES_HPP
 #define OPTIMIZER_DATA_STRUCTURES_HPP
 
-#include "Map.h"
+#include "Map.hpp"
 
 namespace optimizercore	{
 
