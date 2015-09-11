@@ -63,6 +63,7 @@ namespace optimizercore	{
 
 		LocalTuningMode localTuningMode;
 		MapType mapType;
+		int numberOfMaps;
 		int mapTightness;
 		OptimizerParameters()
 		{
@@ -71,7 +72,7 @@ namespace optimizercore	{
 		OptimizerParameters(int _maxIterationsNumber, int _numberOfThreads, double _eps,
 			double* _r, double* _reserves, unsigned _algDimention, int _localExponent,
 			int _localMixParameter, int _localAlgStartIterationNumber, MapType _mapType, int _mapTightness,
-			bool _localVerification)
+			int _numberOfMaps, bool _localVerification)
 		{
 			maxIterationsNumber = _maxIterationsNumber;
 			numberOfThreads = _numberOfThreads;
@@ -83,13 +84,14 @@ namespace optimizercore	{
 			localMixParameter = _localMixParameter;
 			localAlgStartIterationNumber = _localAlgStartIterationNumber;
 			mapType = _mapType;
+			numberOfMaps = _numberOfMaps;
 			mapTightness = _mapTightness;
 			localVerification = _localVerification;
 		}
 		OptimizerParameters(int _maxIterationsNumber, int _numberOfThreads, double _eps,
 			double* _r, double* _reserves, unsigned _algDimention, int _localExponent,
 			int _localMixParameter, int _localAlgStartIterationNumber, MapType _mapType, int _mapTightness,
-			bool _localVerification, LocalTuningMode _localTuningMode)
+			int _numberOfMaps, bool _localVerification, LocalTuningMode _localTuningMode)
 		{
 			maxIterationsNumber = _maxIterationsNumber;
 			numberOfThreads = _numberOfThreads;
@@ -102,6 +104,7 @@ namespace optimizercore	{
 			localAlgStartIterationNumber = _localAlgStartIterationNumber;
 			mapType = _mapType;
 			mapTightness = _mapTightness;
+			numberOfMaps = _numberOfMaps;
 			localVerification = _localVerification;
 			localTuningMode = _localTuningMode;
 		}

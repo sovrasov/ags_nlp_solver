@@ -1,21 +1,29 @@
 #ifndef OPTIMIZER_MULTIMAP_HPP
 #define OPTIMIZER_MULTIMAP_HPP
 
-namespace optimizer
+#include "OptimizerCoreGlobal.hpp"
+
+#define MAX_PREIMAGES 32
+
+namespace optimizercore
 {
-	enum class MultimapType {Rotated, Set};
+	enum class MultimapType {Rotated, Set, Noninjective};
+
 	class OptimizerMultiMap final
 	{
-	protected:
+
+	private:
 		int mDimension;
 		int mTightness;
 		int mNumberOfMaps;
 		MultimapType mMapType;
 
+		SharedVector mTmpVector; //smart ptr for p2
+		double *p2; 
 		int **mRotationPlanes;
-		double *p2;
 
 		bool mIsInitialized;
+
 	public:
 		OptimizerMultiMap();
 		OptimizerMultiMap(MultimapType mapType, int n, int m, int l);
@@ -23,9 +31,9 @@ namespace optimizer
 
 		int GetNumberOfMaps() const;
 		void GetImage(double x, double y[]);
-		void GetAllPreimages(double* p, double xp[]);
+		int GetAllPreimages(double* p, double xp[]);
 
-	protected:
+	private:
 		void InitRotatedMap();
 	};
 

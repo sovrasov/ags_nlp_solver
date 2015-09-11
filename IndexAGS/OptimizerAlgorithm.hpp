@@ -8,6 +8,7 @@
 #include "OptimizerSolution.hpp"
 #include "OptimizerResult.hpp"
 #include "OptimizerTask.hpp"
+#include "OptimizerMultiMap.hpp"
 
 #include <set>
 
@@ -38,6 +39,7 @@ namespace optimizercore	{
 		int mMapType;
 
 		OptimizerTask mTask;
+		OptimizerMultiMap *mPMap;
 		OptimizerSpaceTransformation mSpaceTransform;
 		OptimizerFunction *mTargetFunction, **mRestrictions;
 

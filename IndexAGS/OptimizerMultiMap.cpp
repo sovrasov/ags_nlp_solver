@@ -1,15 +1,16 @@
 #include "OptimizerMultiMap.hpp"
+#include "CoreUtils.hpp"
 #include "Map.hpp"
 
 #include <cassert>
 #include <cmath>
 
-optimizer::OptimizerMultiMap::OptimizerMultiMap()
+optimizercore::OptimizerMultiMap::OptimizerMultiMap()
 {
 	mIsInitialized = false;
 }
 
-optimizer::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n, int m, int l)
+optimizercore::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n, int m, int l)
 {
 	assert(n > 1);
 	assert(m > 1);
@@ -20,16 +21,17 @@ optimizer::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n, int
 	mNumberOfMaps = l;
 	mMapType = mapType;
 
-	if (mapType == MultimapType::Rotated)
-	{
+	if (mapType == MultimapType::Rotated)	{
 		assert(l <= n*(n-1));
 		InitRotatedMap();
 	}
+	else if (mapType == MultimapType::Noninjective)
+		mNumberOfMaps = 1;
 
 	mIsInitialized = true;
 }
 
-optimizer::OptimizerMultiMap::~OptimizerMultiMap()
+optimizercore::OptimizerMultiMap::~OptimizerMultiMap()
 {
 	if (mMapType == MultimapType::Rotated && mIsInitialized)
 	{
@@ -37,16 +39,15 @@ optimizer::OptimizerMultiMap::~OptimizerMultiMap()
 		for (int i = 0; i < PlaneCount; i++)
 			delete[] mRotationPlanes[i];
 		delete[] mRotationPlanes;
-		delete[] p2;
 	}
 }
 
-int optimizer::OptimizerMultiMap::GetNumberOfMaps() const
+int optimizercore::OptimizerMultiMap::GetNumberOfMaps() const
 {
 	return mNumberOfMaps;
 }
 
-void optimizer::OptimizerMultiMap::GetImage(double x, double y[])
+void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 {
 	switch (mMapType)
 	{
@@ -89,10 +90,13 @@ void optimizer::OptimizerMultiMap::GetImage(double x, double y[])
 		}
 	}
 	break;
+	case MultimapType::Noninjective:
+		mapd(x, mTightness, y, mDimension, 3);
+		break;
 	}
 }
 
-void optimizer::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
+int optimizercore::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 {
 	switch (mMapType)
 	{
@@ -127,7 +131,7 @@ void optimizer::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 		xyd(&xx, mTightness, p2, mDimension);
 		xp[0] = xx;
 		//≈сли одна развертка - далее ничего не делаем
-		if (mNumberOfMaps == 1)return;
+		if (mNumberOfMaps == 1)return 1;
 
 		int PlaneCount = mDimension*(mDimension - 1) / 2;//„исло плоскостей
 
@@ -153,12 +157,22 @@ void optimizer::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 		}
 	}
 	break;
+	case MultimapType::Noninjective:
+	{
+		int preimNumber;
+		invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p, mDimension, 4);
+		return preimNumber;
 	}
+	break;
+	}
+	return mNumberOfMaps;
 }
 
-void optimizer::OptimizerMultiMap::InitRotatedMap()
+void optimizercore::OptimizerMultiMap::InitRotatedMap()
 {
 	p2 = new double[mDimension];
+	mTmpVector = SharedVector(p2, utils::array_deleter<double>());
+
 	int PlaneCount = mDimension*(mDimension - 1) / 2;//„исло плоскостей
 	int** mRotationPlanes = new int*[PlaneCount];//Ќомера осей плоскостей, вокруг которых будут совершатьс€ повороты
 	for (int i = 0; i < PlaneCount; i++)

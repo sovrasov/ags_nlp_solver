@@ -22,6 +22,7 @@ OptimizerAlgorithm::OptimizerAlgorithm()
 	mNextTrialsPoints = nullptr;
 	mIntervalsForTrials = nullptr;
 	r = nullptr;
+	mPMap = nullptr;
 
 	mIsTaskInitialized = false;
 	mIsParamsInitialized = false;
@@ -99,6 +100,16 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 	mMethodDimention = params.algDimention;
 	mMapTightness = params.mapTightness;
 	mMapType = static_cast<int>(params.mapType);
+	MultimapType mulMapType;
+	if (mMapType == 4)
+		mulMapType = MultimapType::Set;
+	else if(mMapType == 5)
+		mulMapType = MultimapType::Rotated;
+	else
+		mulMapType = MultimapType::Noninjective;
+	if (mPMap)
+		delete mPMap;
+	mPMap = new OptimizerMultiMap(mulMapType, mMethodDimention, mMapTightness, params.numberOfMaps);
 	mMaxNumberOfIterations = params.maxIterationsNumber;
 	r = params.r;
 	if (mNextPoints)
@@ -125,6 +136,13 @@ void OptimizerAlgorithm::InitializeInformationStorages()
 	mSearchInformationStorage.clear();
 	mSearchInformationStorage.emplace(0.0, 0.0, -1);
 	mSearchInformationStorage.emplace(1.0, 0.0, -1);
+
+	if (mMapType > 3) {
+		int l = mPMap->GetNumberOfMaps();
+		for (int i = 1; i <= l; i++)
+			mSearchInformationStorage.emplace(i, 0.0, -1);
+	}
+
 }
 
 bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
@@ -148,13 +166,21 @@ bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 			}
 		}
 	}
-	else
+	else {
+		int preimagesNumber = mPMap->GetNumberOfMaps();
 		for (int i = 0; i < trailsNumber; i++)
 		{
+			//if mNextPoints[i] in D insert preimages
+			//mPMap->GetAllPreimages(, mNextPoints[i]);
+			//for (int k = 0; k < preimagesNumber; k++)
+				//mNextTrialsPoints[i].x = preimages[k];
+
+			//else
 			storageInsertionError =
 				mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
 			UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
 		}
+	}
 	return storageInsertionError;
 }
 
@@ -322,6 +348,8 @@ OptimizerAlgorithm::~OptimizerAlgorithm()
 		utils::DeleteMatrix(mNextPoints, mNumberOfThreads);
 	if (mNextTrialsPoints)
 		delete[] mNextTrialsPoints;
+	if (mPMap)
+		delete mPMap;
 	if (mIsAlgorithmMemoryAllocated)
 	{
 		delete[] lip_const;

@@ -60,6 +60,7 @@ void OptimizerAlgorithmUnconstrained::SetParameters(OptimizerParameters params)
 	assert(params.reserves != nullptr);
 	assert(params.adaptiveLocalTuningParameter >= 0 &&
 		params.adaptiveLocalTuningParameter <= 1);
+	assert(params.numberOfMaps > 0);
 
 	mLocalStartIterationNumber = params.localAlgStartIterationNumber;
 	eps = params.eps;

@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 	taskdim = task.GetTaskDimention();
 	OptimizerParameters params(maxIterNumber, numOfThreads, eps, &r, &res, taskdim, alpha, local_percent,
 		localStartIteration,
-		static_cast<MapType>(map_type), 12, false, LocalTuningMode::Adaptive);
+		static_cast<MapType>(map_type), 12, 1, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 1];
 	for (int i = 0; i < task.GetNumberOfRestrictions() + 1; i++)
