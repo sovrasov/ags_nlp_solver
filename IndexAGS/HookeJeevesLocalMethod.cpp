@@ -14,7 +14,7 @@ HookeJeevesLocalMethod::HookeJeevesLocalMethod()
 	mStartPoint = nullptr;
 	mFunctions = nullptr;
 
-	mDimention = 0;
+	mDimension = 0;
 
 	mEps = 0.001;
 	mStep = 0.01;
@@ -29,7 +29,7 @@ HookeJeevesLocalMethod::~HookeJeevesLocalMethod()
 }
 void HookeJeevesLocalMethod::DoStep()
 {
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 		mCurrentPoint[i] = (1 + mStepMultiplier)*mCurrentResearchDirection[i] -
 			mStepMultiplier*mPreviousResearchDirection[i];
 }
@@ -39,22 +39,22 @@ void HookeJeevesLocalMethod::StartOptimization(double* optimumPointEvaluation)
 	bool needRestart = true;
 	double currentFValue, nextFValue;
 
-	mCurrentPoint = new double[mDimention];
-	mCurrentResearchDirection = new double[mDimention];
-	mPreviousResearchDirection = new double[mDimention];
+	mCurrentPoint = new double[mDimension];
+	mCurrentResearchDirection = new double[mDimension];
+	mPreviousResearchDirection = new double[mDimension];
 
 	while (i < MAX_LOCAL_ITERATIONS_NUMBER)	{
 		i++;
 		if (needRestart)	{
 			k = 0;
-			std::memcpy(mCurrentPoint, mStartPoint, sizeof(double)*mDimention);
-			std::memcpy(mCurrentResearchDirection, mStartPoint, sizeof(double)*mDimention);
+			std::memcpy(mCurrentPoint, mStartPoint, sizeof(double)*mDimension);
+			std::memcpy(mCurrentResearchDirection, mStartPoint, sizeof(double)*mDimension);
 			currentFValue = EvaluateTargetFunctiuon(mCurrentPoint);
 			needRestart = false;
 		}
 
 		std::swap(mPreviousResearchDirection, mCurrentResearchDirection);
-		std::memcpy(mCurrentResearchDirection, mCurrentPoint, sizeof(double)*mDimention);
+		std::memcpy(mCurrentResearchDirection, mCurrentPoint, sizeof(double)*mDimension);
 		nextFValue = MakeResearch(mCurrentResearchDirection);
 
 		if (currentFValue > nextFValue)	{
@@ -73,7 +73,7 @@ void HookeJeevesLocalMethod::StartOptimization(double* optimumPointEvaluation)
 			break;
 	}
 
-	std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimention);
+	std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimension);
 
 	delete[] mCurrentPoint;
 	delete[] mPreviousResearchDirection;
@@ -120,15 +120,15 @@ void HookeJeevesLocalMethod::SetStartPoint(const double* point, int dimention)
 {
 	assert(point);
 	assert(dimention > 1);
-	mDimention = dimention;
-	mStartPoint = new double[mDimention];
-	std::memcpy(mStartPoint, point, mDimention*sizeof(double));
+	mDimension = dimention;
+	mStartPoint = new double[mDimension];
+	std::memcpy(mStartPoint, point, mDimension*sizeof(double));
 }
 double HookeJeevesLocalMethod::MakeResearch(double* startPoint)
 {
 	double bestValue = EvaluateTargetFunctiuon(startPoint);
 
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 	{
 		startPoint[i] += mStep;
 		double rightFvalue = EvaluateTargetFunctiuon(startPoint);

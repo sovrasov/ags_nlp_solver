@@ -21,12 +21,13 @@ optimizercore::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n,
 	mNumberOfMaps = l;
 	mMapType = mapType;
 
-	if (mapType == MultimapType::Rotated)	{
-		assert(l <= n*(n-1));
+	if (mapType == MultimapType::Rotated) {
+		assert(l <= n*(n - 1));
 		InitRotatedMap();
 	}
-	else if (mapType == MultimapType::Noninjective)
-		mNumberOfMaps = 1;
+
+	p2 = new double[mDimension];
+	mTmpVector = SharedVector(p2, utils::array_deleter<double>());
 
 	mIsInitialized = true;
 }
@@ -54,7 +55,7 @@ void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 	case MultimapType::Set:
 	{
 		double del;
-		int i, intx = (int)floor(x);
+		int i, intx = (int)x;
 		x = x - intx;
 
 		if (intx == 0)
@@ -62,7 +63,7 @@ void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 		else
 			for (i = 1, del = 1; i < intx + 1; del /= 2, i++);
 
-		mapd(x, mTightness, y, mDimension);
+		mapd(x, mTightness + 1, y, mDimension);
 
 		for (i = 0; i < mDimension; i++)
 			y[i] = 2 * y[i] + 0.5 - del;
@@ -70,7 +71,7 @@ void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 	break;
 	case MultimapType::Rotated:
 	{
-		int intx = (int)floor(x);//Ќомер интервала
+		int intx = (int)x;//Ќомер интервала
 		x = x - intx;//дробна€ часть x
 		mapd(x, mTightness, y, mDimension);//получаем точку y[] в исходных координатах
 		if (intx == 0 || mNumberOfMaps == 1)
@@ -90,9 +91,6 @@ void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 		}
 	}
 	break;
-	case MultimapType::Noninjective:
-		mapd(x, mTightness, y, mDimension, 3);
-		break;
 	}
 }
 
@@ -111,14 +109,14 @@ int optimizercore::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 			for (j = 0; j < mDimension; j++)
 				p2[j] = (p[j] + del - 0.5) * 0.5;
 
-			xyd(&xx, mTightness, p2, mDimension);
+			xyd(&xx, mTightness + 1, p2, mDimension);
 			xp[i] = xx + i;
 			del *= 0.5;
 		}
 		del = 0.0;
 		for (j = 0; j < mDimension; j++)
 			p2[j] = (p[j] + del - 0.5) * 0.5;
-		xyd(&xx, mTightness, p2, mDimension);
+		xyd(&xx, mTightness + 1, p2, mDimension);
 		xp[0] = xx;
 	}
 	break;
@@ -157,22 +155,12 @@ int optimizercore::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 		}
 	}
 	break;
-	case MultimapType::Noninjective:
-	{
-		int preimNumber;
-		invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p, mDimension, 4);
-		return preimNumber;
-	}
-	break;
 	}
 	return mNumberOfMaps;
 }
 
 void optimizercore::OptimizerMultiMap::InitRotatedMap()
 {
-	p2 = new double[mDimension];
-	mTmpVector = SharedVector(p2, utils::array_deleter<double>());
-
 	int PlaneCount = mDimension*(mDimension - 1) / 2;//„исло плоскостей
 	int** mRotationPlanes = new int*[PlaneCount];//Ќомера осей плоскостей, вокруг которых будут совершатьс€ повороты
 	for (int i = 0; i < PlaneCount; i++)

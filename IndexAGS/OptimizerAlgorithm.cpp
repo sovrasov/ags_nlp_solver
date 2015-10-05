@@ -62,7 +62,7 @@ void OptimizerAlgorithm::SetTask(OptimizerTask task)
 
 OptimizerSearchSequence OptimizerAlgorithm::GetSearchSequence() const
 {
-	return OptimizerSearchSequence(mSearchInformationStorage, mMethodDimention,
+	return OptimizerSearchSequence(mSearchInformationStorage, mMethodDimension,
 		static_cast<MapType> (mMapType), mMapTightness, mSpaceTransform);
 }
 
@@ -97,24 +97,25 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 	}
 	mNeedLocalVerification = params.localVerification;
 	mAlpha = params.localExponent;
-	mMethodDimention = params.algDimention;
+	mMethodDimension = params.algDimention;
 	mMapTightness = params.mapTightness;
 	mMapType = static_cast<int>(params.mapType);
-	MultimapType mulMapType;
-	if (mMapType == 4)
-		mulMapType = MultimapType::Set;
-	else if(mMapType == 5)
-		mulMapType = MultimapType::Rotated;
-	else
-		mulMapType = MultimapType::Noninjective;
+
 	if (mPMap)
 		delete mPMap;
-	mPMap = new OptimizerMultiMap(mulMapType, mMethodDimention, mMapTightness, params.numberOfMaps);
+	if (mMapType < 4)
+		mPMap = new OptimizerMap(mMethodDimension, mMapTightness, params.mapType);
+	else if (mMapType == 4)
+		mPMap = new OptimizerMultiMap(MultimapType::Set, mMethodDimension, mMapTightness, params.numberOfMaps);
+	else if(mMapType == 5)
+		mPMap = new OptimizerMultiMap(MultimapType::Rotated, mMethodDimension, mMapTightness, params.numberOfMaps);
+
+	mNumberOfMaps = params.numberOfMaps;
 	mMaxNumberOfIterations = params.maxIterationsNumber;
 	r = params.r;
 	if (mNextPoints)
 		utils::DeleteMatrix(mNextPoints, mNumberOfThreads);
-	mNextPoints = utils::AllocateMatrix<double>(mNumberOfThreads, mMethodDimention);
+	mNextPoints = utils::AllocateMatrix<double>(mNumberOfThreads, mMethodDimension);
 	this->SetThreadsNum(params.numberOfThreads);
 
 	mIsParamsInitialized = true;
@@ -122,7 +123,17 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 
 void OptimizerAlgorithm::InitializeInformationStorages()
 {
-	if (!mIsAlgorithmMemoryAllocated){
+	if (mMapType == 4 || !mSpaceTransform.IsZeroConstraintActive()) {
+		//insert the zero restriction for set map
+		mRestrictionsNumber++;
+		delete[] mRestrictions;
+		mRestrictions = new OptimizerFunction*[mRestrictionsNumber];
+		mRestrictions[0] = mSpaceTransform.GetZeroConstraint().get();
+		for (int i = 1; i < mRestrictionsNumber; i++)
+			mRestrictions[i] = mTask.GetTaskFunctions().get()[i - 1].get();
+	}
+
+	if (!mIsAlgorithmMemoryAllocated) {
 		AllocMem();
 		mIsAlgorithmMemoryAllocated = true;
 	}
@@ -138,11 +149,11 @@ void OptimizerAlgorithm::InitializeInformationStorages()
 	mSearchInformationStorage.emplace(1.0, 0.0, -1);
 
 	if (mMapType > 3) {
-		int l = mPMap->GetNumberOfMaps();
-		for (int i = 1; i <= l; i++)
+		for (int i = 2; i <= mNumberOfMaps; i++)
 			mSearchInformationStorage.emplace(i, 0.0, -1);
 	}
 
+	mNeedQueueRefill = true;
 }
 
 bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
@@ -155,7 +166,7 @@ bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 		for (int i = 0; i < trailsNumber; i++)
 		{
 			invmad(mMapTightness, preimages, 32,
-				&preimagesNumber, mNextPoints[i], mMethodDimention, 4);
+				&preimagesNumber, mNextPoints[i], mMethodDimension, 4);
 			for (int k = 0; k < preimagesNumber; k++)
 			{
 				mNextTrialsPoints[i].x = preimages[k];
@@ -166,19 +177,30 @@ bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 			}
 		}
 	}
-	else {
-		int preimagesNumber = mPMap->GetNumberOfMaps();
-		for (int i = 0; i < trailsNumber; i++)
-		{
-			//if mNextPoints[i] in D insert preimages
-			//mPMap->GetAllPreimages(, mNextPoints[i]);
-			//for (int k = 0; k < preimagesNumber; k++)
-				//mNextTrialsPoints[i].x = preimages[k];
-
-			//else
+	else if (mMapType < 3) {
+		for (int i = 0; i < trailsNumber; i++)	{
 			storageInsertionError =
 				mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
 			UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
+		}
+	}
+	else {
+		for (int i = 0; i < trailsNumber; i++) {
+			if (mMapType == 5 || mNextTrialsPoints[i].v != 0) {//if mNextPoints[i] in D insert preimages
+				double preimages[32];
+				mPMap->GetAllPreimages(mNextPoints[i], preimages);
+				for (int k = 0; k < mNumberOfMaps; k++) {
+					mNextTrialsPoints[i].x = preimages[k];
+					storageInsertionError =
+						mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
+					UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
+				}
+			}
+			else {
+				storageInsertionError =
+					mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
+				UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
+			}
 		}
 	}
 	return storageInsertionError;
@@ -188,7 +210,7 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 	const double* a, StopCriterionType stopType)
 {
 	assert(mIsParamsInitialized && mIsTaskInitialized);
-	assert(mMethodDimention == mTask.GetTaskDimention());
+	assert(mMethodDimension == mTask.GetTaskDimention());
 
 	InitializeInformationStorages();
 	
@@ -198,12 +220,16 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 		currentThrNum = 1, ranksUpdateErrCode;
 	
 	mNextTrialsPoints[0].x = 0.5;
-	mapd(mNextTrialsPoints[0].x, mMapTightness, mNextPoints[0],
-		mMethodDimention, mMapType);
+	if (mMapType == 4)
+		mNextTrialsPoints[0].x = pow(2, -(mMethodDimension + 1));
+
+	mPMap->GetImage(mNextTrialsPoints[0].x, mNextPoints[0]);
 	mSpaceTransform.Transform(mNextPoints[0], mNextPoints[0]);
-	
 
 	while (iterationsCount < mMaxNumberOfIterations && !stop)	{
+
+		if (mMapType > 2 || mLocalMixParameter != 0)
+			mNeedQueueRefill = true;
 		iterationsCount++;
 
 #pragma omp parallel for num_threads(currentThrNum)
@@ -212,7 +238,7 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 			mNextTrialsPoints[i].v = 
 				GetIndex(mNextTrialsPoints + i, mNextPoints[i]);
 
-			if (mMapType == 3)
+			if (mMapType >= 3)
 				mSpaceTransform.InvertTransform(mNextPoints[i], mNextPoints[i]);
 
 #pragma omp critical
@@ -228,48 +254,65 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 			for (int i = 0; i < v; i++)
 				set_ranks[i] = -reserves*lip_const[i];
 			v_max = v;
+			mNeedQueueRefill = true;
 		}
 		if (v == v_max)
 			set_ranks[v] = v_indexes[v]->GetMinimumValue();
 
-		if (iterationsCount >= mLocalStartIterationNumber)	{
-			if (iterationsCount % (12 - mLocalMixParameter) == 0
-				&& mLocalMixParameter > 0)
-				ranksUpdateErrCode = UpdateRanks(mLocalMixType);
+		//full update ranks or insert new intervals in queue
+		if (mNeedQueueRefill) {
+			//printf("Refill on iteration: %i\n", iterationsCount);
+			if (iterationsCount >= mLocalStartIterationNumber) {
+				if (iterationsCount % (12 - mLocalMixParameter) == 0
+					&& mLocalMixParameter > 0)
+					ranksUpdateErrCode = UpdateRanks(mLocalMixType);
+				else
+					ranksUpdateErrCode = UpdateRanks(!mLocalMixType);
+			}
 			else
-				ranksUpdateErrCode = UpdateRanks(!mLocalMixType);
+				ranksUpdateErrCode = UpdateRanks(false);
 		}
-		else
-			ranksUpdateErrCode = UpdateRanks(false);
+		else {
+			for (int i = 0; i < currentThrNum; i++) {
+				OptimizerInterval i1(mIntervalsForTrials[i].left, mNextTrialsPoints[i], 0, 0);
+				OptimizerInterval i2(mNextTrialsPoints[i], mIntervalsForTrials[i].right, 0, 0);
+				i1.R = CalculateGlobalR(i1);
+				i2.R = CalculateGlobalR(i2);
+				mQueue.Push(i1);
+				mQueue.Push(i2);
+			}
+		}
 
 		if (iterationsCount >= mNumberOfThreads + 10)
 			currentThrNum = mNumberOfThreads;
 
 		for (int i = 0; i < currentThrNum && !stop; i++)	{
+			//get new interval from queue
+			mIntervalsForTrials[i] = mQueue.Pop();
 			OptimizerTrialPoint left = mIntervalsForTrials[i].left;
 			OptimizerTrialPoint right = mIntervalsForTrials[i].right;
 
+			//fill mIntervalsForTrials
 			if (left.v == right.v)
 				mNextTrialsPoints[i].x = (left.x + right.x) / 2
 				- sgn(right.val - left.val)*pow(fabs(right.val - left.val)
-				/ lip_const[right.v], mMethodDimention) / (2 * r[right.v]);
+				/ lip_const[right.v], mMethodDimension) / (2 * r[right.v]);
 			else
 				mNextTrialsPoints[i].x = (right.x + left.x) / 2;
 			
-			mapd(mNextTrialsPoints[i].x, mMapTightness, mNextPoints[i],
-				mMethodDimention, mMapType);
+			mPMap->GetImage(mNextTrialsPoints[i].x, mNextPoints[i]);
 			mSpaceTransform.Transform(mNextPoints[i], mNextPoints[i]);
 			
 			y = mNextPoints[i];
 
 			if (stopType == StopCriterionType::OptimalPoint)	{
-				if (NormNDimMax(y, a, mMethodDimention) < eps)	{
+				if (NormNDimMax(y, a, mMethodDimension) < eps)	{
 					stop = true;
 					mOptimumEvaluation = mNextTrialsPoints[i];
 				}
 			}
 			else	{
-				if (pow(right.x - left.x, 1.0 / mMethodDimention) < eps)	{
+				if (pow(right.x - left.x, 1.0 / mMethodDimension) < eps)	{
 					stop = true;
 					mOptimumEvaluation = mNextTrialsPoints[i];
 				}
@@ -287,14 +330,14 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 		mOptimumEvaluation = v_indexes[mRestrictionsNumber]->GetMinimumPoint();
 	}
 	
-	mapd(mOptimumEvaluation.x, mMapTightness, y, mMethodDimention, mMapType);
+	mPMap->GetImage(mOptimumEvaluation.x, y);
 	mSpaceTransform.Transform(y, y);
 	
-	SharedVector optPoint(new double[mMethodDimention], array_deleter<double>());
-	std::memcpy(optPoint.get(), y, mMethodDimention*sizeof(double));
+	SharedVector optPoint(new double[mMethodDimension], array_deleter<double>());
+	std::memcpy(optPoint.get(), y, mMethodDimension*sizeof(double));
 
 	OptimizerSolution solution(iterationsCount, mOptimumEvaluation.val,
-		mOptimumEvaluation.x, mMethodDimention, optPoint);
+		mOptimumEvaluation.x, mMethodDimension, optPoint);
 
 	if (mNeedLocalVerification)
 		return OptimizerResult(DoLocalVerification(solution));
@@ -317,7 +360,7 @@ OptimizerSolution OptimizerAlgorithm::DoLocalVerification(OptimizerSolution star
 
 	if (startSolution.GetOptimumValue() > bestLocalValue)
 		return OptimizerSolution(startSolution.GetIterationsCount(),
-		bestLocalValue, 0.5, mMethodDimention, localOptimum);
+		bestLocalValue, 0.5, mMethodDimension, localOptimum);
 
 	return startSolution;
 }
@@ -332,10 +375,10 @@ void OptimizerAlgorithm::SetThreadsNum(int num)
 			delete[] mNextTrialsPoints;
 		if (mIntervalsForTrials)
 			delete[] mIntervalsForTrials;
-		mIntervalsForTrials = new OptimaizerInterval[num];
+		mIntervalsForTrials = new OptimizerInterval[num];
 		mNextTrialsPoints = new OptimizerTrialPoint[num];
 		mNextPoints = utils::AllocateMatrix<double>(
-			mNumberOfThreads, mMethodDimention);
+			mNumberOfThreads, mMethodDimension);
 	}
 }
 OptimizerAlgorithm::~OptimizerAlgorithm()
@@ -359,35 +402,76 @@ OptimizerAlgorithm::~OptimizerAlgorithm()
 		delete[] v_indexes;
 	}
 }
-void OptimizerAlgorithm::UpdateLipConsts(IndxSet* set,
+void OptimizerAlgorithm::UpdateLipConsts(MultimapIndxSet* set,
 	const OptimizerTrialPoint& value)
 {
 	double max = lip_const[value.v];
 	if (max == 1) max = 0;
-	int set_size = set->GetSize();
+	int setNumber = (int)value.x;
+	int set_size = set->GetSize(setNumber);
 	OptimizerTrialPoint cur_point;
 
 	for (int k = 0; k < set_size; k++)
 	{
-		cur_point = set->Get(k);
+		cur_point = set->Get(k, setNumber);
 		if (value.x != cur_point.x)
 			max = fmax(max,
 			fabs(value.val - cur_point.val)
-			/ pow(fabs(value.x - cur_point.x), 1.0 / mMethodDimention));
+			/ pow(fabs(value.x - cur_point.x), 1.0 / mMethodDimension));
 	}
 
-	if (max != 0)
+	if (max != 0) {
+		if (lip_const[value.v] != max)
+			mNeedQueueRefill = true;
 		lip_const[value.v] = max;
+	}
 	else
 		lip_const[value.v] = 1;
+
+	if (set->GetMinimumValue() > value.val)
+		mNeedQueueRefill = true;
+
 	set->Add(value);
+}
+double optimizercore::OptimizerAlgorithm::CalculateGlobalR(const OptimizerInterval& interval)
+{
+	double R;
+	const OptimizerTrialPoint& left = interval.left;
+	const OptimizerTrialPoint& right = interval.right;
+
+	double dx = pow(right.x - left.x, 1.0 / mMethodDimension);
+
+	if (dx == 0)
+		return HUGE_VAL;
+
+	if (right.v == left.v)	{
+		int v = left.v;
+		R = dx + Pow2((right.val - left.val)
+			/ (r[v] * lip_const[v])) / dx
+			- 2 * (right.val + left.val - 2 * set_ranks[v])
+			/ (r[v] * lip_const[v]);
+	}
+	else if (right.v > left.v)	{
+		int v = right.v;
+		R = 2 * dx - 4 * (right.val - set_ranks[v]) /
+			(r[v] * lip_const[v]);
+	}
+	else {//if (rightIt->v < leftIt->v)	
+		int v = left.v;
+		R = 2 * dx - 4 * (left.val - set_ranks[v])
+			/ (r[v] * lip_const[v]);
+	}
+
+	return R;
 }
 int OptimizerAlgorithm::UpdateRanks(bool isLocal)
 {
 	double dx, curr_rank;
 
+	mQueue.Clear();
+
 	for (int i = 0; i < mNumberOfThreads; i++)
-		mIntervalsForTrials[i].rank = -HUGE_VAL;
+		mIntervalsForTrials[i].R = -HUGE_VAL;
 
 	auto leftIt = mSearchInformationStorage.begin();
 	auto rightIt = mSearchInformationStorage.begin();
@@ -397,7 +481,7 @@ int OptimizerAlgorithm::UpdateRanks(bool isLocal)
 	
 	for (int j = 0; j < storageSize - 1; j++)
 	{
-		dx = pow(rightIt->x - leftIt->x, 1.0 / mMethodDimention);
+		dx = pow(rightIt->x - leftIt->x, 1.0 / mMethodDimension);
 
 		if (dx == 0)
 			return 1;
@@ -444,19 +528,24 @@ int OptimizerAlgorithm::UpdateRanks(bool isLocal)
 					/ lip_const[v] + pow(1.5, -mAlpha);
 			}
 		}
-
-		if (curr_rank > mIntervalsForTrials[mNumberOfThreads - 1].rank)
+		
+		mQueue.Push(OptimizerInterval(OptimizerTrialPoint(*leftIt),
+			OptimizerTrialPoint(*rightIt), curr_rank, 0));
+		/*
+		if (curr_rank > mIntervalsForTrials[mNumberOfThreads - 1].R)
 		{
-			OptimaizerInterval newInterval(
+			OptimizerInterval newInterval(
 				OptimizerTrialPoint(*leftIt),
 				OptimizerTrialPoint(*rightIt), curr_rank, 0);
 			for (int i = 0; i < mNumberOfThreads; i++)
-				if (mIntervalsForTrials[i].rank < newInterval.rank)
+				if (mIntervalsForTrials[i].R < newInterval.R)
 					std::swap(mIntervalsForTrials[i], newInterval);
 		}
+		*/
 		++leftIt;
 		++rightIt;
 	}
+	mNeedQueueRefill = false;
 	return 0;
 }
 int OptimizerAlgorithm::GetIndex(OptimizerTrialPoint* oneDimPoint, double* point)
@@ -478,12 +567,12 @@ void OptimizerAlgorithm::AllocMem()
 {
 	lip_const = new double[mRestrictionsNumber + 1];
 	set_ranks = new double[mRestrictionsNumber + 1];
-	v_indexes = new IndxSet*[mRestrictionsNumber + 1];
+	v_indexes = new MultimapIndxSet*[mRestrictionsNumber + 1];
 
 	for (int j = 0; j < mRestrictionsNumber + 1; j++)
 	{
 		set_ranks[j] = 0;
 		lip_const[j] = 1;
-		v_indexes[j] = new IndxSet(mCurrentStorageSize, mStorageReallocStep);
+		v_indexes[j] = new MultimapIndxSet(mCurrentStorageSize, mNumberOfMaps, mStorageReallocStep);
 	}
 }

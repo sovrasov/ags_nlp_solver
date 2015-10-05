@@ -2,14 +2,14 @@
 #define OPTIMIZER_MULTIMAP_HPP
 
 #include "OptimizerCoreGlobal.hpp"
+#include "OptimizerMap.hpp"
 
-#define MAX_PREIMAGES 32
 
 namespace optimizercore
 {
-	enum class MultimapType {Rotated, Set, Noninjective};
+	enum class MultimapType {Rotated, Set};
 
-	class OptimizerMultiMap final
+	class OptimizerMultiMap final : public OptimizerMap
 	{
 
 	private:

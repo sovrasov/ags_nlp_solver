@@ -30,7 +30,7 @@ namespace optimizercore
 		int mLocalStartIterationNumber;
 		int mMaxNumberOfIterations;
 		int mMapTightness;
-		int mMethodDimention;
+		int mMethodDimension;
 		int mAlpha;
 		int mLocalMixParameter;
 		int mMapType;
@@ -39,7 +39,7 @@ namespace optimizercore
 		OptimizerFunction *mTargetFunction;
 		OptimizerFunctionPtr mTargetFunctionSmartPtr;
 
-		OptimaizerInterval *mIntervalsForTrials;
+		OptimizerInterval *mIntervalsForTrials;
 		std::set<OptimizerTrialPoint> mSearchInformationStorage;
 		OptimizerTrialPoint mOptimumEvaluation, *mNextTrialsPoints;
 

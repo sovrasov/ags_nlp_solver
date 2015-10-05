@@ -69,6 +69,12 @@
     <ClInclude Include="Map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OptimizerQueue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimizerMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CoreUtils.cpp">
@@ -117,6 +123,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OptimizerMultiMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptimizerQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptimizerMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

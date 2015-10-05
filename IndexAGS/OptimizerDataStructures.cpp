@@ -69,3 +69,83 @@ OptimizerTrialPoint IndxSet::Get(int i) const
 {
 	return mMem[i];
 }
+//---------------------------------------------------------------------
+
+optimizercore::MultimapIndxSet::MultimapIndxSet() : mMem(nullptr)
+{
+}
+
+optimizercore::MultimapIndxSet::MultimapIndxSet(int memSize, int mapsNumber, int memReallocStep)
+{
+	mMem = new OptimizerTrialPoint*[mapsNumber];
+	mMaxSetsSizes = new int[mapsNumber];
+	mCurrentSetsSizes = new int[mapsNumber];
+
+	for (int i = 0; i < mapsNumber; i++) {
+		mMem[i] = new OptimizerTrialPoint[memSize];
+		mMaxSetsSizes[i] = memSize;
+		mCurrentSetsSizes[i] = 0;
+	}
+
+	mMemReallocationStep = memReallocStep;
+	mNumberOfSubsets = mapsNumber;
+	mCurrentZMin = HUGE_VAL;
+}
+
+void optimizercore::MultimapIndxSet::Add(const OptimizerTrialPoint & trial)
+{
+	int setNumber = trial.x;
+	mMem[setNumber][mCurrentSetsSizes[setNumber]++] = trial;
+
+	if (trial.val < mCurrentZMin)
+		mCurrentZMin = trial.val;
+
+	if (mCurrentSetsSizes[setNumber] == mMaxSetsSizes[setNumber]) {
+		reAllocMem(&mMem[setNumber], mCurrentSetsSizes[setNumber], mMemReallocationStep);
+		mMaxSetsSizes[setNumber] += mMemReallocationStep;
+	}
+}
+
+OptimizerTrialPoint optimizercore::MultimapIndxSet::Get(int i, int mapNumber) const
+{
+	return mMem[mapNumber][i];
+}
+
+int optimizercore::MultimapIndxSet::GetSize(int mapNumber) const
+{
+	return mCurrentSetsSizes[mapNumber];
+}
+
+double optimizercore::MultimapIndxSet::GetMinimumValue() const
+{
+	return mCurrentZMin;
+}
+
+OptimizerTrialPoint optimizercore::MultimapIndxSet::GetMinimumPoint() const
+{
+	OptimizerTrialPoint min(0, HUGE_VAL, 0);
+
+	for (int i = 0; i < mNumberOfSubsets; i++)
+		for (int j = 0; j < mCurrentSetsSizes[i]; j++)
+			if (min.val > mMem[i][j].val)
+				min = mMem[i][j];
+
+	return min;
+}
+
+void optimizercore::MultimapIndxSet::Reset()
+{
+	for (int i = 0; i < mNumberOfSubsets; i++)
+		mCurrentSetsSizes[i] = 0;
+	mCurrentZMin = HUGE_VAL;
+}
+
+optimizercore::MultimapIndxSet::~MultimapIndxSet()
+{
+	if (mMem != nullptr) {
+		for (int i = 0; i < mNumberOfSubsets; i++)
+			delete[] mMem[i];
+		delete[] mCurrentSetsSizes;
+		delete[] mMaxSetsSizes;
+	}
+}

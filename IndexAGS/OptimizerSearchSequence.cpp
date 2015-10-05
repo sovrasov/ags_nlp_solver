@@ -9,7 +9,7 @@ using namespace optimizercore;
 OptimizerSearchSequence::OptimizerSearchSequence()
 {
 	mSize = 0;
-	mDimention = 0;
+	mDimension = 0;
 	mMapDensity = 0;
 	mMapType = MapType::Simple;
 	mIsInitialized = false;
@@ -22,7 +22,7 @@ OptimizerSearchSequence::OptimizerSearchSequence(const std::set<OptimizerTrialPo
 	assert(mapDensity > 0);
 
 	mSize = searchSequence.size();
-	mDimention = dimention;
+	mDimension = dimention;
 	mMapType = mapType;
 	mMapDensity = mapDensity;
 	mSpaceTransform = transform;
@@ -54,7 +54,7 @@ size_t OptimizerSearchSequence::GetSize() const
 unsigned OptimizerSearchSequence::GetDimention() const
 {
 	CheckIsInitialized();
-	return mDimention;
+	return mDimension;
 }
 unsigned OptimizerSearchSequence::GetMapDensity() const
 {
@@ -68,7 +68,7 @@ MapType OptimizerSearchSequence::GetMapType() const
 }
 void OptimizerSearchSequence::GetPoint(int index, double* x)
 {
-	mapd(mPointsMemPtr[index], mMapDensity, x, mDimention, static_cast<int> (mMapType));
+	mapd(mPointsMemPtr[index], mMapDensity, x, mDimension, static_cast<int> (mMapType));
 	mSpaceTransform.Transform(x, x);
 }
 double OptimizerSearchSequence::GetOneDimPoint(int index)

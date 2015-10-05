@@ -41,22 +41,22 @@ int main(int argc, char* argv[])
 	int localStartIteration = 10;
 	local_percent = 0;
 	r = 3;
-	eps = 0.01;
-	map_type = 1;
+	eps = 0.001;
+	map_type = 4;
 	alpha = 20;
 	int numOfThreads = 1;
 	int taskdim = 2;
 	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
-	int maxIterNumber = 2000;
+	int maxIterNumber = 5000;
 	//	ParseArguments(argc, argv, numOfThreads, taskdim, gklsClass, maxIterNumber);
 
 	OptimizerAlgorithm ags;
-	OptimizerTask task = TestTaskFactory::GetTask(3);
+	OptimizerTask task = TestTaskFactory::GetTask(0);
 
 	taskdim = task.GetTaskDimention();
 	OptimizerParameters params(maxIterNumber, numOfThreads, eps, &r, &res, taskdim, alpha, local_percent,
 		localStartIteration,
-		static_cast<MapType>(map_type), 12, 1, false, LocalTuningMode::Adaptive);
+		static_cast<MapType>(map_type), 12, 4, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 1];
 	for (int i = 0; i < task.GetNumberOfRestrictions() + 1; i++)
@@ -82,8 +82,7 @@ int main(int argc, char* argv[])
 	*/
 	for (int i = 0; i < params.algDimention; i++)
 		printf("x[%i]: %f   ", i, optPoint.get()[i]);
-	printf("\nFvalue %f\n", task.GetTaskFunctions().get()
-		[task.GetNumberOfRestrictions()].get()->Calculate(x_opt));
+	printf("\nFvalue %f\n", result.GetSolution().GetOptimumValue());
 	printf("iterations %i\n", result.GetSolution().GetIterationsCount());
 	for (int i = 0; i <= task.GetNumberOfRestrictions(); i++)
 	{

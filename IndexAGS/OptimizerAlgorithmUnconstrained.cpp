@@ -38,7 +38,7 @@ void OptimizerAlgorithmUnconstrained::SetTask(OptimizerFunctionPtr function,
 
 OptimizerSearchSequence OptimizerAlgorithmUnconstrained::GetSearchSequence() const
 {
-	return OptimizerSearchSequence(mSearchInformationStorage, mMethodDimention,
+	return OptimizerSearchSequence(mSearchInformationStorage, mMethodDimension,
 		static_cast<MapType> (mMapType), mMapTightness, mSpaceTransform);
 }
 
@@ -58,8 +58,8 @@ void OptimizerAlgorithmUnconstrained::SetParameters(OptimizerParameters params)
 	assert(params.r != nullptr);
 	assert(params.numberOfThreads > 0);
 	assert(params.reserves != nullptr);
-	assert(params.adaptiveLocalTuningParameter >= 0 &&
-		params.adaptiveLocalTuningParameter <= 1);
+	//assert(params.adaptiveLocalTuningParameter >= 0 &&
+	//	params.adaptiveLocalTuningParameter <= 1);
 	assert(params.numberOfMaps > 0);
 
 	mLocalStartIterationNumber = params.localAlgStartIterationNumber;
@@ -74,7 +74,7 @@ void OptimizerAlgorithmUnconstrained::SetParameters(OptimizerParameters params)
 	}
 	mNeedLocalVerification = params.localVerification;
 	mAlpha = params.localExponent;
-	mMethodDimention = params.algDimention;
+	mMethodDimension = params.algDimention;
 	mMapTightness = params.mapTightness;
 	mMapType = static_cast<int>(params.mapType);
 	mMaxNumberOfIterations = params.maxIterationsNumber;
@@ -82,7 +82,7 @@ void OptimizerAlgorithmUnconstrained::SetParameters(OptimizerParameters params)
 	r = *params.r;
 	if (mNextPoints)
 		utils::DeleteMatrix(mNextPoints, mNumberOfThreads);
-	mNextPoints = utils::AllocateMatrix<double>(mNumberOfThreads, mMethodDimention);
+	mNextPoints = utils::AllocateMatrix<double>(mNumberOfThreads, mMethodDimension);
 	this->SetThreadsNum(params.numberOfThreads);
 
 	mIsParamsInitialized = true;
@@ -101,11 +101,11 @@ void OptimizerAlgorithmUnconstrained::InitializeInformationStorage()
 
 	mSearchInformationStorage.clear();
 
-	mapd(0.0, mMapTightness, mNextPoints[0], mMethodDimention, mMapType);
+	mapd(0.0, mMapTightness, mNextPoints[0], mMethodDimension, mMapType);
 	mSpaceTransform.Transform(mNextPoints[0], mNextPoints[0]);
 	mSearchInformationStorage.emplace(0.0, mTargetFunction->Calculate(mNextPoints[0]), 0);
 
-	mapd(1.0, mMapTightness, mNextPoints[0], mMethodDimention, mMapType);
+	mapd(1.0, mMapTightness, mNextPoints[0], mMethodDimension, mMapType);
 	mSpaceTransform.Transform(mNextPoints[0], mNextPoints[0]);
 	mSearchInformationStorage.emplace(1.0, mTargetFunction->Calculate(mNextPoints[0]), 0);
 }
@@ -120,7 +120,7 @@ bool OptimizerAlgorithmUnconstrained::InsertNewTrials(int trailsNumber)
 		for (int i = 0; i < trailsNumber; i++)
 		{
 			invmad(mMapTightness, preimages, 32,
-				&preimagesNumber, mNextPoints[i], mMethodDimention, 4);
+				&preimagesNumber, mNextPoints[i], mMethodDimension, 4);
 			for (int k = 0; k < preimagesNumber; k++)
 			{
 				mNextTrialsPoints[i].x = preimages[k];
@@ -152,7 +152,7 @@ OptimizerResult OptimizerAlgorithmUnconstrained::StartOptimization(
 	const double* a, StopCriterionType stopType)
 {
 	assert(mIsParamsInitialized && mIsTaskInitialized);
-	assert(mSpaceTransform.GetDomainDimention() == mMethodDimention);
+	assert(mSpaceTransform.GetDomainDimention() == mMethodDimension);
 
 	InitializeInformationStorage();
 
@@ -163,7 +163,7 @@ OptimizerResult OptimizerAlgorithmUnconstrained::StartOptimization(
 
 	mNextTrialsPoints[0].x = 0.5;
 	mapd(mNextTrialsPoints[0].x, mMapTightness, mNextPoints[0],
-		mMethodDimention, mMapType);
+		mMethodDimension, mMapType);
 	mSpaceTransform.Transform(mNextPoints[0], mNextPoints[0]);
 
 	while (iterationsCount < mMaxNumberOfIterations && !stop)	{
@@ -201,22 +201,22 @@ OptimizerResult OptimizerAlgorithmUnconstrained::StartOptimization(
 
 			mNextTrialsPoints[i].x = (left.x + right.x) / 2
 				- sgn(right.val - left.val)*pow(fabs(right.val - left.val)
-				/ mIntervalsForTrials[i].localM, mMethodDimention) / (2 * r);
+				/ mIntervalsForTrials[i].localM, mMethodDimension) / (2 * r);
 
 			mapd(mNextTrialsPoints[i].x, mMapTightness, mNextPoints[i],
-				mMethodDimention, mMapType);
+				mMethodDimension, mMapType);
 			mSpaceTransform.Transform(mNextPoints[i], mNextPoints[i]);
 
 			y = mNextPoints[i];
 
 			if (stopType == StopCriterionType::OptimalPoint)	{
-				if (NormNDimMax(y, a, mMethodDimention) < eps)	{
+				if (NormNDimMax(y, a, mMethodDimension) < eps)	{
 					stop = true;
 					mOptimumEvaluation = mNextTrialsPoints[i];
 				}
 			}
 			else	{
-				if (pow(right.x - left.x, 1.0 / mMethodDimention) < eps)	{
+				if (pow(right.x - left.x, 1.0 / mMethodDimension) < eps)	{
 					stop = true;
 					mOptimumEvaluation = mNextTrialsPoints[i];
 				}
@@ -235,14 +235,14 @@ OptimizerResult OptimizerAlgorithmUnconstrained::StartOptimization(
 			return p1.val < p2.val;
 		});
 
-	mapd(mOptimumEvaluation.x, mMapTightness, y, mMethodDimention, mMapType);
+	mapd(mOptimumEvaluation.x, mMapTightness, y, mMethodDimension, mMapType);
 	mSpaceTransform.Transform(y, y);
 
-	SharedVector optPoint(new double[mMethodDimention], array_deleter<double>());
-	std::memcpy(optPoint.get(), y, mMethodDimention*sizeof(double));
+	SharedVector optPoint(new double[mMethodDimension], array_deleter<double>());
+	std::memcpy(optPoint.get(), y, mMethodDimension*sizeof(double));
 
 	OptimizerSolution solution(iterationsCount, mOptimumEvaluation.val,
-		mOptimumEvaluation.x, mMethodDimention, optPoint);
+		mOptimumEvaluation.x, mMethodDimension, optPoint);
 
 	if (mNeedLocalVerification)
 		return OptimizerResult(DoLocalVerification(solution));
@@ -256,7 +256,7 @@ OptimizerSolution OptimizerAlgorithmUnconstrained::DoLocalVerification(Optimizer
 
 	OptimizerTask localTask(std::shared_ptr<OptimizerFunctionPtr>(functions,
 		utils::array_deleter<OptimizerFunctionPtr>()),
-		0, mMethodDimention, mSpaceTransform.GetLeftDomainBound(),
+		0, mMethodDimension, mSpaceTransform.GetLeftDomainBound(),
 		mSpaceTransform.GetRightDomainBound());
 
 	localoptimizer::HookeJeevesLocalMethod localMethod;
@@ -267,13 +267,13 @@ OptimizerSolution OptimizerAlgorithmUnconstrained::DoLocalVerification(Optimizer
 	localMethod.SetStartPoint(startSolution.GetOptimumPoint().get(),
 		localTask.GetTaskDimention());
 
-	SharedVector localOptimum(new double[mMethodDimention], array_deleter<double>());
+	SharedVector localOptimum(new double[mMethodDimension], array_deleter<double>());
 	localMethod.StartOptimization(localOptimum.get());
 	double bestLocalValue = mTargetFunction->Calculate(localOptimum.get());
 
 	if (startSolution.GetOptimumValue() > bestLocalValue)
 		return OptimizerSolution(startSolution.GetIterationsCount(),
-		bestLocalValue, 0.5, mMethodDimention, localOptimum);
+		bestLocalValue, 0.5, mMethodDimension, localOptimum);
 
 	return startSolution;
 }
@@ -288,10 +288,10 @@ void OptimizerAlgorithmUnconstrained::SetThreadsNum(int num)
 			delete[] mNextTrialsPoints;
 		if (mIntervalsForTrials)
 			delete[] mIntervalsForTrials;
-		mIntervalsForTrials = new OptimaizerInterval[num];
+		mIntervalsForTrials = new OptimizerInterval[num];
 		mNextTrialsPoints = new OptimizerTrialPoint[num];
 		mNextPoints = utils::AllocateMatrix<double>(
-			mNumberOfThreads, mMethodDimention);
+			mNumberOfThreads, mMethodDimension);
 	}
 }
 OptimizerAlgorithmUnconstrained::~OptimizerAlgorithmUnconstrained()
@@ -318,8 +318,8 @@ void OptimizerAlgorithmUnconstrained::UpdateGlobalM(
 	--leftPointIt;
 	++rightPointIt;
 
-	double leftIntervalNorm = pow(newPointIt->x - leftPointIt->x, 1.0 / mMethodDimention);
-	double rightIntervalNorm = pow(rightPointIt->x - newPointIt->x, 1.0 / mMethodDimention);
+	double leftIntervalNorm = pow(newPointIt->x - leftPointIt->x, 1.0 / mMethodDimension);
+	double rightIntervalNorm = pow(rightPointIt->x - newPointIt->x, 1.0 / mMethodDimension);
 
 
 	max = fmax(fmax(fabs(newPointIt->val - leftPointIt->val) / leftIntervalNorm,
@@ -340,7 +340,7 @@ void OptimizerAlgorithmUnconstrained::UpdateGlobalM(
 		if (mLocalTuningMode != LocalTuningMode::None)
 		//if (mLocalTuningMode == LocalTuningMode::Maximum)
 			mMaxIntervalNorm = fmax(
-				pow(nextPointIt->x - currentPointIt->x, 1.0 / mMethodDimention),
+				pow(nextPointIt->x - currentPointIt->x, 1.0 / mMethodDimension),
 				mMaxIntervalNorm);
 
 		++currentPointIt;
@@ -362,7 +362,7 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 	double localMConsts[3];
 
 	for (int i = 0; i < mNumberOfThreads; i++)
-		mIntervalsForTrials[i].rank = -HUGE_VAL;
+		mIntervalsForTrials[i].R = -HUGE_VAL;
 
 	auto leftIt = mSearchInformationStorage.begin();
 	auto rightIt = mSearchInformationStorage.begin();
@@ -372,7 +372,7 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 
 	for (int j = 0; j < storageSize - 1; j++)
 	{
-		dx = pow(rightIt->x - leftIt->x, 1.0 / mMethodDimention);
+		dx = pow(rightIt->x - leftIt->x, 1.0 / mMethodDimension);
 
 		if (dx == 0)
 			return 1;
@@ -387,7 +387,7 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 				std::swap(localMConsts[1], localMConsts[2]);
 
 				localMConsts[2] = fabs(rightRightIt->val - rightIt->val) 
-					/ pow(rightRightIt->x - rightIt->x, 1.0 / mMethodDimention);
+					/ pow(rightRightIt->x - rightIt->x, 1.0 / mMethodDimension);
 
 				mu1 = fmax(fmax(localMConsts[0], localMConsts[1]), localMConsts[2]);
 			}
@@ -396,7 +396,7 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 
 				localMConsts[1] = fabs(rightIt->val - leftIt->val) / dx;
 				localMConsts[2] = fabs(rightRightIt->val - rightIt->val) /
-					pow(rightRightIt->x - rightIt->x, 1.0 / mMethodDimention);
+					pow(rightRightIt->x - rightIt->x, 1.0 / mMethodDimension);
 				mu1 = fmax(localMConsts[1], localMConsts[2]);
 			}
 			else
@@ -422,13 +422,13 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 			curr_rank /= sqrt((rightIt->val - mZ)*
 			(leftIt->val - mZ)) / localM + pow(1.5, -mAlpha);
 
-		if (curr_rank > mIntervalsForTrials[mNumberOfThreads - 1].rank)
+		if (curr_rank > mIntervalsForTrials[mNumberOfThreads - 1].R)
 		{
-			OptimaizerInterval newInterval(
+			OptimizerInterval newInterval(
 				OptimizerTrialPoint(*leftIt),
 				OptimizerTrialPoint(*rightIt), curr_rank, localM);
 			for (int i = 0; i < mNumberOfThreads; i++)
-				if (mIntervalsForTrials[i].rank < newInterval.rank)
+				if (mIntervalsForTrials[i].R < newInterval.R)
 					std::swap(mIntervalsForTrials[i], newInterval);
 		}
 		++leftIt;

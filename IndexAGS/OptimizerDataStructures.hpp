@@ -24,28 +24,32 @@ namespace optimizercore	{
 	};
 	
 	inline bool operator<(const OptimizerTrialPoint& t1,
-		const OptimizerTrialPoint& t2){
+		const OptimizerTrialPoint& t2) {
 		return t1.x < t2.x;
 	}
-	
 
-	struct OptimaizerInterval
+	struct OptimizerInterval
 	{
 		OptimizerTrialPoint left, right;
-		double rank, localM;
+		double R, localM;
 
-		OptimaizerInterval()
+		OptimizerInterval()
 		{}
 
-		OptimaizerInterval(OptimizerTrialPoint _left,
+		OptimizerInterval(OptimizerTrialPoint _left,
 			OptimizerTrialPoint _right, double _rank, double _localM)
 		{
 			left = _left;
 			right = _right;
-			rank = _rank;
+			R = _rank;
 			localM = _localM;
 		}
 	};
+
+	inline bool operator<(const OptimizerInterval& t1,
+		const OptimizerInterval& t2){
+		return t1.R < t2.R;
+	}
 
 	struct OptimizerParameters
 	{
@@ -115,18 +119,22 @@ namespace optimizercore	{
 
 	private:
 		int mCurrentSetSize;
+		//int* mCurrentSetsSizes;
 		int mMemReallocationStep;
 		int mMemSize;
 		OptimizerTrialPoint* mMem;
+		//OptimizerTrialPoint** mMem;
 		double mCurrentZMin;
 
 	public:
 
 		IndxSet();
 		IndxSet(int memSize, int memReallocStep);
+		//IndxSet(int memSize, int mapsNumber, int memReallocStep);
 
 		void Add(const OptimizerTrialPoint& trial);
 		OptimizerTrialPoint Get(int i) const;
+		//OptimizerTrialPoint Get(int i, int mapNumber) const;
 
 		int GetSize() const;
 		double GetMinimumValue() const;
@@ -137,6 +145,35 @@ namespace optimizercore	{
 
 		~IndxSet();
 
+	};
+
+	class MultimapIndxSet
+	{
+
+	private:
+		int mMemReallocationStep;
+		int* mCurrentSetsSizes;
+		int* mMaxSetsSizes;
+		int mMemSize;
+		int mNumberOfSubsets;
+		OptimizerTrialPoint** mMem;
+		double mCurrentZMin;
+
+	public:
+
+		MultimapIndxSet();
+		MultimapIndxSet(int memSize, int mapsNumber, int memReallocStep);
+
+		void Add(const OptimizerTrialPoint& trial);
+		OptimizerTrialPoint Get(int i, int mapNumber) const;
+
+		int GetSize(int mapNumber) const;
+		double GetMinimumValue() const;
+		OptimizerTrialPoint GetMinimumPoint() const;
+
+		void Reset();
+
+		~MultimapIndxSet();
 	};
 
 }

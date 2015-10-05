@@ -15,7 +15,7 @@ namespace optimizercore	{
 	private:
 
 		size_t mSize;
-		unsigned mDimention;
+		unsigned mDimension;
 		MapType mMapType;
 		unsigned mMapDensity;
 		double* mPointsMemPtr;
