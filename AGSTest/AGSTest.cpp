@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
 
 	int localStartIteration = 10;
 	local_percent = 0;
-	r = 3;
+	r = 2;
 	eps = 0.001;
-	map_type = 4;
+	map_type = 5;
 	alpha = 20;
 	int numOfThreads = 1;
 	int taskdim = 2;
@@ -56,10 +56,10 @@ int main(int argc, char* argv[])
 	taskdim = task.GetTaskDimention();
 	OptimizerParameters params(maxIterNumber, numOfThreads, eps, &r, &res, taskdim, alpha, local_percent,
 		localStartIteration,
-		static_cast<MapType>(map_type), 12, 4, false, LocalTuningMode::Adaptive);
+		static_cast<MapType>(map_type), 12, 2, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
-	params.r = new double[task.GetNumberOfRestrictions() + 1];
-	for (int i = 0; i < task.GetNumberOfRestrictions() + 1; i++)
+	params.r = new double[task.GetNumberOfRestrictions() + 2];
+	for (int i = 0; i < task.GetNumberOfRestrictions() + 2; i++)
 		params.r[i] = r;
 
 	ags.SetParameters(params);
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
 	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
-	TestGKLSClass(params, gklsClass, taskdim);
+	//TestGKLSClass(params, gklsClass, taskdim);
 
 //	delete[] params.r;
 //	delete[] params.reserves;
