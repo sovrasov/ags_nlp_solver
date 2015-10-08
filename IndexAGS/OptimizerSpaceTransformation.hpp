@@ -13,7 +13,7 @@ namespace optimizercore
 		SharedVector mLeftDomainBound;
 		SharedVector mRightDomainBound;
 		SharedVector mSpaceShiftValues;
-		int mDimention;
+		int mDimension;
 		double mRho;
 		double* mLeftBoundPtr;
 		double* mRightBoundPtr;

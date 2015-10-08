@@ -20,14 +20,23 @@ optimizercore::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n,
 	mTightness = m;
 	mNumberOfMaps = l;
 	mMapType = mapType;
-
-	if (mapType == MultimapType::Rotated) {
-		assert(l <= n*(n - 1));
-		InitRotatedMap();
-	}
+	mRotationPlanes = nullptr;
 
 	p2 = new double[mDimension];
 	mTmpVector = SharedVector(p2, utils::array_deleter<double>());
+
+	switch (mMapType)
+	{
+	case MultimapType::Set:
+		mCurrentMap = &OptimizerMultiMap::GetSetMapImage;
+		mCurrentInvMap = &OptimizerMultiMap::GetAllSetMapPreimages;
+		break;
+	case MultimapType::Rotated:
+		assert(l <= n*(n - 1));
+		InitRotatedMap();
+		mCurrentMap = &OptimizerMultiMap::GetRotatedMapImage;
+		mCurrentInvMap = &OptimizerMultiMap::GetAllRotatedMapPreimages;
+	}
 
 	mIsInitialized = true;
 }
@@ -36,8 +45,7 @@ optimizercore::OptimizerMultiMap::~OptimizerMultiMap()
 {
 	if (mMapType == MultimapType::Rotated && mIsInitialized)
 	{
-		int PlaneCount = mDimension*(mDimension - 1) / 2;
-		for (int i = 0; i < PlaneCount; i++)
+		for (int i = 0; i < mRotatdeMapPlanesCount; i++)
 			delete[] mRotationPlanes[i];
 		delete[] mRotationPlanes;
 	}
@@ -48,122 +56,120 @@ int optimizercore::OptimizerMultiMap::GetNumberOfMaps() const
 	return mNumberOfMaps;
 }
 
+void optimizercore::OptimizerMultiMap::GetRotatedMapImage(double x, double y[])
+{
+	int intx = (int)x;//Ќомер интервала
+	x = x - intx;//дробна€ часть x
+	mapd(x, mTightness, y, mDimension);//получаем точку y[] в исходных координатах
+	if (intx == 0 || mNumberOfMaps == 1)
+		return;//≈сли начальный интервал или одна развертка - далее ничего не делаем
+	
+	int PlaneIndex = intx - 1;//“еперь PlaneNumber - номер перестановки
+	PlaneIndex = PlaneIndex % mRotatdeMapPlanesCount;
+	//ѕреобразование координат
+	double tmp = y[mRotationPlanes[PlaneIndex][1]];
+	y[mRotationPlanes[PlaneIndex][1]] = y[mRotationPlanes[PlaneIndex][0]];
+	y[mRotationPlanes[PlaneIndex][0]] = -tmp;
+
+	if (intx > mRotatdeMapPlanesCount)//ћен€ем знак преобразовани€
+	{
+		y[mRotationPlanes[PlaneIndex][0]] = -y[mRotationPlanes[PlaneIndex][0]];
+		y[mRotationPlanes[PlaneIndex][1]] = -y[mRotationPlanes[PlaneIndex][1]];
+	}
+}
+void optimizercore::OptimizerMultiMap::GetSetMapImage(double x, double y[])
+{
+	double del;
+	int i, intx = (int)x;
+	x = x - intx;
+
+	if (intx == 0)
+		del = 0.0;
+	else
+		for (i = 1, del = 1; i < intx + 1; del /= 2, i++);
+
+	mapd(x, mTightness + 1, y, mDimension);
+
+	for (i = 0; i < mDimension; i++)
+		y[i] = 2 * y[i] + 0.5 - del;
+}
+
 void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 {
-	switch (mMapType)
+	(this->*mCurrentMap)(x, y);
+}
+
+int optimizercore::OptimizerMultiMap::GetAllSetMapPreimages(double * p, double xp[])
+{
+	int i, j;
+	double xx;
+	double del;
+	del = 0.5;
+	for (i = 1; i < mNumberOfMaps; i++)
 	{
-	case MultimapType::Set:
-	{
-		double del;
-		int i, intx = (int)x;
-		x = x - intx;
+		for (j = 0; j < mDimension; j++)
+			p2[j] = (p[j] + del - 0.5) * 0.5;
 
-		if (intx == 0)
-			del = 0.0;
-		else
-			for (i = 1, del = 1; i < intx + 1; del /= 2, i++);
-
-		mapd(x, mTightness + 1, y, mDimension);
-
-		for (i = 0; i < mDimension; i++)
-			y[i] = 2 * y[i] + 0.5 - del;
+		xyd(&xx, mTightness + 1, p2, mDimension);
+		xp[i] = xx + i;
+		del *= 0.5;
 	}
-	break;
-	case MultimapType::Rotated:
-	{
-		int intx = (int)x;//Ќомер интервала
-		x = x - intx;//дробна€ часть x
-		mapd(x, mTightness, y, mDimension);//получаем точку y[] в исходных координатах
-		if (intx == 0 || mNumberOfMaps == 1)
-			return;//≈сли начальный интервал или одна развертка - далее ничего не делаем
-		int PlaneCount = mDimension*(mDimension - 1) / 2;
-		int PlaneIndex = intx - 1;//“еперь PlaneNumber - номер перестановки
-		PlaneIndex = PlaneIndex % PlaneCount;
-		//ѕреобразование координат
-		double tmp = y[mRotationPlanes[PlaneIndex][1]];
-		y[mRotationPlanes[PlaneIndex][1]] = y[mRotationPlanes[PlaneIndex][0]];
-		y[mRotationPlanes[PlaneIndex][0]] = -tmp;
+	del = 0.0;
+	for (j = 0; j < mDimension; j++)
+		p2[j] = (p[j] + del - 0.5) * 0.5;
+	xyd(&xx, mTightness + 1, p2, mDimension);
+	xp[0] = xx;
 
-		if (intx > PlaneCount)//ћен€ем знак преобразовани€
+	return mNumberOfMaps;
+}
+
+int optimizercore::OptimizerMultiMap::GetAllRotatedMapPreimages(double * p, double xp[])
+{
+	int i, j;
+	double xx;
+	std::copy_n(p, mDimension, p2);
+	//for (j = 0; j < mDimension; j++) p2[j] = p[j];
+
+	xyd(&xx, mTightness, p2, mDimension);
+	xp[0] = xx;
+	//≈сли одна развертка - далее ничего не делаем
+	if (mNumberOfMaps == 1)return 1;
+
+	for (i = 1; i < mNumberOfMaps; i++)
+	{
+		std::copy_n(p, mDimension, p2);
+		//for (j = 0; j < mDimension; j++)
+			//p2[j] = p[j];
+		//ќбратное преобразование координат
+		int PlaneIndex = (i - 1) % mRotatdeMapPlanesCount;
+
+		double tmp = p[mRotationPlanes[PlaneIndex][1]];
+		p2[mRotationPlanes[PlaneIndex][1]] = -p[mRotationPlanes[PlaneIndex][0]];
+		p2[mRotationPlanes[PlaneIndex][0]] = tmp;
+
+		if (i > mRotatdeMapPlanesCount)//ћен€ем знак преобразовани€
 		{
-			y[mRotationPlanes[PlaneIndex][0]] = -y[mRotationPlanes[PlaneIndex][0]];
-			y[mRotationPlanes[PlaneIndex][1]] = -y[mRotationPlanes[PlaneIndex][1]];
+			p2[mRotationPlanes[PlaneIndex][0]] = -p2[mRotationPlanes[PlaneIndex][0]];
+			p2[mRotationPlanes[PlaneIndex][1]] = -p2[mRotationPlanes[PlaneIndex][1]];
 		}
+
+		xyd(&xx, mTightness, p2, mDimension);
+		xp[i] = xx + (i);
 	}
-	break;
-	}
+
+	return mNumberOfMaps;
 }
 
 int optimizercore::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 {
-	switch (mMapType)
-	{
-	case MultimapType::Set:
-	{
-		int i, j;
-		double xx;
-		double del;
-		del = 0.5;
-		for (i = 1; i < mNumberOfMaps; i++)
-		{
-			for (j = 0; j < mDimension; j++)
-				p2[j] = (p[j] + del - 0.5) * 0.5;
-
-			xyd(&xx, mTightness + 1, p2, mDimension);
-			xp[i] = xx + i;
-			del *= 0.5;
-		}
-		del = 0.0;
-		for (j = 0; j < mDimension; j++)
-			p2[j] = (p[j] + del - 0.5) * 0.5;
-		xyd(&xx, mTightness + 1, p2, mDimension);
-		xp[0] = xx;
-	}
-	break;
-	case MultimapType::Rotated:
-	{
-		int i, j;
-		double xx;
-		for (j = 0; j < mDimension; j++) p2[j] = p[j];
-
-		xyd(&xx, mTightness, p2, mDimension);
-		xp[0] = xx;
-		//≈сли одна развертка - далее ничего не делаем
-		if (mNumberOfMaps == 1)return 1;
-
-		int PlaneCount = mDimension*(mDimension - 1) / 2;//„исло плоскостей
-
-		for (i = 1; i < mNumberOfMaps; i++)
-		{
-			for (j = 0; j < mDimension; j++)
-				p2[j] = p[j];
-			//ќбратное преобразование координат
-			int PlaneIndex = (i - 1) % PlaneCount;
-
-			double tmp = p[mRotationPlanes[PlaneIndex][1]];
-			p2[mRotationPlanes[PlaneIndex][1]] = -p[mRotationPlanes[PlaneIndex][0]];
-			p2[mRotationPlanes[PlaneIndex][0]] = tmp;
-
-			if (i > PlaneCount)//ћен€ем знак преобразовани€
-			{
-				p2[mRotationPlanes[PlaneIndex][0]] = -p2[mRotationPlanes[PlaneIndex][0]];
-				p2[mRotationPlanes[PlaneIndex][1]] = -p2[mRotationPlanes[PlaneIndex][1]];
-			}
-
-			xyd(&xx, mTightness, p2, mDimension);
-			xp[i] = xx + (i);
-		}
-	}
-	break;
-	}
-	return mNumberOfMaps;
+	return (this->*mCurrentInvMap)(p, xp);
 }
 
 void optimizercore::OptimizerMultiMap::InitRotatedMap()
 {
-	int PlaneCount = mDimension*(mDimension - 1) / 2;//„исло плоскостей
-	int** mRotationPlanes = new int*[PlaneCount];//Ќомера осей плоскостей, вокруг которых будут совершатьс€ повороты
-	for (int i = 0; i < PlaneCount; i++)
+	mRotatdeMapPlanesCount = mDimension*(mDimension - 1) / 2;
+	mRotationPlanes = new int*[mRotatdeMapPlanesCount];//Ќомера осей плоскостей, вокруг которых будут совершатьс€ повороты
+	for (int i = 0; i < mRotatdeMapPlanesCount; i++)
 		mRotationPlanes[i] = new int[2];
 
 	const int k = 2;//ѕодмножества из двух элементов

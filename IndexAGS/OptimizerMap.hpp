@@ -4,21 +4,25 @@
 #include "OptimizerCoreGlobal.hpp"
 #include "Map.hpp"
 
-#define MAX_PREIMAGES 32
-
 namespace optimizercore {
 
-	class OptimizerMap
+#define MAX_PREIMAGES 32
+
+	class EXPORT_API OptimizerMap
 	{
-	private:
-		MapType mMapType;
+	protected:
 		int mDimension;
 		int mTightness;
 
+		bool mIsInitialized;
+	private:
+		MapType mMapType;
+		int mMapKey;
+
 	public:
 		OptimizerMap();
-		virtual ~OptimizerMap();
 		OptimizerMap(int dimension, int tightness, MapType type);
+		virtual ~OptimizerMap();
 
 		virtual void GetImage(double x, double y[]);
 		virtual int GetAllPreimages(double* p, double xp[]);

@@ -109,7 +109,6 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 		mPMap = new OptimizerMultiMap(MultimapType::Set, mMethodDimension, mMapTightness, params.numberOfMaps);
 	else if(mMapType == 5)
 		mPMap = new OptimizerMultiMap(MultimapType::Rotated, mMethodDimension, mMapTightness, params.numberOfMaps);
-
 	mNumberOfMaps = params.numberOfMaps;
 	mMaxNumberOfIterations = params.maxIterationsNumber;
 	r = params.r;
@@ -191,8 +190,6 @@ bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 				mPMap->GetAllPreimages(mNextPoints[i], preimages);
 				for (int k = 0; k < mNumberOfMaps; k++) {
 					mNextTrialsPoints[i].x = preimages[k];
-					if (preimages[k] < 0 || preimages[k] > mNumberOfMaps)
-						throw - 1;
 					storageInsertionError =
 						mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
 					UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
@@ -301,9 +298,6 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 				/ lip_const[right.v], mMethodDimension) / (2 * r[right.v]);
 			else
 				mNextTrialsPoints[i].x = (right.x + left.x) / 2;
-
-			if (mNextTrialsPoints[i].x < 0 || mNextTrialsPoints[i].x > mNumberOfMaps)
-				throw - 1;
 			
 			mPMap->GetImage(mNextTrialsPoints[i].x, mNextPoints[i]);
 			mSpaceTransform.Transform(mNextPoints[i], mNextPoints[i]);

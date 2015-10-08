@@ -4,25 +4,29 @@
 #include "OptimizerCoreGlobal.hpp"
 #include "OptimizerMap.hpp"
 
-
 namespace optimizercore
 {
 	enum class MultimapType {Rotated, Set};
 
-	class OptimizerMultiMap final : public OptimizerMap
+	class EXPORT_API OptimizerMultiMap final : public OptimizerMap
 	{
 
 	private:
-		int mDimension;
-		int mTightness;
 		int mNumberOfMaps;
+		int mRotatdeMapPlanesCount;
 		MultimapType mMapType;
 
+		int **mRotationPlanes;
 		SharedVector mTmpVector; //smart ptr for p2
 		double *p2; 
-		int **mRotationPlanes;
 
-		bool mIsInitialized;
+		void(OptimizerMultiMap:: *mCurrentMap)(double x, double y[]);
+		int(OptimizerMultiMap:: *mCurrentInvMap)(double* p, double xp[]);
+
+		void GetSetMapImage(double x, double y[]);
+		void GetRotatedMapImage(double x, double y[]);
+		int GetAllSetMapPreimages(double* p, double xp[]);
+		int GetAllRotatedMapPreimages(double* p, double xp[]);
 
 	public:
 		OptimizerMultiMap();

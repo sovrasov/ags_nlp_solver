@@ -3,6 +3,7 @@
 
 optimizercore::OptimizerMap::OptimizerMap()
 {
+	mIsInitialized = false;
 }
 
 optimizercore::OptimizerMap::~OptimizerMap()
@@ -17,42 +18,35 @@ optimizercore::OptimizerMap::OptimizerMap(int dimension, int tightness, MapType 
 	mDimension = dimension;
 	mTightness = tightness;
 	mMapType = type;
+
+	switch (mMapType)
+	{
+	case MapType::Simple:
+		mMapKey = 1;
+		break;
+	case MapType::Linear:
+		mMapKey = 2;
+		break;
+	case MapType::Noninjective:
+		mMapKey = 3;
+		break;
+	}
+
+	mIsInitialized = true;
 }
 
 void optimizercore::OptimizerMap::GetImage(double x, double y[])
 {
-	switch (mMapType)
-	{
-	case MapType::Simple:
-		mapd(x, mTightness, y, mDimension, 1);
-		break;
-	case MapType::Linear:
-		mapd(x, mTightness, y, mDimension, 2);
-		break;
-	case MapType::Noninjective:
-		mapd(x, mTightness, y, mDimension, 3);
-		break;
-	default:
-		mapd(x, mTightness, y, mDimension, 1);
-	}
+	mapd(x, mTightness, y, mDimension, mMapKey);
 }
 
 int optimizercore::OptimizerMap::GetAllPreimages(double * p, double xp[])
 {
 	int preimNumber = 1;
-	switch (mMapType)
-	{
-	case MapType::Simple:
-		xyd(xp, mTightness, p, mDimension);
-		break;
-	case MapType::Linear:
-		xyd(xp, mTightness, p, mDimension);
-		break;
-	case MapType::Noninjective:
+	if(mMapType == MapType::Noninjective)
 		invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p, mDimension, 4);
-		break;
-	default:
+	else
 		xyd(xp, mTightness, p, mDimension);
-	}
+
 	return preimNumber;
 }

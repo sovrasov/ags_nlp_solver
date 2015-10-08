@@ -59,8 +59,7 @@ int main(int argc, char* argv[])
 		static_cast<MapType>(map_type), 12, 2, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 2];
-	for (int i = 0; i < task.GetNumberOfRestrictions() + 2; i++)
-		params.r[i] = r;
+	std::fill_n(params.r, task.GetNumberOfRestrictions() + 2, r);
 
 	ags.SetParameters(params);
 	ags.SetTask(task);
