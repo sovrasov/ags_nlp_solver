@@ -5,6 +5,7 @@
 #include "OptimizerDataStructures.hpp"
 #include "Map.hpp"
 #include "OptimizerSpaceTransformation.hpp"
+#include "OptimizerMap.hpp"
 #include <set>
 
 namespace optimizercore	{
@@ -13,6 +14,8 @@ namespace optimizercore	{
 	{
 
 	private:
+
+		OptimizerMap* mMap;
 
 		size_t mSize;
 		unsigned mDimension;
@@ -38,7 +41,7 @@ namespace optimizercore	{
 
 		OptimizerSearchSequence();
 		OptimizerSearchSequence(const std::set<OptimizerTrialPoint>& sequence,
-			unsigned dimention,	MapType mapType, unsigned mapDensity,
+			unsigned dimension,	MapType mapType, unsigned mapDensity,
 			OptimizerSpaceTransformation transform);
 		~OptimizerSearchSequence();
 

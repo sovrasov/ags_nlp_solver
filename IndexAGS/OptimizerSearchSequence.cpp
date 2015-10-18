@@ -15,14 +15,14 @@ OptimizerSearchSequence::OptimizerSearchSequence()
 	mIsInitialized = false;
 }
 OptimizerSearchSequence::OptimizerSearchSequence(const std::set<OptimizerTrialPoint>& searchSequence,
-	unsigned dimention, MapType mapType, unsigned mapDensity, OptimizerSpaceTransformation transform)
+	unsigned dimension, MapType mapType, unsigned mapDensity, OptimizerSpaceTransformation transform)
 {
 	assert(!searchSequence.empty());
-	assert(dimention > 1);
+	assert(dimension > 1);
 	assert(mapDensity > 0);
 
 	mSize = searchSequence.size();
-	mDimension = dimention;
+	mDimension = dimension;
 	mMapType = mapType;
 	mMapDensity = mapDensity;
 	mSpaceTransform = transform;
@@ -69,6 +69,7 @@ MapType OptimizerSearchSequence::GetMapType() const
 void OptimizerSearchSequence::GetPoint(int index, double* x)
 {
 	mapd(mPointsMemPtr[index], mMapDensity, x, mDimension, static_cast<int> (mMapType));
+	//mMap->GetImage(mPointsMemPtr[index], x);
 	mSpaceTransform.Transform(x, x);
 }
 double OptimizerSearchSequence::GetOneDimPoint(int index)
@@ -77,7 +78,6 @@ double OptimizerSearchSequence::GetOneDimPoint(int index)
 }
 double OptimizerSearchSequence::GetValue(int index)
 {
-	mValuesMemPtr = mValues.get();
 	return mValuesMemPtr[index];
 }
 void OptimizerSearchSequence::CheckIsInitialized() const

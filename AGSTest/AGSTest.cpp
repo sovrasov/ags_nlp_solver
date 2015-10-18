@@ -14,22 +14,35 @@ int main(int argc, char* argv[])
 	int map_type = 1, local_percent = 3, alpha = 15;
 
 	double r = 4.5, eps = 0.001, res = 0;
-	/*
-	if (argc == 13)
-	for (int i = 1; i<argc; i++)	{
-	if (!strcmp(argv[i], "-r"))
-	r = atof(argv[i + 1]);
-	else if (!strcmp(argv[i], "-mt"))
-	map_type = atoi(argv[i + 1]);
-	else if (!strcmp(argv[i], "-p"))
-	eps = atof(argv[i + 1]);
-	else if (!strcmp(argv[i], "-lc"))
-	local_percent = atof(argv[i + 1]);
-	else if (!strcmp(argv[i], "-dim"))
-	GKLS_dim = atoi(argv[i + 1]);
-	else if (!strcmp(argv[i], "-alph"))
-	alpha = atof(argv[i + 1]);
-	}
+
+	int localStartIteration = 10;
+	local_percent = 0;
+	r = 3;
+	eps = 0.01;
+	map_type = 4;
+	alpha = 20;
+	int numOfThreads = 1;
+	int taskdim = 2;
+	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
+	int maxIterNumber = 7000, numberOfMaps = 2;
+
+	//if (argc == 13)
+	for (int i = 1; i < argc; i++)	{
+		if (!strcmp(argv[i], "-r"))
+			r = atof(argv[i + 1]);
+		else if (!strcmp(argv[i], "-mt"))
+			map_type = atoi(argv[i + 1]);
+		else if (!strcmp(argv[i], "-eps"))
+			eps = atof(argv[i + 1]);
+		else if(!strcmp(argv[i], "-nm"))
+			numberOfMaps = atoi(argv[i + 1]);
+	//else if (!strcmp(argv[i], "-lc"))
+	//local_percent = atof(argv[i + 1]);
+	//else if (!strcmp(argv[i], "-dim"))
+	//GKLS_dim = atoi(argv[i + 1]);
+	//else if (!strcmp(argv[i], "-alph"))
+	//alpha = atof(argv[i + 1]);
+	}/*
 	else
 	{
 	printf("\nUsage:\n-r reliability\n-mt map type\n-p precision\n-lc percent of local iterations\n-dim dimention of tasks\n-alph local parameter\n");
@@ -38,16 +51,7 @@ int main(int argc, char* argv[])
 	}
 	*/
 
-	int localStartIteration = 10;
-	local_percent = 0;
-	r = 2;
-	eps = 0.001;
-	map_type = 5;
-	alpha = 20;
-	int numOfThreads = 1;
-	int taskdim = 2;
-	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
-	int maxIterNumber = 5000;
+	
 	//	ParseArguments(argc, argv, numOfThreads, taskdim, gklsClass, maxIterNumber);
 
 	OptimizerAlgorithm ags;
@@ -56,7 +60,7 @@ int main(int argc, char* argv[])
 	taskdim = task.GetTaskDimention();
 	OptimizerParameters params(maxIterNumber, numOfThreads, eps, &r, &res, taskdim, alpha, local_percent,
 		localStartIteration,
-		static_cast<MapType>(map_type), 12, 2, false, LocalTuningMode::Adaptive);
+		static_cast<MapType>(map_type), 12, numberOfMaps, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 2];
 	std::fill_n(params.r, task.GetNumberOfRestrictions() + 2, r);
@@ -89,6 +93,7 @@ int main(int argc, char* argv[])
 		printf("Calculations counter for function #%i: %i\n", i + 1,
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
+	TestMultimapsGKLSClass(params, gklsClass, 3);
 	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
 	//TestGKLSClass(params, gklsClass, taskdim);
 
@@ -175,6 +180,6 @@ auto parabaloidF = new FunctionPtrWrapper();
 	sprintf(fileName, "4threads_%R=%f_EPS=%f.png", r, eps);
 	VisualizeSequences(function, sequence1, sequence2, fileName);
 	*/
-	getchar();
+	//getchar();
 	return 0;
 }

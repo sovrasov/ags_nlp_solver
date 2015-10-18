@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <algorithm>
 
 optimizercore::OptimizerMultiMap::OptimizerMultiMap()
 {
@@ -32,7 +33,7 @@ optimizercore::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n,
 		mCurrentInvMap = &OptimizerMultiMap::GetAllSetMapPreimages;
 		break;
 	case MultimapType::Rotated:
-		assert(l <= n*(n - 1));
+		assert(l <= n*(n - 1) + 1);
 		InitRotatedMap();
 		mCurrentMap = &OptimizerMultiMap::GetRotatedMapImage;
 		mCurrentInvMap = &OptimizerMultiMap::GetAllRotatedMapPreimages;
@@ -101,13 +102,11 @@ void optimizercore::OptimizerMultiMap::GetImage(double x, double y[])
 
 int optimizercore::OptimizerMultiMap::GetAllSetMapPreimages(double * p, double xp[])
 {
-	int i, j;
 	double xx;
-	double del;
-	del = 0.5;
-	for (i = 1; i < mNumberOfMaps; i++)
+	double del = 0.5;
+	for (int i = 1; i < mNumberOfMaps; i++)
 	{
-		for (j = 0; j < mDimension; j++)
+		for (int j = 0; j < mDimension; j++)
 			p2[j] = (p[j] + del - 0.5) * 0.5;
 
 		xyd(&xx, mTightness + 1, p2, mDimension);
@@ -115,7 +114,7 @@ int optimizercore::OptimizerMultiMap::GetAllSetMapPreimages(double * p, double x
 		del *= 0.5;
 	}
 	del = 0.0;
-	for (j = 0; j < mDimension; j++)
+	for (int j = 0; j < mDimension; j++)
 		p2[j] = (p[j] + del - 0.5) * 0.5;
 	xyd(&xx, mTightness + 1, p2, mDimension);
 	xp[0] = xx;
@@ -125,21 +124,16 @@ int optimizercore::OptimizerMultiMap::GetAllSetMapPreimages(double * p, double x
 
 int optimizercore::OptimizerMultiMap::GetAllRotatedMapPreimages(double * p, double xp[])
 {
-	int i, j;
 	double xx;
 	std::copy_n(p, mDimension, p2);
-	//for (j = 0; j < mDimension; j++) p2[j] = p[j];
-
 	xyd(&xx, mTightness, p2, mDimension);
 	xp[0] = xx;
 	//≈сли одна развертка - далее ничего не делаем
 	if (mNumberOfMaps == 1)return 1;
 
-	for (i = 1; i < mNumberOfMaps; i++)
+	for (int i = 1; i < mNumberOfMaps; i++)
 	{
 		std::copy_n(p, mDimension, p2);
-		//for (j = 0; j < mDimension; j++)
-			//p2[j] = p[j];
 		//ќбратное преобразование координат
 		int PlaneIndex = (i - 1) % mRotatdeMapPlanesCount;
 

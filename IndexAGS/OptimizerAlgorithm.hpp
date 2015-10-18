@@ -54,6 +54,7 @@ namespace optimizercore	{
 		OptimizerQueue mQueue;
 
 		double *lip_const, *set_ranks, eps, *r, reserves;
+		int *mFunctionalsCalculationsStat;
 		double **mNextPoints;
 		MultimapIndxSet **v_indexes;
 

@@ -46,7 +46,7 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 	double meanItCount = 0;
 	int err_count = 0;
 	int results[100];
-	memset(results, 0, 100 * sizeof(int));
+	std::fill_n(results, 100, 0);
 	int max_count=0;
 	
 //	algParams.eps /= 2;
@@ -114,17 +114,113 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 		printf("\nR= %f map_type= %i local percent= %i, threadsNum= %i .txt",
 			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads);
 
-	//	out = fopen(filename, "wt");
+		out = fopen(filename, "wt");
 		int t_count = 0;
 
 		for (int i = 0; i < max_count + 20; i += 10){
 			for (int j = 0; j < 100; j++)
 				if (results[j] < i)
 					t_count++;
-		//	fprintf(out, "%i; %i\n", i, t_count);
+			fprintf(out, "%i; %i\n", i, t_count);
 			//printf("%i; %i\n", i, t_count);
 			t_count = 0;
 		}
-//		fclose(out);
+		fclose(out);
+	}
+}
+void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::GKLSClass classType, int gklsDimention)
+{
+	algParams.algDimention = gklsDimention;
+	SharedVector leftBound = SharedVector(new double[gklsDimention]);
+	SharedVector rightBound = SharedVector(new double[gklsDimention]);
+	std::fill_n(leftBound.get(), gklsDimention, -1.);
+	std::fill_n(rightBound.get(), gklsDimention, 1.);
+
+	GKLSFunctionWrapper *function = new GKLSFunctionWrapper();
+	auto taskFunctions = new optimizercore::OptimizerFunctionPtr[1];
+	taskFunctions[0] = OptimizerFunctionPtr(function);
+
+	function->SetClassType(classType, gklsDimention);
+
+	double meanItCount = 0;
+	int err_count = 0;
+	int results[100];
+	std::fill_n(results, 100, 0);
+	int max_count = 0;
+
+	optimizercore::OptimizerAlgorithm ags;
+	ags.SetParameters(algParams);
+	optimizercore::OptimizerTask task(std::shared_ptr<OptimizerFunctionPtr>(taskFunctions,
+		utils::array_deleter<OptimizerFunctionPtr>()), 0, gklsDimention, leftBound, rightBound);
+	ags.SetTask(task);
+
+	double* globalMinPoint = new double[gklsDimention], *y;
+
+	for (int j = 1; j <= 100; j++)
+	{
+		function->SetFunctionNumber(j);
+		function->GetMinPoint(globalMinPoint);
+		printf("\nTask# %i\n", j);
+		for (unsigned i = 0; i < gklsDimention; i++)
+		{
+			//		printf("%f  ", globalMinPoint[i]);
+			//	globalMinPoint[i] *= 0.5;
+		}
+		//	printf("\n");
+		auto result = ags.StartOptimization(globalMinPoint, optimizercore::StopCriterionType::OptimalPoint);
+		auto stat = result.GetSolution();
+		y = stat.GetOptimumPoint().get();
+
+		for (unsigned i = 0; i < gklsDimention; i++)
+			printf("%f  ", y[i]);
+
+		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1));
+		printf("\nFunction value %f\n", stat.GetOptimumValue());
+		printf("Helder const evaluation: %f", ags.GetLipschitzConst(result.GetNumberOfFunctionals() - 1));
+		printf("\n-------------------\n");
+		meanItCount += result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1) / 100.0;
+		if (optimizercore::utils::NormNDimMax(y, globalMinPoint, gklsDimention) > 0.01)
+		{
+			err_count++;
+			results[j - 1] = 21000000;
+			//break;
+		}
+		else {
+			results[j - 1] = stat.GetIterationsCount();
+			if (max_count < results[j - 1])
+				max_count = results[j - 1];
+		}
+	}
+
+	printf("Total errors: %i\n", err_count);
+	printf("Mean iterations number: %f\n", meanItCount);
+
+	if (err_count == 0)
+	{
+		FILE* out;
+		char filename[100];
+		int m_type = static_cast<int>(algParams.mapType);
+
+		sprintf_s(filename, "R= %f map_type= %i local percent= %i, threadsNum= %i maps_num=%i .txt",
+			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads,
+			algParams.numberOfMaps);
+
+
+
+		printf("\nR= %f map_type= %i local percent= %i, threadsNum= %i.txt\n",
+			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads);
+
+			out = fopen(filename, "wt");
+		int t_count = 0;
+
+		for (int i = 0; i < max_count + 20; i += 10) {
+			for (int j = 0; j < 100; j++)
+				if (results[j] < i)
+					t_count++;
+				fprintf(out, "%i; %i\n", i, t_count);
+			printf("%i; %i\n", i, t_count);
+			t_count = 0;
+		}
+				fclose(out);
 	}
 }

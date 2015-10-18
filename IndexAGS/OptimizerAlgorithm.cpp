@@ -1,7 +1,8 @@
 #include <cmath>
 #include <cassert>
+#include <algorithm>
+
 #include "OptimizerAlgorithm.hpp"
-#include "Map.hpp"
 #include "CoreUtils.hpp"
 #include "HookeJeevesLocalMethod.hpp"
 
@@ -10,13 +11,13 @@ using namespace optimizercore::utils;
 
 OptimizerAlgorithm::OptimizerAlgorithm()
 {
-	mCurrentStorageSize = 2000;
-	mStorageReallocStep = 2000;
+	mCurrentStorageSize = 5000;
+	mStorageReallocStep = 3000;
 	mIsAlgorithmMemoryAllocated = false;
 
 	mLocalStartIterationNumber = 1;
 	mNumberOfThreads = 1;
-	mMaxNumberOfIterations = 5000;
+	mMaxNumberOfIterations = 10000;
 	mNextPoints = nullptr;
 	mRestrictions = nullptr;
 	mNextTrialsPoints = nullptr;
@@ -103,8 +104,10 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 
 	if (mPMap)
 		delete mPMap;
-	if (mMapType < 4)
+	if (mMapType < 4) {
 		mPMap = new OptimizerMap(mMethodDimension, mMapTightness, params.mapType);
+		mNumberOfMaps = 1;
+	}
 	else if (mMapType == 4)
 		mPMap = new OptimizerMultiMap(MultimapType::Set, mMethodDimension, mMapTightness, params.numberOfMaps);
 	else if(mMapType == 5)
@@ -124,13 +127,16 @@ void OptimizerAlgorithm::InitializeInformationStorages()
 {
 	if (mMapType == 4 || !mSpaceTransform.IsZeroConstraintActive()) {
 		//insert the zero restriction for set map
-		mRestrictionsNumber++;
+		mRestrictionsNumber = mTask.GetNumberOfRestrictions() + 1;
 		delete[] mRestrictions;
 		mRestrictions = new OptimizerFunction*[mRestrictionsNumber];
 		mRestrictions[0] = mSpaceTransform.GetZeroConstraint().get();
 		for (int i = 1; i < mRestrictionsNumber; i++)
 			mRestrictions[i] = mTask.GetTaskFunctions().get()[i - 1].get();
 	}
+
+	mFunctionalsCalculationsStat = new int[mRestrictionsNumber + 1];
+	std::fill_n(mFunctionalsCalculationsStat, mRestrictionsNumber + 1, 0);
 
 	if (!mIsAlgorithmMemoryAllocated) {
 		AllocMem();
@@ -158,37 +164,13 @@ void OptimizerAlgorithm::InitializeInformationStorages()
 bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 {
 	bool storageInsertionError;
-	if (mMapType == 3)
-	{
-		int preimagesNumber = 0;
-		double preimages[32];
-		for (int i = 0; i < trailsNumber; i++)
-		{
-			invmad(mMapTightness, preimages, 32,
-				&preimagesNumber, mNextPoints[i], mMethodDimension, 4);
-			for (int k = 0; k < preimagesNumber; k++)
-			{
-				mNextTrialsPoints[i].x = preimages[k];
-				storageInsertionError =
-					mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
-				UpdateLipConsts(
-					v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
-			}
-		}
-	}
-	else if (mMapType < 3) {
-		for (int i = 0; i < trailsNumber; i++)	{
-			storageInsertionError =
-				mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
-			UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
-		}
-	}
-	else {
+	
+	if (mNumberOfMaps != 1 || mMapType == 3) {
 		for (int i = 0; i < trailsNumber; i++) {
-			if (mMapType == 5 || mNextTrialsPoints[i].v != 0) {//if mNextPoints[i] in D insert preimages
-				double preimages[32];
-				mPMap->GetAllPreimages(mNextPoints[i], preimages);
-				for (int k = 0; k < mNumberOfMaps; k++) {
+			if (mMapType == 5 || mMapType == 3 || mNextTrialsPoints[i].v != 0) {
+				double preimages[MAX_PREIMAGES];
+				int preimNumber = mPMap->GetAllPreimages(mNextPoints[i], preimages);
+				for (int k = 0; k < preimNumber; k++) {
 					mNextTrialsPoints[i].x = preimages[k];
 					storageInsertionError =
 						mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
@@ -202,6 +184,14 @@ bool OptimizerAlgorithm::InsertNewTrials(int trailsNumber)
 			}
 		}
 	}
+	else {
+		for (int i = 0; i < trailsNumber; i++) {
+			storageInsertionError =
+				mSearchInformationStorage.insert(mNextTrialsPoints[i]).second;
+			UpdateLipConsts(v_indexes[mNextTrialsPoints[i].v], mNextTrialsPoints[i]);
+		}
+	}
+
 	return storageInsertionError;
 }
 
@@ -227,7 +217,7 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 
 	while (iterationsCount < mMaxNumberOfIterations && !stop)	{
 
-		if (mMapType > 2 || mLocalMixParameter != 0)
+		if (mMapType == 3 || mNumberOfMaps != 1 || mLocalMixParameter != 0)
 			mNeedQueueRefill = true;
 		iterationsCount++;
 
@@ -241,8 +231,11 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 				mSpaceTransform.InvertTransform(mNextPoints[i], mNextPoints[i]);
 
 #pragma omp critical
-			if (mNextTrialsPoints[i].v > v)
-				v = mNextTrialsPoints[i].v;
+			{
+				mFunctionalsCalculationsStat[mNextTrialsPoints[i].v]++;
+				if (mNextTrialsPoints[i].v > v)
+					v = mNextTrialsPoints[i].v;
+			}
 		}
 
 		if (!InsertNewTrials(currentThrNum))
@@ -260,7 +253,6 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 
 		//full update ranks or insert new intervals in queue
 		if (mNeedQueueRefill) {
-			//printf("Refill on iteration: %i\n", iterationsCount);
 			if (iterationsCount >= mLocalStartIterationNumber) {
 				if (iterationsCount % (12 - mLocalMixParameter) == 0
 					&& mLocalMixParameter > 0)
@@ -333,15 +325,17 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 	mSpaceTransform.Transform(y, y);
 	
 	SharedVector optPoint(new double[mMethodDimension], array_deleter<double>());
-	std::memcpy(optPoint.get(), y, mMethodDimension*sizeof(double));
+	std::copy_n(y, mMethodDimension, optPoint.get());
 
 	OptimizerSolution solution(iterationsCount, mOptimumEvaluation.val,
 		mOptimumEvaluation.x, mMethodDimension, optPoint);
 
 	if (mNeedLocalVerification)
-		return OptimizerResult(DoLocalVerification(solution));
+		return OptimizerResult(DoLocalVerification(solution),
+			SharedIntVector(mFunctionalsCalculationsStat, array_deleter<int>()), mRestrictionsNumber + 1);
 	else
-		return OptimizerResult(solution);
+		return OptimizerResult(solution,
+			SharedIntVector(mFunctionalsCalculationsStat, array_deleter<int>()), mRestrictionsNumber + 1);
 }
 OptimizerSolution OptimizerAlgorithm::DoLocalVerification(OptimizerSolution startSolution)
 {
