@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include "OptimizerDataStructures.hpp"
 #include "CoreUtils.hpp"
 
@@ -94,7 +95,7 @@ optimizercore::MultimapIndxSet::MultimapIndxSet(int memSize, int mapsNumber, int
 
 void optimizercore::MultimapIndxSet::Add(const OptimizerTrialPoint & trial)
 {
-	int setNumber = trial.x;
+	int setNumber = (int)trial.x;
 	mMem[setNumber][mCurrentSetsSizes[setNumber]++] = trial;
 
 	if (trial.val < mCurrentZMin)
@@ -135,8 +136,7 @@ OptimizerTrialPoint optimizercore::MultimapIndxSet::GetMinimumPoint() const
 
 void optimizercore::MultimapIndxSet::Reset()
 {
-	for (int i = 0; i < mNumberOfSubsets; i++)
-		mCurrentSetsSizes[i] = 0;
+	std::fill_n(mCurrentSetsSizes, mNumberOfSubsets, 0);
 	mCurrentZMin = HUGE_VAL;
 }
 
@@ -145,6 +145,7 @@ optimizercore::MultimapIndxSet::~MultimapIndxSet()
 	if (mMem != nullptr) {
 		for (int i = 0; i < mNumberOfSubsets; i++)
 			delete[] mMem[i];
+		delete[] mMem;
 		delete[] mCurrentSetsSizes;
 		delete[] mMaxSetsSizes;
 	}
