@@ -407,8 +407,7 @@ void OptimizerAlgorithm::UpdateLipConsts(MultimapIndxSet* set,
 	for (int k = 0; k < set_size; k++)
 	{
 		cur_point = set->Get(k, setNumber);
-		if (value.x != cur_point.x)
-			max = fmax(max,
+		max = fmax(max,
 			fabs(value.val - cur_point.val)
 			/ pow(fabs(value.x - cur_point.x), 1.0 / mMethodDimension));
 	}

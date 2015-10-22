@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
 			eps = atof(argv[i + 1]);
 		else if(!strcmp(argv[i], "-nm"))
 			numberOfMaps = atoi(argv[i + 1]);
-	//else if (!strcmp(argv[i], "-lc"))
-	//local_percent = atof(argv[i + 1]);
+	else if (!strcmp(argv[i], "-nt"))
+		numOfThreads = atof(argv[i + 1]);
 	//else if (!strcmp(argv[i], "-dim"))
 	//GKLS_dim = atoi(argv[i + 1]);
 	//else if (!strcmp(argv[i], "-alph"))
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 		printf("Calculations counter for function #%i: %i\n", i + 1,
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
-	TestMultimapsGKLSClass(params, gklsClass, 3);
+	TestMultimapsGKLSClass(params, gklsClass, 2);
 	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
 	//TestGKLSClass(params, gklsClass, taskdim);
 
