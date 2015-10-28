@@ -2,6 +2,7 @@
 #define OPTIMIZER_MULTIMAP_HPP
 
 #include "OptimizerCoreGlobal.hpp"
+#include "CoreUtils.hpp"
 #include "OptimizerMap.hpp"
 
 namespace optimizercore
@@ -10,13 +11,24 @@ namespace optimizercore
 
 	class EXPORT_API OptimizerMultiMap final : public OptimizerMap
 	{
-
+	private:
+		class MatrixMemHolder final {
+		private:
+			int **mMem, mMemSize;
+		public:
+			MatrixMemHolder(int **mem, int size) : mMem(mem), mMemSize(size)
+			{	}
+			~MatrixMemHolder() {
+				utils::DeleteMatrix(mMem, mMemSize);
+			}
+		};
 	private:
 		int mNumberOfMaps;
-		int mRotatdeMapPlanesCount;
+		int mRotatedMapPlanesCount;
 		MultimapType mMapType;
 
 		int **mRotationPlanes;
+		std::shared_ptr<MatrixMemHolder> mRotationPlanesHolder;
 		SharedVector mTmpVector; //smart ptr for p2
 		double *p2; 
 

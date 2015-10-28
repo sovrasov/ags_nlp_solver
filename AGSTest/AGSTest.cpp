@@ -1,32 +1,31 @@
 ﻿#include "OptimizerAlgorithm.hpp"
 #include "CoreUtils.hpp"
 #include <cmath>
-#include "SequenceVisualizer.h"
-#include "GKLSClassTest.h"
+#include "SequenceVisualizer.hpp"
+#include "GKLSClassTest.hpp"
 #include "TestTaskFactory.hpp"
 #include "OptimizerSTLFunctionWrapper.hpp"
 #include "HookeJeevesLocalMethod.hpp"
+#include "TestGrishaginClass.hpp"
 
 using namespace optimizercore;
 
+enum class TestSet {GKLS, Gris};
+
 int main(int argc, char* argv[])
 {
-	int map_type = 1, local_percent = 3, alpha = 15;
-
-	double r = 4.5, eps = 0.001, res = 0;
-
+	int map_type = 1;
+	int local_percent = 3;
+	int alpha = 15;
+	double r = 4.5, eps = 0.01, res = 0;
 	int localStartIteration = 10;
-	local_percent = 0;
-	r = 3;
-	eps = 0.01;
-	map_type = 4;
-	alpha = 20;
 	int numOfThreads = 1;
 	int taskdim = 2;
-	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
-	int maxIterNumber = 7000, numberOfMaps = 2;
+	int maxIterNumber = 7000;
+	int numberOfMaps = 2;
 
-	//if (argc == 13)
+	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
+
 	for (int i = 1; i < argc; i++)	{
 		if (!strcmp(argv[i], "-r"))
 			r = atof(argv[i + 1]);
@@ -38,21 +37,7 @@ int main(int argc, char* argv[])
 			numberOfMaps = atoi(argv[i + 1]);
 	else if (!strcmp(argv[i], "-nt"))
 		numOfThreads = atof(argv[i + 1]);
-	//else if (!strcmp(argv[i], "-dim"))
-	//GKLS_dim = atoi(argv[i + 1]);
-	//else if (!strcmp(argv[i], "-alph"))
-	//alpha = atof(argv[i + 1]);
-	}/*
-	else
-	{
-	printf("\nUsage:\n-r reliability\n-mt map type\n-p precision\n-lc percent of local iterations\n-dim dimention of tasks\n-alph local parameter\n");
-	system("PAUSE");
-	exit(0);
 	}
-	*/
-
-	
-	//	ParseArguments(argc, argv, numOfThreads, taskdim, gklsClass, maxIterNumber);
 
 	OptimizerAlgorithm ags;
 	OptimizerTask task = TestTaskFactory::GetTask(0);
@@ -93,7 +78,9 @@ int main(int argc, char* argv[])
 		printf("Calculations counter for function #%i: %i\n", i + 1,
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
-	TestMultimapsGKLSClass(params, gklsClass, 2);
+	//TestMultimapsGKLSClass(params, gklsClass, 2);
+	TestVAGrisClass(params);
+	
 	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
 	//TestGKLSClass(params, gklsClass, taskdim);
 

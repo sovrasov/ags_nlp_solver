@@ -1,5 +1,4 @@
 #include "OptimizerMultiMap.hpp"
-#include "CoreUtils.hpp"
 #include "Map.hpp"
 
 #include <cassert>
@@ -44,12 +43,8 @@ optimizercore::OptimizerMultiMap::OptimizerMultiMap(MultimapType mapType, int n,
 
 optimizercore::OptimizerMultiMap::~OptimizerMultiMap()
 {
-	if (mMapType == MultimapType::Rotated && mIsInitialized)
-	{
-		for (int i = 0; i < mRotatdeMapPlanesCount; i++)
-			delete[] mRotationPlanes[i];
-		delete[] mRotationPlanes;
-	}
+//	if (mMapType == MultimapType::Rotated && mIsInitialized)
+//		utils::DeleteMatrix(mRotationPlanes, mRotatedMapPlanesCount);
 }
 
 int optimizercore::OptimizerMultiMap::GetNumberOfMaps() const
@@ -66,13 +61,13 @@ void optimizercore::OptimizerMultiMap::GetRotatedMapImage(double x, double y[])
 		return;//Если начальный интервал или одна развертка - далее ничего не делаем
 	
 	int PlaneIndex = intx - 1;//Теперь PlaneNumber - номер перестановки
-	PlaneIndex = PlaneIndex % mRotatdeMapPlanesCount;
+	PlaneIndex = PlaneIndex % mRotatedMapPlanesCount;
 	//Преобразование координат
 	double tmp = y[mRotationPlanes[PlaneIndex][1]];
 	y[mRotationPlanes[PlaneIndex][1]] = y[mRotationPlanes[PlaneIndex][0]];
 	y[mRotationPlanes[PlaneIndex][0]] = -tmp;
 
-	if (intx > mRotatdeMapPlanesCount)//Меняем знак преобразования
+	if (intx > mRotatedMapPlanesCount)//Меняем знак преобразования
 	{
 		y[mRotationPlanes[PlaneIndex][0]] = -y[mRotationPlanes[PlaneIndex][0]];
 		y[mRotationPlanes[PlaneIndex][1]] = -y[mRotationPlanes[PlaneIndex][1]];
@@ -135,13 +130,13 @@ int optimizercore::OptimizerMultiMap::GetAllRotatedMapPreimages(double * p, doub
 	{
 		std::copy_n(p, mDimension, p2);
 		//Обратное преобразование координат
-		int PlaneIndex = (i - 1) % mRotatdeMapPlanesCount;
+		int PlaneIndex = (i - 1) % mRotatedMapPlanesCount;
 
 		double tmp = p[mRotationPlanes[PlaneIndex][1]];
 		p2[mRotationPlanes[PlaneIndex][1]] = -p[mRotationPlanes[PlaneIndex][0]];
 		p2[mRotationPlanes[PlaneIndex][0]] = tmp;
 
-		if (i > mRotatdeMapPlanesCount)//Меняем знак преобразования
+		if (i > mRotatedMapPlanesCount)//Меняем знак преобразования
 		{
 			p2[mRotationPlanes[PlaneIndex][0]] = -p2[mRotationPlanes[PlaneIndex][0]];
 			p2[mRotationPlanes[PlaneIndex][1]] = -p2[mRotationPlanes[PlaneIndex][1]];
@@ -161,10 +156,10 @@ int optimizercore::OptimizerMultiMap::GetAllPreimages(double * p, double xp[])
 
 void optimizercore::OptimizerMultiMap::InitRotatedMap()
 {
-	mRotatdeMapPlanesCount = mDimension*(mDimension - 1) / 2;
-	mRotationPlanes = new int*[mRotatdeMapPlanesCount];//Номера осей плоскостей, вокруг которых будут совершаться повороты
-	for (int i = 0; i < mRotatdeMapPlanesCount; i++)
-		mRotationPlanes[i] = new int[2];
+	mRotatedMapPlanesCount = mDimension*(mDimension - 1) / 2;
+	mRotationPlanes = utils::AllocateMatrix<int>(mRotatedMapPlanesCount, 2);//Номера осей плоскостей, вокруг которых будут совершаться повороты
+	mRotationPlanesHolder = std::shared_ptr<MatrixMemHolder>(
+		new MatrixMemHolder(mRotationPlanes, mRotatedMapPlanesCount));
 
 	const int k = 2;//Подмножества из двух элементов
 	int plane[k];//Два номера под элементы

@@ -1,5 +1,5 @@
-#include "SequenceVisualizer.h"
-#include "OptimizerFunctionWrappers.h"
+#include "SequenceVisualizer.hpp"
+#include "OptimizerFunctionWrappers.hpp"
 #include <cmath>
 #include <discpp.h>
 

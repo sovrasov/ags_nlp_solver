@@ -1,11 +1,12 @@
-#include "GKLSClassTest.h"
+#include "GKLSClassTest.hpp"
 #include "CoreUtils.hpp"
 #include "OptimizerAlgorithmUnconstrained.hpp"
 #include "OptimizerSpaceTransformation.hpp"
+
 #include <cstdio>
 #include <algorithm>
-using namespace optimizercore;
 
+using namespace optimizercore;
 
 int ParseArguments(int arg_c, char** arg_v, int &threadsNum, int &problemDim,
 	gklsfunction::GKLSClass& classType, int& maxIterCount)
@@ -155,6 +156,7 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 	ags.SetTask(task);
 
 	double* globalMinPoint = new double[gklsDimention], *y;
+	double avgHelderConst = 0;
 
 	for (int j = 1; j <= 100; j++)
 	{
@@ -170,15 +172,17 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 		auto result = ags.StartOptimization(globalMinPoint, optimizercore::StopCriterionType::OptimalPoint);
 		auto stat = result.GetSolution();
 		y = stat.GetOptimumPoint().get();
+		double helderConst = ags.GetLipschitzConst(result.GetNumberOfFunctionals() - 1);
+		avgHelderConst += helderConst / 100.0;
 
 		for (unsigned i = 0; i < gklsDimention; i++)
 			printf("%f  ", y[i]);
-
 		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1));
 		printf("\nFunction value %f\n", stat.GetOptimumValue());
-		printf("Helder const evaluation: %f", ags.GetLipschitzConst(result.GetNumberOfFunctionals() - 1));
+		printf("Helder const evaluation: %f", helderConst);
 		printf("\n-------------------\n");
 		meanItCount += result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1) / 100.0;
+
 		if (optimizercore::utils::NormNDimMax(y, globalMinPoint, gklsDimention) > 0.01)
 		{
 			err_count++;
@@ -186,7 +190,8 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 			//break;
 		}
 		else {
-			results[j - 1] = stat.GetIterationsCount();
+			//results[j - 1] = stat.GetIterationsCount();
+			results[j - 1] = result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1);
 			if (max_count < results[j - 1])
 				max_count = results[j - 1];
 		}
@@ -194,6 +199,7 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 
 	printf("Total errors: %i\n", err_count);
 	printf("Mean iterations number: %f\n", meanItCount);
+	printf("Average helder const: %f", avgHelderConst);
 
 	if (err_count == 0)
 	{
@@ -201,16 +207,14 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 		char filename[100];
 		int m_type = static_cast<int>(algParams.mapType);
 
-		sprintf_s(filename, "R= %f map_type= %i local percent= %i, threadsNum= %i maps_num=%i .txt",
+		sprintf_s(filename, "GK R= %.3f map_type= %i local percent= %i, threadsNum= %i maps_num=%i.csv",
 			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads,
 			algParams.numberOfMaps);
 
-
-
-		printf("\nR= %f map_type= %i local percent= %i, threadsNum= %i.txt\n",
+		printf("\nGK R= %f map_type= %i local percent= %i, threadsNum= %i\n",
 			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads);
 
-			out = fopen(filename, "wt");
+		out = fopen(filename, "wt");
 		int t_count = 0;
 
 		for (int i = 0; i < max_count + 20; i += 10) {
@@ -218,9 +222,11 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 				if (results[j] < i)
 					t_count++;
 				fprintf(out, "%i; %i\n", i, t_count);
-			printf("%i; %i\n", i, t_count);
+			//printf("%i; %i\n", i, t_count);
 			t_count = 0;
 		}
-				fclose(out);
+		fprintf(out, "Average helder const: %f\n", avgHelderConst);
+		fprintf(out, "Average iterations number: %f\n", meanItCount);
+		fclose(out);
 	}
 }

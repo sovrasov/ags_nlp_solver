@@ -86,10 +86,11 @@
   <ItemGroup>
     <ClInclude Include="2d_func_cl.h" />
     <ClInclude Include="gkls.h" />
-    <ClInclude Include="GKLSClassTest.h" />
-    <ClInclude Include="OptimizerFunctionWrappers.h" />
+    <ClInclude Include="GKLSClassTest.hpp" />
+    <ClInclude Include="OptimizerFunctionWrappers.hpp" />
     <ClInclude Include="rnd_gen.h" />
-    <ClInclude Include="SequenceVisualizer.h" />
+    <ClInclude Include="SequenceVisualizer.hpp" />
+    <ClInclude Include="TestGrishaginClass.hpp" />
     <ClInclude Include="TestTaskFactory.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +100,7 @@
     <ClCompile Include="OptimizerFunctionWrappers.cpp" />
     <ClCompile Include="rnd_gen.cpp" />
     <ClCompile Include="SequenceVisualizer.cpp" />
+    <ClCompile Include="TestGrishaginClass.cpp" />
     <ClCompile Include="TestTaskFactory.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

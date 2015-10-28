@@ -27,16 +27,19 @@
     <ClInclude Include="2d_func_cl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SequenceVisualizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OptimizerFunctionWrappers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GKLSClassTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TestTaskFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestGrishaginClass.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GKLSClassTest.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimizerFunctionWrappers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SequenceVisualizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -60,6 +63,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestTaskFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestGrishaginClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
