@@ -1,7 +1,8 @@
 #include <cmath>
 #include "Map.hpp"
 
-extern int n1,nexp,l,iq,iu[10],iv[10];
+//extern
+int n1,nexp,l,iq,iu[10],iv[10];
 
 void xyd ( double *xx, int m, double y[], int n)
 {

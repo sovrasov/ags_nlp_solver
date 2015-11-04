@@ -152,7 +152,7 @@ OptimizerResult OptimizerAlgorithmUnconstrained::StartOptimization(
 	const double* a, StopCriterionType stopType)
 {
 	assert(mIsParamsInitialized && mIsTaskInitialized);
-	assert(mSpaceTransform.GetDomainDimention() == mMethodDimension);
+	assert(mSpaceTransform.GetDomainDimension() == mMethodDimension);
 
 	InitializeInformationStorage();
 

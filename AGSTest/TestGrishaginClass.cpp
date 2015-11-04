@@ -42,12 +42,12 @@ void TestVAGrisClass(optimizercore::OptimizerParameters algParams)
 		double helderConst = ags.GetLipschitzConst(result.GetNumberOfFunctionals() - 1);
 		avgHelderConst += helderConst / 100.0;
 
-		for (unsigned i = 0; i < 2; i++)
-			printf("%f  ", y[i]);
-		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1));
-		printf("\nFunction value %f\n", stat.GetOptimumValue());
+		printf("Function #%i\n", i);
+		printf("Evaluated optimum point (%f  ; %f)\n", y[0], y[1]);
+		printf("It_count: %i\n", result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1));
+		printf("Function value %f\n", stat.GetOptimumValue());
 		printf("Helder const evaluation: %f", helderConst);
-		printf("\n-------------------\n");
+		printf("\n--------------------------------\n");
 		meanItCount += result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1) / 100.0;
 		if (optimizercore::utils::NormNDimMax(y, globalMinPoint, 2) > 0.01)
 		{

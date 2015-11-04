@@ -37,7 +37,7 @@ namespace optimizercore
 		bool IsZeroConstraintActive() const;
 		SharedVector GetLeftDomainBound() const;
 		SharedVector GetRightDomainBound() const;
-		int GetDomainDimention() const;
+		int GetDomainDimension() const;
 
 	};
 }

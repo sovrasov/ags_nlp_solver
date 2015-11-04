@@ -85,7 +85,7 @@ SharedVector OptimizerSpaceTransformation::GetRightDomainBound() const
 	return mRightDomainBound;
 }
 
-int OptimizerSpaceTransformation::GetDomainDimention() const
+int OptimizerSpaceTransformation::GetDomainDimension() const
 {
 	return mDimension;
 }

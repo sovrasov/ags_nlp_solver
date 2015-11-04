@@ -7,6 +7,7 @@
 #include "OptimizerSTLFunctionWrapper.hpp"
 #include "HookeJeevesLocalMethod.hpp"
 #include "TestGrishaginClass.hpp"
+#include "HolderConstEvaluate.hpp"
 
 using namespace optimizercore;
 
@@ -15,9 +16,9 @@ enum class TestSet {GKLS, Gris};
 int main(int argc, char* argv[])
 {
 	int map_type = 1;
-	int local_percent = 3;
+	int local_percent = 0;
 	int alpha = 15;
-	double r = 4.5, eps = 0.01, res = 0;
+	double r = 3.5, eps = 0.01, res = 0;
 	int localStartIteration = 10;
 	int numOfThreads = 1;
 	int taskdim = 2;
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
 	int numberOfMaps = 2;
 
 	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
+	TestSet set = TestSet::Gris;
 
 	for (int i = 1; i < argc; i++)	{
 		if (!strcmp(argv[i], "-r"))
@@ -35,8 +37,12 @@ int main(int argc, char* argv[])
 			eps = atof(argv[i + 1]);
 		else if(!strcmp(argv[i], "-nm"))
 			numberOfMaps = atoi(argv[i + 1]);
-	else if (!strcmp(argv[i], "-nt"))
-		numOfThreads = atof(argv[i + 1]);
+		else if (!strcmp(argv[i], "-nt"))
+			numOfThreads = atof(argv[i + 1]);
+		else if (!strcmp(argv[i], "-gkls"))
+			set = TestSet::GKLS;
+		else if (!strcmp(argv[i], "-gris"))
+			TestSet set = TestSet::Gris;
 	}
 
 	OptimizerAlgorithm ags;
@@ -49,7 +55,7 @@ int main(int argc, char* argv[])
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 2];
 	std::fill_n(params.r, task.GetNumberOfRestrictions() + 2, r);
-
+	/*
 	ags.SetParameters(params);
 	ags.SetTask(task);
 
@@ -58,7 +64,6 @@ int main(int argc, char* argv[])
 	auto result = ags.StartOptimization(x_opt, optimizercore::StopCriterionType::Precision);
 	auto optPoint = result.GetSolution().GetOptimumPoint();
 
-	/*
 	localoptimizer::HookeJeevesLocalMethod localMethod;
 	localMethod.SetEps(eps / 1000);
 	localMethod.SetInitialStep(2*eps);
@@ -67,7 +72,6 @@ int main(int argc, char* argv[])
 	localMethod.SetStartPoint(x_opt, task.GetTaskDimention());
 	
 	localMethod.StartOptimization(optPoint.get());
-	*/
 	for (int i = 0; i < params.algDimention; i++)
 		printf("x[%i]: %f   ", i, optPoint.get()[i]);
 	printf("\nFvalue %f\n", result.GetSolution().GetOptimumValue());
@@ -78,13 +82,18 @@ int main(int argc, char* argv[])
 		printf("Calculations counter for function #%i: %i\n", i + 1,
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
-	//TestMultimapsGKLSClass(params, gklsClass, 2);
-	TestVAGrisClass(params);
-	
-	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
-	//TestGKLSClass(params, gklsClass, taskdim);
+	*/
+	if(set == TestSet::Gris)
+		TestVAGrisClass(params);
+	else
+		TestMultimapsGKLSClass(params, gklsClass, 2);
 
-//	delete[] params.r;
+	delete[] params.r;
+
+	//RunEvaluationExpOnGKLSClass(0, 0.001);
+	//RunEvaluationExpOnGrishaginClass(0, 0.001);
+	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
+
 //	delete[] params.reserves;
 
 	//////////////GLOBAL
