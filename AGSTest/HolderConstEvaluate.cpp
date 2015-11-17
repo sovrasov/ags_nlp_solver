@@ -9,7 +9,7 @@
 
 using namespace optimizercore;
 
-#define NUM_THREADS 1
+#define NUM_THREADS 4
 
 void RunEvaluationExpOnGrishaginClass(double * constValues, double eps)
 {
@@ -30,6 +30,7 @@ void RunEvaluationExpOnGrishaginClass(double * constValues, double eps)
 	{
 		functions[omp_get_thread_num()]->SetFunctionNumber(i);
 		holderConsts[i - 1] = EvaluateHolderConst(functions[omp_get_thread_num()], map, transform, eps);
+		printf("Evaluation for function %i completed. HC = %f\n", i, holderConsts[i - 1]);
 	}
 
 	sprintf(filename, "VAGrisFunctions eps=%f.csv", eps);
@@ -66,6 +67,7 @@ void RunEvaluationExpOnGKLSClass(double* constValues, double eps)
 	{
 		functions[omp_get_thread_num()]->SetFunctionNumber(i);
 		holderConsts[i - 1] = EvaluateHolderConst(functions[omp_get_thread_num()], map, transform, eps);
+		printf("Evaluation for function %i completed. HC = %f\n", i, holderConsts[i - 1]);
 	}
 
 	sprintf(filename, "GKLSFunctions eps=%f.csv", eps);
@@ -86,12 +88,10 @@ double EvaluateHolderConst(OptimizerFunction *function, OptimizerMap& map,
 	double holderConst = 0, x = 0;// , normEps = pow(eps, 1.0 / transform.GetDomainDimension());
 	double *arg = new double[transform.GetDomainDimension()];
 	double *fvalues = new double[iterationsNumber];
-	//double fvalueLeft, fvalueRight;
 	double powValue = 1.0 / transform.GetDomainDimension();
 
 	map.GetImage(x, arg);
 	transform.Transform(arg, arg);
-	//fvalueLeft = function->Calculate(arg);
 
 	for (int i = 0; i < iterationsNumber - 1; i++) {
 		fvalues[i] = function->Calculate(arg);
@@ -101,9 +101,6 @@ double EvaluateHolderConst(OptimizerFunction *function, OptimizerMap& map,
 		x += eps;
 		map.GetImage(x, arg);
 		transform.Transform(arg, arg);
-		//fvalueRight = function->Calculate(arg);
-		//holderConst = fmax(holderConst, fabs(fvalueLeft - fvalueRight) / normEps);
-		//std::swap(fvalueLeft, fvalueRight);
 	}
 
 	delete[] arg;

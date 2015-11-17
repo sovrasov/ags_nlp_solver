@@ -49,7 +49,7 @@ __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
 		  is=nexp-1; d=0.0;
 		} else {
 		  d=d*nexp;
-		  is=d;
+		  is=(int)d;
 		  d=d-is;
 	 }
 	 i=is;

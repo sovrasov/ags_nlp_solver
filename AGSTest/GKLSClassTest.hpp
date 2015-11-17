@@ -7,6 +7,6 @@
 int ParseArguments(int arg_c, char** arg_v, int &threadsNum, int &problemDim,
 	gklsfunction::GKLSClass& classType, int& maxIterCount);
 void TestGKLSClass(optimizercore::OptimizerParameters, gklsfunction::GKLSClass, int gklsDimention);
-void TestMultimapsGKLSClass(optimizercore::OptimizerParameters, gklsfunction::GKLSClass, int gklsDimention);
+int TestMultimapsGKLSClass(optimizercore::OptimizerParameters, gklsfunction::GKLSClass, int gklsDimention);
 
 #endif

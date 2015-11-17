@@ -3,6 +3,6 @@
 
 #include "OptimizerDataStructures.hpp"
 
-void TestVAGrisClass(optimizercore::OptimizerParameters algParams);
+int TestVAGrisClass(optimizercore::OptimizerParameters algParams);
 
 #endif

@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	int localStartIteration = 10;
 	int numOfThreads = 1;
 	int taskdim = 2;
-	int maxIterNumber = 7000;
+	int maxIterNumber = 65000;
 	int numberOfMaps = 2;
 
 	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
@@ -83,15 +83,56 @@ int main(int argc, char* argv[])
 			((OptimizerSTLFunctionWrapper*)task.GetTaskFunctions().get()[i].get())->GetCalculationsCounter());
 	}
 	*/
+
 	if(set == TestSet::Gris)
 		TestVAGrisClass(params);
 	else
-		TestMultimapsGKLSClass(params, gklsClass, 2);
-
+		TestMultimapsGKLSClass(params, gklsClass, 3);
+					
+	/*
+	params.mapType = MapType::Rotated;
+	params.numberOfMaps = 2;
+	params.r[0] = 3.0;
+	for (int i = 0; i <= 5; i++)
+	{
+		TestGKLSClass(params, gklsClass, 3);
+		params.r[0] += 0.1;
+	}
+	params.numberOfMaps = 2;
+	params.r[0] = 3.0;
+	for (int i = 0; i <= 5; i++)
+	{
+		TestGKLSClass(params, gklsClass, 3);
+		params.r[0] += 0.1;
+	}
+	params.numberOfMaps = 3;
+	params.r[0] = 3.0;
+	for (int i = 0; i <= 5; i++)
+	{
+		TestGKLSClass(params, gklsClass, 3);
+		params.r[0] += 0.1;
+	}
+	params.mapType = MapType::Set;
+	params.numberOfMaps = 2;
+	params.r[0] = 3.0;
+	for (int i = 0; i <= 5; i++)
+	{
+		TestGKLSClass(params, gklsClass, 3);
+		params.r[0] += 0.1;
+	}
+	params.mapType = MapType::Set;
+	params.numberOfMaps = 3;
+	params.r[0] = 3.0;
+	for (int i = 0; i <= 5; i++)
+	{
+		TestGKLSClass(params, gklsClass, 3);
+		params.r[0] += 0.1;
+	}
+	*/
 	delete[] params.r;
 
-	//RunEvaluationExpOnGKLSClass(0, 0.001);
-	//RunEvaluationExpOnGrishaginClass(0, 0.001);
+	//RunEvaluationExpOnGKLSClass(0, 0.00001);
+	//RunEvaluationExpOnGrishaginClass(0, 0.00001);
 	//VisualizeSolution(task, ags.GetSearchSequence(), result.GetSolution(), "st.png");
 
 //	delete[] params.reserves;

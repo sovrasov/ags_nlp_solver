@@ -4,9 +4,12 @@
 #include "OptimizerFunctionWrappers.hpp"
 #include "OptimizerAlgorithm.hpp"
 
+#include <chrono>
+
+using namespace std::chrono;
 using namespace optimizercore;
 
-void TestVAGrisClass(optimizercore::OptimizerParameters algParams)
+int TestVAGrisClass(optimizercore::OptimizerParameters algParams)
 {
 	SharedVector leftBound = SharedVector(new double[2]);
 	SharedVector rightBound = SharedVector(new double[2]);
@@ -30,13 +33,14 @@ void TestVAGrisClass(optimizercore::OptimizerParameters algParams)
 		utils::array_deleter<OptimizerFunctionPtr>()), 0, 2, leftBound, rightBound);
 	ags.SetTask(task);
 
+	steady_clock::time_point start = steady_clock::now();
 	for (int i = 1; i <= 100; i++)
 	{
 		function->SetFunctionNumber(i);
 		globalMinPoint[0] = function->GetMinXCoordinate();
 		globalMinPoint[1] = function->GetMinYCoordinate();
 
-		auto result = ags.StartOptimization(globalMinPoint, optimizercore::StopCriterionType::OptimalPoint);
+		auto result = ags.StartOptimization(globalMinPoint, optimizercore::StopCriterionType::Precision);
 		auto stat = result.GetSolution();
 		y = stat.GetOptimumPoint().get();
 		double helderConst = ags.GetLipschitzConst(result.GetNumberOfFunctionals() - 1);
@@ -61,10 +65,13 @@ void TestVAGrisClass(optimizercore::OptimizerParameters algParams)
 				max_count = results[i - 1];
 		}
 	}
+	steady_clock::time_point end = steady_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(end - start);
 
 	printf("Total errors: %i\n", err_count);
 	printf("Mean iterations number: %f\n", meanItCount);
-	printf("Average helder const: %f", avgHelderConst);
+	printf("Average helder const: %f\n", avgHelderConst);
+	printf("Total time: %f\n", time_span.count());
 
 	if (err_count == 0)
 	{
@@ -94,4 +101,5 @@ void TestVAGrisClass(optimizercore::OptimizerParameters algParams)
 		fprintf(out, "Average iterations number: %f\n", meanItCount);
 		fclose(out);
 	}
+	return err_count;
 }

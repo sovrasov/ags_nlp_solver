@@ -18,7 +18,7 @@ namespace optimizercore {
 
 	public:
 		// размер очереди должен быть равен 2^k - 1
-		OptimizerQueue(int _MaxSize = 32767);
+		OptimizerQueue(int _MaxSize = 131071);
 		~OptimizerQueue() { delete[] pMem; }
 
 		int GetSize() const;

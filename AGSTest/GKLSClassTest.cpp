@@ -5,7 +5,9 @@
 
 #include <cstdio>
 #include <algorithm>
+#include <chrono>
 
+using namespace std::chrono;
 using namespace optimizercore;
 
 int ParseArguments(int arg_c, char** arg_v, int &threadsNum, int &problemDim,
@@ -129,7 +131,7 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 		fclose(out);
 	}
 }
-void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::GKLSClass classType, int gklsDimention)
+int TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::GKLSClass classType, int gklsDimention)
 {
 	algParams.algDimention = gklsDimention;
 	SharedVector leftBound = SharedVector(new double[gklsDimention]);
@@ -158,6 +160,7 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 	double* globalMinPoint = new double[gklsDimention], *y;
 	double avgHelderConst = 0;
 
+	steady_clock::time_point start = steady_clock::now();
 	for (int j = 1; j <= 100; j++)
 	{
 		function->SetFunctionNumber(j);
@@ -177,7 +180,7 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 
 		for (unsigned i = 0; i < gklsDimention; i++)
 			printf("%f  ", y[i]);
-		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(result.GetNumberOfFunctionals() - 1));
+		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(0));
 		printf("\nFunction value %f\n", stat.GetOptimumValue());
 		printf("Helder const evaluation: %f", helderConst);
 		printf("\n-------------------\n");
@@ -196,10 +199,13 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 				max_count = results[j - 1];
 		}
 	}
+	steady_clock::time_point end = steady_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(end - start);
 
 	printf("Total errors: %i\n", err_count);
 	printf("Mean iterations number: %f\n", meanItCount);
-	printf("Average helder const: %f", avgHelderConst);
+	printf("Average helder const: %f\n", avgHelderConst);
+	printf("Total time: %f\n", time_span.count());
 
 	if (err_count == 0)
 	{
@@ -229,4 +235,5 @@ void TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfu
 		fprintf(out, "Average iterations number: %f\n", meanItCount);
 		fclose(out);
 	}
+	return err_count;
 }
