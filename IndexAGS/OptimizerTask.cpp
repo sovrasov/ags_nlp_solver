@@ -18,10 +18,10 @@ OptimizerTask::OptimizerTask(std::shared_ptr<OptimizerFunctionPtr> taskFunctions
 	assert(rightBound);
 
 	mTaskFunctions = taskFunctions;
-	mTaskDimention = taskDimention;
+	mTaskDimension = taskDimention;
 	mNumberOfRestrictions = numberOfRestrictions;
 
-	mSpaceTransform = OptimizerSpaceTransformation(leftBound, rightBound, mTaskDimention);
+	mSpaceTransform = OptimizerSpaceTransformation(leftBound, rightBound, mTaskDimension);
 
 	mOptimumPoint = nullptr;
 	mIsInitialized = true;
@@ -31,10 +31,10 @@ unsigned OptimizerTask::GetNumberOfRestrictions() const
 	CheckIsInitialized();
 	return mNumberOfRestrictions;
 }
-unsigned OptimizerTask::GetTaskDimention() const
+unsigned OptimizerTask::GetTaskDimension() const
 {
 	CheckIsInitialized();
-	return mTaskDimention;
+	return mTaskDimension;
 }
 SharedVector OptimizerTask::GetOptimumPoint() const
 {

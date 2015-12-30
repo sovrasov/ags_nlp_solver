@@ -5,6 +5,7 @@
 #include "OptimizerAlgorithm.hpp"
 #include "CoreUtils.hpp"
 #include "HookeJeevesLocalMethod.hpp"
+#include "OptimizerExperimentalMap.hpp"
 
 using namespace optimizercore;
 using namespace optimizercore::utils;
@@ -110,8 +111,10 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 	}
 	else if (mMapType == 4)
 		mPMap = new OptimizerMultiMap(MultimapType::Set, mMethodDimension, mMapTightness, params.numberOfMaps);
-	else if(mMapType == 5)
+	else if (mMapType == 5)
 		mPMap = new OptimizerMultiMap(MultimapType::Rotated, mMethodDimension, mMapTightness, params.numberOfMaps);
+	else if (mMapType == 6)
+		mPMap = new OptimizerExperimentalMap();
 	mNumberOfMaps = params.numberOfMaps;
 	mMaxNumberOfIterations = params.maxIterationsNumber;
 	r = params.r;
@@ -125,7 +128,7 @@ void OptimizerAlgorithm::SetParameters(OptimizerParameters params)
 
 void OptimizerAlgorithm::InitializeInformationStorages()
 {
-	if (mMapType == 4 || !mSpaceTransform.IsZeroConstraintActive()) {
+	if (mMapType == 4 || mSpaceTransform.IsZeroConstraintActive()) {
 		//insert the zero restriction for set map
 		mRestrictionsNumber = mTask.GetNumberOfRestrictions() + 1;
 		delete[] mRestrictions;
@@ -199,7 +202,7 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 	const double* a, StopCriterionType stopType)
 {
 	assert(mIsParamsInitialized && mIsTaskInitialized);
-	assert(mMethodDimension == mTask.GetTaskDimention());
+	assert(mMethodDimension == mTask.GetTaskDimension());
 
 	InitializeInformationStorages();
 	
@@ -216,7 +219,6 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 	mSpaceTransform.Transform(mNextPoints[0], mNextPoints[0]);
 
 	while (iterationsCount < mMaxNumberOfIterations && !stop)	{
-
 		if (mMapType == 3 || mNumberOfMaps != 1 || mLocalMixParameter != 0)
 			mNeedQueueRefill = true;
 		iterationsCount++;
@@ -314,13 +316,13 @@ OptimizerResult OptimizerAlgorithm::StartOptimization(
 	mOptimumEvaluation.v = GetIndex(&mOptimumEvaluation, y);
 	mSearchInformationStorage.insert(mOptimumEvaluation);
 
-	if (stopType == StopCriterionType::Precision)
+	if (stopType == StopCriterionType::Precision || iterationsCount == mMaxNumberOfIterations)
 	{
 		if (mOptimumEvaluation.v == mRestrictionsNumber)
 			v_indexes[mRestrictionsNumber]->Add(mOptimumEvaluation);
 		mOptimumEvaluation = v_indexes[mRestrictionsNumber]->GetMinimumPoint();
 	}
-	
+
 	mPMap->GetImage(mOptimumEvaluation.x, y);
 	mSpaceTransform.Transform(y, y);
 	
@@ -345,9 +347,9 @@ OptimizerSolution OptimizerAlgorithm::DoLocalVerification(OptimizerSolution star
 	localMethod.SetProblem(mTask);
 	localMethod.SetStepMultiplier(2);
 	localMethod.SetStartPoint(startSolution.GetOptimumPoint().get(),
-		mTask.GetTaskDimention());
+		mTask.GetTaskDimension());
 
-	SharedVector localOptimum(new double[mTask.GetTaskDimention()], array_deleter<double>());
+	SharedVector localOptimum(new double[mTask.GetTaskDimension()], array_deleter<double>());
 	localMethod.StartOptimization(localOptimum.get());
 	double bestLocalValue = mTargetFunction->Calculate(localOptimum.get());
 

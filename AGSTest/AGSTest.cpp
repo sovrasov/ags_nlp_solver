@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	int localStartIteration = 10;
 	int numOfThreads = 1;
 	int taskdim = 2;
-	int maxIterNumber = 65000;
+	int maxIterNumber = 20000;
 	int numberOfMaps = 2;
 
 	gklsfunction::GKLSClass gklsClass = gklsfunction::GKLSClass::Simple;
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 		else if(!strcmp(argv[i], "-nm"))
 			numberOfMaps = atoi(argv[i + 1]);
 		else if (!strcmp(argv[i], "-nt"))
-			numOfThreads = atof(argv[i + 1]);
+			numOfThreads = atoi(argv[i + 1]);
 		else if (!strcmp(argv[i], "-gkls"))
 			set = TestSet::GKLS;
 		else if (!strcmp(argv[i], "-gris"))
@@ -48,13 +48,14 @@ int main(int argc, char* argv[])
 	OptimizerAlgorithm ags;
 	OptimizerTask task = TestTaskFactory::GetTask(0);
 
-	taskdim = task.GetTaskDimention();
+	taskdim = task.GetTaskDimension();
 	OptimizerParameters params(maxIterNumber, numOfThreads, eps, &r, &res, taskdim, alpha, local_percent,
 		localStartIteration,
 		static_cast<MapType>(map_type), 12, numberOfMaps, false, LocalTuningMode::Adaptive);
 	params.reserves = &res;
 	params.r = new double[task.GetNumberOfRestrictions() + 2];
 	std::fill_n(params.r, task.GetNumberOfRestrictions() + 2, r);
+
 	/*
 	ags.SetParameters(params);
 	ags.SetTask(task);
@@ -69,7 +70,7 @@ int main(int argc, char* argv[])
 	localMethod.SetInitialStep(2*eps);
 	localMethod.SetProblem(task);
 	localMethod.SetStepMultiplier(2);
-	localMethod.SetStartPoint(x_opt, task.GetTaskDimention());
+	localMethod.SetStartPoint(x_opt, task.GetTaskDimension());
 	
 	localMethod.StartOptimization(optPoint.get());
 	for (int i = 0; i < params.algDimention; i++)
@@ -87,8 +88,8 @@ int main(int argc, char* argv[])
 	if(set == TestSet::Gris)
 		TestVAGrisClass(params);
 	else
-		TestMultimapsGKLSClass(params, gklsClass, 3);
-					
+		TestMultimapsGKLSClass(params, gklsClass, 4);
+
 	/*
 	params.mapType = MapType::Rotated;
 	params.numberOfMaps = 2;

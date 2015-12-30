@@ -145,12 +145,14 @@ int TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfun
 
 	function->SetClassType(classType, gklsDimention);
 
-	double meanItCount = 0;
+	double meanItCount = 0, reserves = 0.01;
 	int err_count = 0;
 	int results[100];
 	std::fill_n(results, 100, 0);
 	int max_count = 0;
 
+	if (algParams.mapType == MapType::Set && gklsDimention == 3)
+		algParams.reserves = &reserves;
 	optimizercore::OptimizerAlgorithm ags;
 	ags.SetParameters(algParams);
 	optimizercore::OptimizerTask task(std::shared_ptr<OptimizerFunctionPtr>(taskFunctions,
@@ -181,6 +183,8 @@ int TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfun
 		for (unsigned i = 0; i < gklsDimention; i++)
 			printf("%f  ", y[i]);
 		printf("\nIt_count: %i\n", result.GetNumberOfCalculations(0));
+		if (algParams.mapType == MapType::Set)
+			printf("Objective function evaluations: %i\n", result.GetNumberOfCalculations(1));
 		printf("\nFunction value %f\n", stat.GetOptimumValue());
 		printf("Helder const evaluation: %f", helderConst);
 		printf("\n-------------------\n");
@@ -206,6 +210,8 @@ int TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfun
 	printf("Mean iterations number: %f\n", meanItCount);
 	printf("Average helder const: %f\n", avgHelderConst);
 	printf("Total time: %f\n", time_span.count());
+
+	delete[] globalMinPoint;
 
 	if (err_count == 0)
 	{

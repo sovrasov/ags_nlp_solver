@@ -168,7 +168,7 @@ void VisualizeSolution(OptimizerTask task,
 		g.contur(xray, n, yray, n, (double*)zmat, zlev);
 	}
 
-	for (int k = 0; k < task.GetNumberOfRestrictions(); k++)
+	for (unsigned k = 0; k < task.GetNumberOfRestrictions(); k++)
 	{
 		targetFunction =
 			functions.get()[k].get();

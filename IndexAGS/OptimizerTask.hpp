@@ -16,7 +16,7 @@ namespace optimizercore
 		std::shared_ptr<OptimizerFunctionPtr> mTaskFunctions;
 
 		unsigned mNumberOfRestrictions;
-		unsigned mTaskDimention;
+		unsigned mTaskDimension;
 		SharedVector mOptimumPoint;
 		OptimizerSpaceTransformation mSpaceTransform;
 
@@ -31,7 +31,7 @@ namespace optimizercore
 
 		std::shared_ptr<OptimizerFunctionPtr> GetTaskFunctions() const;
 		unsigned GetNumberOfRestrictions() const;
-		unsigned GetTaskDimention() const;
+		unsigned GetTaskDimension() const;
 		PROPERTY(SharedVector, OptimumPoint);
 		OptimizerSpaceTransformation GetSpaceTransformation() const;
 

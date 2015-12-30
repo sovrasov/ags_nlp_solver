@@ -27,6 +27,7 @@ namespace optimizercore {
 
 		void Push(const OptimizerInterval &value);
 		void PushWithPriority(const OptimizerInterval &value);
+		void DeleteInterval(const OptimizerInterval &value);
 		OptimizerInterval Pop();
 
 		void Clear();

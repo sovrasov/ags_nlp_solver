@@ -46,8 +46,8 @@ namespace optimizercore
 		~OptimizerMultiMap();
 
 		int GetNumberOfMaps() const;
-		void GetImage(double x, double y[]);
-		int GetAllPreimages(double* p, double xp[]);
+		void GetImage(double x, double y[]) override;
+		int GetAllPreimages(double* p, double xp[]) override;
 
 	private:
 		void InitRotatedMap();

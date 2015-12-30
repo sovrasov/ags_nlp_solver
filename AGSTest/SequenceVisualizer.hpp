@@ -1,4 +1,3 @@
-#include "discpp.h"
 #include "OptimizerFunction.hpp"
 #include "OptimizerSearchSequence.hpp"
 #include "OptimizerTask.hpp"

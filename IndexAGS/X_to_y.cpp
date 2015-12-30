@@ -12,7 +12,6 @@ __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
   int iw[11];
   int it,is,i,j,k;
   void node(int is, int n1, int nexp, int& l, int& iq, int iu[], int iv[]);
-	  //void node ( int );
 
   p=0.0;
   n1=n-1;

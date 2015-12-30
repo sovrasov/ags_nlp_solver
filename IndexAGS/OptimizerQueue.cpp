@@ -77,6 +77,19 @@ void OptimizerQueue::PushWithPriority(const OptimizerInterval &value)
 	}
 }
 
+void optimizercore::OptimizerQueue::DeleteInterval(const OptimizerInterval & value)
+{
+	for (int i = 0; i < CurSize; i++)
+		if (pMem[i].right.x == value.right.x)
+		{
+			pMem[i] = pMem[CurSize - 1];
+			CurSize--;
+			if (CurSize > 1)
+				ReBuild(i);
+			break;
+		}
+}
+
 // ------------------------------------------------------------------------------------------------
 OptimizerInterval OptimizerQueue::Pop()
 {

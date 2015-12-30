@@ -265,7 +265,7 @@ OptimizerSolution OptimizerAlgorithmUnconstrained::DoLocalVerification(Optimizer
 	localMethod.SetProblem(localTask);
 	localMethod.SetStepMultiplier(2);
 	localMethod.SetStartPoint(startSolution.GetOptimumPoint().get(),
-		localTask.GetTaskDimention());
+		localTask.GetTaskDimension());
 
 	SharedVector localOptimum(new double[mMethodDimension], array_deleter<double>());
 	localMethod.StartOptimization(localOptimum.get());
