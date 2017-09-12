@@ -1,5 +1,7 @@
 #include "HookeJeevesLocalMethod.hpp"
 #include <cassert>
+#include <cstring>
+#include <cmath>
 #include <algorithm>
 
 #define MAX_LOCAL_ITERATIONS_NUMBER 10000
