@@ -6,17 +6,37 @@ OptimizerResult::OptimizerResult()
 {
 	mIsInitialized = false;
 }
-OptimizerResult::~OptimizerResult()
-{}
-OptimizerResult::OptimizerResult(const OptimizerSolution& Solution)
+optimizercore::OptimizerResult::OptimizerResult(const OptimizerSolution & Solution)
 {
 	mSolution = Solution;
+	mNumberOfFunctionals = 1;
+	mFunctionalsCalculationStat = 0;
+	mIsInitialized = true;
+}
+OptimizerResult::~OptimizerResult()
+{}
+OptimizerResult::OptimizerResult(const OptimizerSolution& Solution,
+	SharedIntVector& functionalsCalculationStat,
+	int numberOfFunctionals)
+{
+	mSolution = Solution;
+	mFunctionalsCalculationStat = functionalsCalculationStat;
+	mNumberOfFunctionals = numberOfFunctionals;
+
 	mIsInitialized = true;
 }
 OptimizerSolution OptimizerResult::GetSolution() const
 {
 	CheckIsInitialized();
 	return mSolution;
+}
+int optimizercore::OptimizerResult::GetNumberOfCalculations(int fNumber) const
+{
+	return mFunctionalsCalculationStat.get()[fNumber];
+}
+int optimizercore::OptimizerResult::GetNumberOfFunctionals() const
+{
+	return mNumberOfFunctionals;
 }
 void OptimizerResult::CheckIsInitialized() const
 {

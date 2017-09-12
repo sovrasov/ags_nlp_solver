@@ -25,5 +25,6 @@
 #include <memory>
 namespace optimizercore {
 	using SharedVector = std::shared_ptr<double>;
+	using SharedIntVector = std::shared_ptr<int>;
 }
 #endif

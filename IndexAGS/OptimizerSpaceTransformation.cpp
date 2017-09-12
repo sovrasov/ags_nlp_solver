@@ -16,29 +16,29 @@ OptimizerSpaceTransformation::OptimizerSpaceTransformation(
 {
 	mLeftDomainBound = leftBound;
 	mRightDomainBound = rightBound;
-	mDimention = domainDimention;
+	mDimension = domainDimention;
 	mLeftBoundPtr = mLeftDomainBound.get();
 	mRightBoundPtr = mRightDomainBound.get();
 
 	mRho = 0;
-	mSpaceShiftValues = SharedVector(new double[mDimention], utils::array_deleter<double>());
+	mSpaceShiftValues = SharedVector(new double[mDimension], utils::array_deleter<double>());
 	mSpaceShiftValuesPtr = mSpaceShiftValues.get();
 
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 	{
 		mRho = fmax(mRho, mRightBoundPtr[i] - mLeftBoundPtr[i]);
 		mSpaceShiftValuesPtr[i] = 0.5*(mLeftBoundPtr[i] + mRightBoundPtr[i]);
 	}
 
 	mNeedZeroConstraint = false;
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 		if (fabs(mRho - (mRightBoundPtr[i] - mLeftBoundPtr[i])) > CUBE_DETECT_PRECISION)
 		{
 			mNeedZeroConstraint = true;
 			break;
 		}
 
-	int dimention = mDimention;
+	int dimension = mDimension;
 	double* spaceShift = mSpaceShiftValuesPtr;
 	double* leftBnd = mLeftBoundPtr;
 	double* rightBnd = mRightBoundPtr;
@@ -46,11 +46,11 @@ OptimizerSpaceTransformation::OptimizerSpaceTransformation(
 
 	mZeroConstraint = OptimizerFunctionPtr(new OptimizerSTLFunctionWrapper(
 		std::function<double(const double *)>(
-		[dimention, spaceShift, rho, leftBnd, rightBnd](const double* x)->double
+		[dimension, spaceShift, rho, leftBnd, rightBnd](const double* x)->double
 	{
 		double value = -HUGE_VAL;
 
-		for (int i = 0; i < dimention; i++)
+		for (int i = 0; i < dimension; i++)
 			value = fmax(value, (fabs(x[i] - spaceShift[i])
 			- (rightBnd[i] - leftBnd[i])*0.5) / rho);
 
@@ -64,14 +64,14 @@ OptimizerSpaceTransformation::OptimizerSpaceTransformation(
 void OptimizerSpaceTransformation::Transform(
 	const double* arg, double* image) const
 {
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 		image[i] = mRho*arg[i] + mSpaceShiftValuesPtr[i];
 }
 
 void OptimizerSpaceTransformation::InvertTransform(
 	const double* arg, double* image) const
 {
-	for (int i = 0; i < mDimention; i++)
+	for (int i = 0; i < mDimension; i++)
 		image[i] = (arg[i] - mSpaceShiftValuesPtr[i]) / mRho;
 }
 
@@ -85,9 +85,9 @@ SharedVector OptimizerSpaceTransformation::GetRightDomainBound() const
 	return mRightDomainBound;
 }
 
-int OptimizerSpaceTransformation::GetDomainDimention() const
+int OptimizerSpaceTransformation::GetDomainDimension() const
 {
-	return mDimention;
+	return mDimension;
 }
 OptimizerFunctionPtr OptimizerSpaceTransformation::GetZeroConstraint() const
 {

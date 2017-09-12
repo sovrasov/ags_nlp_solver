@@ -1,4 +1,4 @@
-#include "OptimizerFunctionWrappers.h"
+#include "OptimizerFunctionWrappers.hpp"
 
 VAGRisFunctionWrapper::VAGRisFunctionWrapper()
 {	}

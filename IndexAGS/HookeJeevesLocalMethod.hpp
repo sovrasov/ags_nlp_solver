@@ -13,7 +13,7 @@ namespace localoptimizer
 	{
 	private:
 
-		int mDimention;
+		int mDimension;
 		int mConstraintsNumber;
 		OptimizerFunction** mFunctions;
 

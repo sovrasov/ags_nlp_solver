@@ -1,7 +1,7 @@
 #include "OptimizerSearchSequence.hpp"
 #include "CoreUtils.hpp"
 #include "OptimizerCoreGlobal.hpp"
-#include "Map.h"
+#include "Map.hpp"
 #include <cassert>
 
 using namespace optimizercore;
@@ -9,20 +9,20 @@ using namespace optimizercore;
 OptimizerSearchSequence::OptimizerSearchSequence()
 {
 	mSize = 0;
-	mDimention = 0;
+	mDimension = 0;
 	mMapDensity = 0;
 	mMapType = MapType::Simple;
 	mIsInitialized = false;
 }
 OptimizerSearchSequence::OptimizerSearchSequence(const std::set<OptimizerTrialPoint>& searchSequence,
-	unsigned dimention, MapType mapType, unsigned mapDensity, OptimizerSpaceTransformation transform)
+	unsigned dimension, MapType mapType, unsigned mapDensity, OptimizerSpaceTransformation transform)
 {
 	assert(!searchSequence.empty());
-	assert(dimention > 1);
+	assert(dimension > 1);
 	assert(mapDensity > 0);
 
 	mSize = searchSequence.size();
-	mDimention = dimention;
+	mDimension = dimension;
 	mMapType = mapType;
 	mMapDensity = mapDensity;
 	mSpaceTransform = transform;
@@ -54,7 +54,7 @@ size_t OptimizerSearchSequence::GetSize() const
 unsigned OptimizerSearchSequence::GetDimention() const
 {
 	CheckIsInitialized();
-	return mDimention;
+	return mDimension;
 }
 unsigned OptimizerSearchSequence::GetMapDensity() const
 {
@@ -68,7 +68,8 @@ MapType OptimizerSearchSequence::GetMapType() const
 }
 void OptimizerSearchSequence::GetPoint(int index, double* x)
 {
-	mapd(mPointsMemPtr[index], mMapDensity, x, mDimention, static_cast<int> (mMapType));
+	mapd(mPointsMemPtr[index], mMapDensity, x, mDimension, static_cast<int> (mMapType));
+	//mMap->GetImage(mPointsMemPtr[index], x);
 	mSpaceTransform.Transform(x, x);
 }
 double OptimizerSearchSequence::GetOneDimPoint(int index)
@@ -77,7 +78,6 @@ double OptimizerSearchSequence::GetOneDimPoint(int index)
 }
 double OptimizerSearchSequence::GetValue(int index)
 {
-	mValuesMemPtr = mValues.get();
 	return mValuesMemPtr[index];
 }
 void OptimizerSearchSequence::CheckIsInitialized() const

@@ -10,7 +10,7 @@ namespace optimizercore
 	private:
 
 		int mIteratinsCount;
-		unsigned mDimention;
+		unsigned mDimension;
 		double mOptimumValue;
 		double mOneDimOptimumPoint;
 		SharedVector mOptimumPoint;

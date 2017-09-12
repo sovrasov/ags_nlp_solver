@@ -13,7 +13,7 @@ namespace optimizercore
 		SharedVector mLeftDomainBound;
 		SharedVector mRightDomainBound;
 		SharedVector mSpaceShiftValues;
-		int mDimention;
+		int mDimension;
 		double mRho;
 		double* mLeftBoundPtr;
 		double* mRightBoundPtr;
@@ -37,7 +37,7 @@ namespace optimizercore
 		bool IsZeroConstraintActive() const;
 		SharedVector GetLeftDomainBound() const;
 		SharedVector GetRightDomainBound() const;
-		int GetDomainDimention() const;
+		int GetDomainDimension() const;
 
 	};
 }

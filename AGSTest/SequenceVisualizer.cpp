@@ -1,7 +1,8 @@
-#include "SequenceVisualizer.h"
-#include "OptimizerFunctionWrappers.h"
+#include "SequenceVisualizer.hpp"
+#include "OptimizerFunctionWrappers.hpp"
 #include <cmath>
-/*
+#include <discpp.h>
+
 double Get2dPointDifference(const double *x, const double *y)
 {
 	return fmax(fabs(x[0] - y[0]), fabs(x[1] - y[1]));
@@ -167,7 +168,7 @@ void VisualizeSolution(OptimizerTask task,
 		g.contur(xray, n, yray, n, (double*)zmat, zlev);
 	}
 
-	for (int k = 0; k < task.GetNumberOfRestrictions(); k++)
+	for (unsigned k = 0; k < task.GetNumberOfRestrictions(); k++)
 	{
 		targetFunction =
 			functions.get()[k].get();
@@ -201,4 +202,4 @@ void VisualizeSolution(OptimizerTask task,
 	g.color("fore");
 	g.title();
 	g.disfin();
-}*/
+}

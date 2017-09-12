@@ -1,7 +1,7 @@
 #ifndef OPTIMIZER_DATA_STRUCTURES_HPP
 #define OPTIMIZER_DATA_STRUCTURES_HPP
 
-#include "Map.h"
+#include "Map.hpp"
 
 namespace optimizercore	{
 
@@ -24,28 +24,32 @@ namespace optimizercore	{
 	};
 	
 	inline bool operator<(const OptimizerTrialPoint& t1,
-		const OptimizerTrialPoint& t2){
+		const OptimizerTrialPoint& t2) {
 		return t1.x < t2.x;
 	}
-	
 
-	struct OptimaizerInterval
+	struct OptimizerInterval
 	{
 		OptimizerTrialPoint left, right;
-		double rank, localM;
+		double R, localM;
 
-		OptimaizerInterval()
+		OptimizerInterval()
 		{}
 
-		OptimaizerInterval(OptimizerTrialPoint _left,
+		OptimizerInterval(OptimizerTrialPoint _left,
 			OptimizerTrialPoint _right, double _rank, double _localM)
 		{
 			left = _left;
 			right = _right;
-			rank = _rank;
+			R = _rank;
 			localM = _localM;
 		}
 	};
+
+	inline bool operator<(const OptimizerInterval& t1,
+		const OptimizerInterval& t2){
+		return t1.R < t2.R;
+	}
 
 	struct OptimizerParameters
 	{
@@ -63,6 +67,7 @@ namespace optimizercore	{
 
 		LocalTuningMode localTuningMode;
 		MapType mapType;
+		int numberOfMaps;
 		int mapTightness;
 		OptimizerParameters()
 		{
@@ -71,7 +76,7 @@ namespace optimizercore	{
 		OptimizerParameters(int _maxIterationsNumber, int _numberOfThreads, double _eps,
 			double* _r, double* _reserves, unsigned _algDimention, int _localExponent,
 			int _localMixParameter, int _localAlgStartIterationNumber, MapType _mapType, int _mapTightness,
-			bool _localVerification)
+			int _numberOfMaps, bool _localVerification)
 		{
 			maxIterationsNumber = _maxIterationsNumber;
 			numberOfThreads = _numberOfThreads;
@@ -83,13 +88,14 @@ namespace optimizercore	{
 			localMixParameter = _localMixParameter;
 			localAlgStartIterationNumber = _localAlgStartIterationNumber;
 			mapType = _mapType;
+			numberOfMaps = _numberOfMaps;
 			mapTightness = _mapTightness;
 			localVerification = _localVerification;
 		}
 		OptimizerParameters(int _maxIterationsNumber, int _numberOfThreads, double _eps,
 			double* _r, double* _reserves, unsigned _algDimention, int _localExponent,
 			int _localMixParameter, int _localAlgStartIterationNumber, MapType _mapType, int _mapTightness,
-			bool _localVerification, LocalTuningMode _localTuningMode)
+			int _numberOfMaps, bool _localVerification, LocalTuningMode _localTuningMode)
 		{
 			maxIterationsNumber = _maxIterationsNumber;
 			numberOfThreads = _numberOfThreads;
@@ -102,6 +108,7 @@ namespace optimizercore	{
 			localAlgStartIterationNumber = _localAlgStartIterationNumber;
 			mapType = _mapType;
 			mapTightness = _mapTightness;
+			numberOfMaps = _numberOfMaps;
 			localVerification = _localVerification;
 			localTuningMode = _localTuningMode;
 		}
@@ -112,18 +119,22 @@ namespace optimizercore	{
 
 	private:
 		int mCurrentSetSize;
+		//int* mCurrentSetsSizes;
 		int mMemReallocationStep;
 		int mMemSize;
 		OptimizerTrialPoint* mMem;
+		//OptimizerTrialPoint** mMem;
 		double mCurrentZMin;
 
 	public:
 
 		IndxSet();
 		IndxSet(int memSize, int memReallocStep);
+		//IndxSet(int memSize, int mapsNumber, int memReallocStep);
 
 		void Add(const OptimizerTrialPoint& trial);
 		OptimizerTrialPoint Get(int i) const;
+		//OptimizerTrialPoint Get(int i, int mapNumber) const;
 
 		int GetSize() const;
 		double GetMinimumValue() const;
@@ -134,6 +145,35 @@ namespace optimizercore	{
 
 		~IndxSet();
 
+	};
+
+	class MultimapIndxSet
+	{
+
+	private:
+		int mMemReallocationStep;
+		int* mCurrentSetsSizes;
+		int* mMaxSetsSizes;
+		int mMemSize;
+		int mNumberOfSubsets;
+		OptimizerTrialPoint** mMem;
+		double mCurrentZMin;
+
+	public:
+
+		MultimapIndxSet();
+		MultimapIndxSet(int memSize, int mapsNumber, int memReallocStep);
+
+		void Add(const OptimizerTrialPoint& trial);
+		OptimizerTrialPoint Get(int i, int mapNumber) const;
+
+		int GetSize(int mapNumber) const;
+		double GetMinimumValue() const;
+		OptimizerTrialPoint GetMinimumPoint() const;
+
+		void Reset();
+
+		~MultimapIndxSet();
 	};
 
 }

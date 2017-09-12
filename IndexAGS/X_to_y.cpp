@@ -1,19 +1,17 @@
-#include <math.h>
-#include "map.h"
-
-int n1,nexp,l,iq,iu[10],iv[10];
+#include <cmath>
+#include "Map.hpp"
 
 __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
 {
  /* mapping y(x) : 1 - center, 2 - line, 3 - node */
 // use key = 1
 
-
+  int n1, nexp, l, iq, iu[10], iv[10];
   double d, mne, dd, dr;//,tmp;
   double p,r;
   int iw[11];
   int it,is,i,j,k;
-  void node ( int );
+  void node(int is, int n1, int nexp, int& l, int& iq, int iu[], int iv[]);
 
   p=0.0;
   n1=n-1;
@@ -50,11 +48,11 @@ __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
 		  is=nexp-1; d=0.0;
 		} else {
 		  d=d*nexp;
-		  is=d;
+		  is=(int)d;
 		  d=d-is;
 	 }
 	 i=is;
-	 node(i);
+	 node(i, n1, nexp, l, iq, iu, iv);
 	 i=iu[0];
 	 iu[0]=iu[it];
 	 iu[it]=i;
@@ -91,7 +89,7 @@ __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
 	 }
 }
 
-void node ( int is )
+void node ( int is, int n1, int nexp, int& l, int& iq, int iu[], int iv[])
 {
  /* calculate iu=u[s], iv=v[s], l=l[s] by is=s */
 
