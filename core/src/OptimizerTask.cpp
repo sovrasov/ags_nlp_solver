@@ -57,5 +57,5 @@ OptimizerSpaceTransformation OptimizerTask::GetSpaceTransformation() const
 void OptimizerTask::CheckIsInitialized() const
 {
 	if (mIsInitialized == false)
-		throw std::exception("Optimizer Task is not initialized.");
+		throw std::runtime_error("Optimizer Task is not initialized.");
 }

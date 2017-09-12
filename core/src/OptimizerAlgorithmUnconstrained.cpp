@@ -2,6 +2,8 @@
 #include "HookeJeevesLocalMethod.hpp"
 
 #include <cassert>
+#include <cmath>
+#include <cstring>
 #include <algorithm>
 
 using namespace optimizercore;
@@ -142,7 +144,7 @@ bool OptimizerAlgorithmUnconstrained::InsertNewTrials(int trailsNumber)
 
 			if (!(storageInsertionError = insertionResult.second))
 				break;
-			
+
 			UpdateGlobalM(insertionResult.first);
 		}
 	return storageInsertionError;
@@ -312,7 +314,7 @@ void OptimizerAlgorithmUnconstrained::UpdateGlobalM(
 	double max = mGlobalM;
 	if (max == 1) max = 0;
 
-	
+
 	auto leftPointIt = newPointIt;
 	auto rightPointIt = newPointIt;
 	--leftPointIt;
@@ -324,8 +326,8 @@ void OptimizerAlgorithmUnconstrained::UpdateGlobalM(
 
 	max = fmax(fmax(fabs(newPointIt->val - leftPointIt->val) / leftIntervalNorm,
 		fabs(rightPointIt->val - newPointIt->val) /	rightIntervalNorm), max);
-	
-	
+
+
 	mMaxIntervalNorm = 0;
 	auto currentPointIt = mSearchInformationStorage.begin();
 	auto nextPointIt = currentPointIt;
@@ -349,7 +351,7 @@ void OptimizerAlgorithmUnconstrained::UpdateGlobalM(
 	//if (currentPointIt->x != newPointIt->x)
 	//	max = fmax(fabs(newPointIt->val - currentPointIt->val) /
 	//	pow(fabs(newPointIt->x - currentPointIt->x), 1.0 / mMethodDimention), max);
-	
+
 	//printf("%e |", mMaxIntervalNorm);
 	if (max != 0)
 		mGlobalM = max;
@@ -386,7 +388,7 @@ int OptimizerAlgorithmUnconstrained::UpdateRanks(bool isLocal)
 				std::swap(localMConsts[0], localMConsts[1]);
 				std::swap(localMConsts[1], localMConsts[2]);
 
-				localMConsts[2] = fabs(rightRightIt->val - rightIt->val) 
+				localMConsts[2] = fabs(rightRightIt->val - rightIt->val)
 					/ pow(rightRightIt->x - rightIt->x, 1.0 / mMethodDimension);
 
 				mu1 = fmax(fmax(localMConsts[0], localMConsts[1]), localMConsts[2]);

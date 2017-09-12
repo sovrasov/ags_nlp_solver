@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Map.hpp"
 
-__declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
+EXPORT_API void mapd(double x, int m, double* y, int n, int key)
 {
  /* mapping y(x) : 1 - center, 2 - line, 3 - node */
 // use key = 1
@@ -24,20 +24,20 @@ __declspec(dllexport) void mapd(double x, int m, double* y, int n, int key)
   for ( i=0; i<n; i++ ) {
 	 iw[i]=1; y[i]=0.0;
   }
- 
+
   if ( key == 2 ) {
 		d=d*(1.0-1.0/mne); k=0;
 	 } else
 	 if ( key > 2 ) {
 		  dr=mne/nexp;
-		  dr=dr-fmod(dr,1.0); 
+		  dr=dr-fmod(dr,1.0);
 		  //dr=(dr>0)?floor(dr):ceil(dr);
 		  dd=mne-dr;
 		  dr=d*dd;
-		  dd=dr-fmod(dr,1.0); 
+		  dd=dr-fmod(dr,1.0);
 		  //dd=(dr>0)?floor(dr):ceil(dr);
           dr=dd+(dd-1)/(nexp-1);
-		  dd=dr-fmod(dr,1.0); 
+		  dd=dr-fmod(dr,1.0);
 		  //dd=(dr>0)?floor(dr):ceil(dr);
 		  d=dd*(1./(mne-1.0));
   }

@@ -83,5 +83,5 @@ double OptimizerSearchSequence::GetValue(int index)
 void OptimizerSearchSequence::CheckIsInitialized() const
 {
 	if (mIsInitialized == false)
-		throw std::exception("Optimizer Solution is not initialized.");
+		throw std::runtime_error("Optimizer Solution is not initialized.");
 }

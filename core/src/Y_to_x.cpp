@@ -74,7 +74,7 @@ void numbr ( int *iss)
   *iss=is;
 }
 
-__declspec(dllexport) void invmad(int m, double xp[], int kp,
+EXPORT_API void invmad(int m, double xp[], int kp,
 	int *kxx, double p[], int n, int incr)
 {
 	/* calculate kx preimage p node */
@@ -96,7 +96,7 @@ __declspec(dllexport) void invmad(int m, double xp[], int kp,
 	}
 	dr = mne / nexp;
 
-	dr=dr-fmod(dr,1.0);  
+	dr=dr-fmod(dr,1.0);
 	//dr = (dr>0) ? floor(dr) : ceil(dr);
 
 	del = 1. / (mne - dr);
@@ -110,10 +110,10 @@ __declspec(dllexport) void invmad(int m, double xp[], int kp,
 		if (i >= n) {
 			xyd(&x, m, y, n);
 			dr = x*mne;
-			dd=dr-fmod(dr,1.0); 
+			dd=dr-fmod(dr,1.0);
 			//dd = (dr>0) ? floor(dr) : ceil(dr);
 			dr = dd / nexp;
-			dd=dd-dr+fmod(dr,1.0); 
+			dd=dd-dr+fmod(dr,1.0);
 			//dd = dd - ((dr>0) ? floor(dr) : ceil(dr));
 			x = dd*del;
 			if (kx>kp) break;

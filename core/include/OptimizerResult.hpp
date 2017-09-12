@@ -1,5 +1,5 @@
 #ifndef OPTIMIZER_RESULT_HPP
-#define OPTIMIZER_RESULT_HPP 
+#define OPTIMIZER_RESULT_HPP
 
 #include "OptimizerCoreGlobal.hpp"
 #include "OptimizerSolution.hpp"
@@ -18,7 +18,7 @@ namespace optimizercore
 		OptimizerResult();
 		OptimizerResult(const OptimizerSolution& Solution);
 		OptimizerResult(const OptimizerSolution& Solution,
-			SharedIntVector& functionalsCalculationStat,
+			SharedIntVector functionalsCalculationStat,
 			int numberOfFunctionals);
 
 		~OptimizerResult();

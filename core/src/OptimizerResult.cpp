@@ -16,7 +16,7 @@ optimizercore::OptimizerResult::OptimizerResult(const OptimizerSolution & Soluti
 OptimizerResult::~OptimizerResult()
 {}
 OptimizerResult::OptimizerResult(const OptimizerSolution& Solution,
-	SharedIntVector& functionalsCalculationStat,
+	SharedIntVector functionalsCalculationStat,
 	int numberOfFunctionals)
 {
 	mSolution = Solution;
@@ -41,5 +41,5 @@ int optimizercore::OptimizerResult::GetNumberOfFunctionals() const
 void OptimizerResult::CheckIsInitialized() const
 {
 	if (mIsInitialized == false)
-		throw std::exception("Optimizer Solution is not initialized.");
+		throw std::runtime_error("Optimizer Solution is not initialized.");
 }
