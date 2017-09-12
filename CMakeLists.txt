@@ -20,3 +20,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   add_definitions(/EHsc /openmp)
 endif()
+
+file(GLOB SAMPLE_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/sample/*.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/sample/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/sample/*.h)
+
+add_executable(${PROJECT_NAME_STR}_sample ${SAMPLE_SRC_FILES})
+target_include_directories(${PROJECT_NAME_STR}_sample PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sample)
+target_link_libraries(${PROJECT_NAME_STR}_sample ${PROJECT_NAME_STR})

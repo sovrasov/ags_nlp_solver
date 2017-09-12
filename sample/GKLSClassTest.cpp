@@ -4,6 +4,7 @@
 #include "OptimizerSpaceTransformation.hpp"
 
 #include <cstdio>
+#include <cstring>
 #include <algorithm>
 #include <chrono>
 
@@ -51,7 +52,7 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 	int results[100];
 	std::fill_n(results, 100, 0);
 	int max_count=0;
-	
+
 //	algParams.eps /= 2;
 	//optimizercore::OptimizerAlgorithm ags;
 	optimizercore::OptimizerAlgorithmUnconstrained ags;
@@ -59,7 +60,7 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 	optimizercore::OptimizerTask task(std::shared_ptr<OptimizerFunctionPtr>(taskFunctions,
 		utils::array_deleter<OptimizerFunctionPtr>()), 0, gklsDimention, leftBound, rightBound);
 	//ags.SetTask(task);
-	ags.SetTask(taskFunctions[0], 
+	ags.SetTask(taskFunctions[0],
 		optimizercore::OptimizerSpaceTransformation(leftBound, rightBound, gklsDimention));
 
 	double* globalMinPoint = new double[gklsDimention], *y;
@@ -109,7 +110,7 @@ void TestGKLSClass(optimizercore::OptimizerParameters algParams, gklsfunction::G
 		char filename[100];
 		int m_type = static_cast<int>(algParams.mapType);
 
-		sprintf_s(filename, "R= %f map_type= %i local percent= %i, threadsNum= %i .txt",
+		sprintf(filename, "R= %f map_type= %i local percent= %i, threadsNum= %i .txt",
 			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads);
 
 
@@ -219,7 +220,7 @@ int TestMultimapsGKLSClass(optimizercore::OptimizerParameters algParams, gklsfun
 		char filename[100];
 		int m_type = static_cast<int>(algParams.mapType);
 
-		sprintf_s(filename, "GK R= %.3f map_type= %i local percent= %i, threadsNum= %i maps_num=%i.csv",
+		sprintf(filename, "GK R= %.3f map_type= %i local percent= %i, threadsNum= %i maps_num=%i.csv",
 			*algParams.r, m_type, algParams.localMixParameter, algParams.numberOfThreads,
 			algParams.numberOfMaps);
 

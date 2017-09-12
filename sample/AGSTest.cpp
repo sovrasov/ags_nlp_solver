@@ -1,6 +1,7 @@
 ﻿#include "OptimizerAlgorithm.hpp"
 #include "CoreUtils.hpp"
 #include <cmath>
+#include <cstring>
 #include "SequenceVisualizer.hpp"
 #include "GKLSClassTest.hpp"
 #include "TestTaskFactory.hpp"
@@ -71,7 +72,7 @@ int main(int argc, char* argv[])
 	localMethod.SetProblem(task);
 	localMethod.SetStepMultiplier(2);
 	localMethod.SetStartPoint(x_opt, task.GetTaskDimension());
-	
+
 	localMethod.StartOptimization(optPoint.get());
 	for (int i = 0; i < params.algDimention; i++)
 		printf("x[%i]: %f   ", i, optPoint.get()[i]);
@@ -149,7 +150,7 @@ int main(int argc, char* argv[])
 		TestGKLSClass(params, gklsClass, taskdim);
 		params.r[0] += 0.1;
 	}
-	
+
 	params.localMixParameter = 7;
 
 	params.r[0] = 3.1;
@@ -167,7 +168,7 @@ int main(int argc, char* argv[])
 		TestGKLSClass(params, gklsClass, taskdim);
 		params.r[0] += 0.1;
 	}
-	
+
 	params.mapType = MapType::Noninjective;
 	params.r[0] = 3.4;
 	for (int i = 0; i <= 12; i++)
