@@ -1,0 +1,6 @@
+[submodule "3rd-party/global-optimization-test-problems"]
+	path = 3rd-party/global-optimization-test-problems
+	url = https://github.com/sovrasov/global-optimization-test-problems.git
+[submodule "3rd-party/cmdline"]
+	path = 3rd-party/cmdline
+	url = https://github.com/sovrasov/cmdline.git

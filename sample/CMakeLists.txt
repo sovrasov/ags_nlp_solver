@@ -13,3 +13,4 @@ add_executable(${PROJECT_NAME_STR} ${SAMPLE_SRC_FILES})
 target_include_directories(${PROJECT_NAME_STR} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME_STR} nlp_solver)
+target_link_libraries(${PROJECT_NAME_STR} gkls_functions)
