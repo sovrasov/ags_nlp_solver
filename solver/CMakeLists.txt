@@ -12,7 +12,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/core/include/*.hpp)
 
 add_library(${PROJECT_NAME_STR} ${SRC_FILES})
 
-target_include_directories(${PROJECT_NAME_STR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME_STR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${GO_INTERFACE_INCLUDE_DIR}/)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(${PROJECT_NAME_STR} INTERFACE -Wall -fopenmp -march=native)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
