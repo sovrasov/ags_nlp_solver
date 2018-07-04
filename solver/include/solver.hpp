@@ -59,7 +59,8 @@ protected:
   void InitDataStructures();
   void ClearDataStructures();
 
-  void UpdateH(std::set<Interval*, CompareIntervals>::iterator);
+  void UpdateAllH(std::set<Interval*>::iterator);
+  void UpdateH(double newValue, int index);
   double CalculateR(Interval*) const;
   double GetNextPointCoordinate(Interval*) const;
 

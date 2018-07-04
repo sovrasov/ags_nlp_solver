@@ -113,7 +113,7 @@ void NLPSolver::FirstIteration()
                               1. / mProblem->GetDimension());
     mMinDelta = std::min(mMinDelta, pNewInterval->delta);
     auto insRes = mSearchInformation.insert(pNewInterval);
-    UpdateH(insRes.first);
+    UpdateAllH(insRes.first);
   }
   RefillQueue();
   CalculateNextPoints();
@@ -179,8 +179,8 @@ void NLPSolver::InsertIntervals()
     if(!wasInserted)
       throw std::runtime_error("Error during interval insertion.");
 
-    UpdateH(insResult.first);
-    UpdateH(--insResult.first);
+    UpdateAllH(insResult.first);
+    UpdateAllH(--insResult.first);
 
     if(!mNeedRefillQueue)
     {
@@ -231,34 +231,49 @@ void NLPSolver::EstimateOptimum()
   }
 }
 
-void NLPSolver::UpdateH(std::set<Interval*, CompareIntervals>::iterator it_iter)
+void NLPSolver::UpdateH(double newValue, int index)
 {
-  /*
-  Trial& currentPoint = mSearchData[idx];
-  int left_idx = idx - 1;
-  while(left_idx > 0 && mSearchData[left_idx].v != currentPoint.v)
-    left_idx--;
-  if(left_idx != (int)idx && mSearchData[left_idx].v == mSearchData[idx].v)
-    UpdateMu(mSearchData[left_idx], mSearchData[idx]);
-
-  size_t right_idx = idx + 1;
-  while(right_idx < mSearchData.size() - 1 && mSearchData[right_idx].v != currentPoint.v)
-    right_idx++;
-  if(right_idx != idx && mSearchData[right_idx].v == mSearchData[idx].v)
-    UpdateMu(mSearchData[idx], mSearchData[right_idx]);
-  }
-  */
-  Interval* it = *it_iter;
-  if (it->pr.idx != it->pl.idx)
-    return;
-  double oldMu = mHEstimations[it->pl.idx];
-  double newMu = fabs(it->pr.g[it->pr.idx] - it->pl.g[it->pl.idx]) /
-    pow(it->pr.x - it->pl.x, 1. / mProblem->GetDimension());
-
-  if (newMu > oldMu || (oldMu == 1.0 && newMu > zeroHLevel))
+  if (newValue > mHEstimations[index] || mHEstimations[index] == 1.0 && newValue > zeroHLevel)
   {
-    mHEstimations[it->pr.idx] = newMu;
+    mHEstimations[index] = newValue;
     mNeedRefillQueue = true;
+  }
+}
+
+void NLPSolver::UpdateAllH(std::set<Interval*>::iterator iterator)
+{
+  Interval* pInterval = *iterator;
+  if (pInterval->pl.idx < 0)
+    return;
+
+  if (pInterval->pl.idx == pInterval->pr.idx)
+    UpdateH(fabs(pInterval->pr.g[pInterval->pr.idx] - pInterval->pl.g[pInterval->pl.idx]) /
+                 pInterval->delta, pInterval->pl.idx);
+  else
+  {
+    auto rightIterator = iterator;
+    auto leftIterator = iterator;
+    //right lookup
+    ++rightIterator;
+    while(rightIterator != mSearchInformation.end() && (*rightIterator)->pl.idx < pInterval->pl.idx)
+      ++rightIterator;
+    if (rightIterator != mSearchInformation.end() && (*rightIterator)->pl.idx >= pInterval->pl.idx)
+    {
+      int idx = (*rightIterator)->pl.idx;
+      UpdateH(fabs((*rightIterator)->pl.g[idx] - pInterval->pl.g[idx]) /
+              pow((*rightIterator)->pl.x - pInterval->pl.x, 1. / mProblem->GetDimension()), pInterval->pl.idx);
+    }
+
+    //left lookup
+    --leftIterator;
+    while(leftIterator != mSearchInformation.begin() && (*leftIterator)->pl.idx < pInterval->pl.idx)
+      --leftIterator;
+    if (leftIterator != mSearchInformation.begin() && (*leftIterator)->pl.idx >= pInterval->pl.idx)
+    {
+      int idx = (*leftIterator)->pl.idx;
+      UpdateH(fabs((*leftIterator)->pl.g[idx] - pInterval->pl.g[idx]) /
+              pow(pInterval->pl.x - (*leftIterator)->pl.x, 1. / mProblem->GetDimension()), pInterval->pl.idx);
+    }
   }
 }
 
