@@ -7,7 +7,7 @@ struct Trial
 {
   double x;
   double y[solverMaxDim];
-  double z[solverMaxConstraints + 1];
+  double g[solverMaxConstraints + 1];
   int idx;
   Trial() {}
   Trial(double _x) : x(_x) {}
@@ -15,19 +15,17 @@ struct Trial
 
 struct Interval
 {
-  double xl;
-  double xr;
-  double zl;
-  double zr;
+  Trial pl;
+  Trial pr;
   double R;
   double delta;
   Interval() {}
-  Interval(double _xl, double _xr) : xl(_xl), xr(_xr) {}
+  Interval(const Trial& _pl, const Trial& _pr) : pl(_pl), pr(_pr) {}
 };
 
 inline bool operator<(const Interval& i1, const Interval& i2)
 {
-  return i1.xl < i2.xl;
+  return i1.pl.x < i2.pl.x;
 }
 
 class CompareByR

@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   std::string problemClass = parser.get<std::string>("problemsClass");
 
   auto start = std::chrono::system_clock::now();
-  std::vector<std::vector<int>> allStatistics;
+  std::vector<std::vector<unsigned>> allStatistics;
 
   double objectiveAvgConst = 0.;
   double solutionCheckAcc = 3*parser.get<double>("accuracy");
