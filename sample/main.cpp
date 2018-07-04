@@ -10,7 +10,7 @@
 
 #include "solver.hpp"
 
-void saveStatistics(const std::vector<std::vector<int>>& stat, const cmdline::parser& parser);
+void saveStatistics(const std::vector<std::vector<unsigned>>& stat, const cmdline::parser& parser);
 void initParser(cmdline::parser& parser);
 
 int main(int argc, char** argv)
@@ -99,17 +99,17 @@ int main(int argc, char** argv)
   std::cout << "Time elapsed: " << elapsed_seconds.count() << "s\n";
   std::cout << "Objective average Holder const estimation: " << objectiveAvgConst << "\n";
 
-  //saveStatistics(allStatistics, parser);
+  saveStatistics(allStatistics, parser);
 
   return 0;
 }
 
-void saveStatistics(const std::vector<std::vector<int>>& stat, const cmdline::parser& parser)
+void saveStatistics(const std::vector<std::vector<unsigned>>& stat, const cmdline::parser& parser)
 {
   size_t numFuncs = stat.back().size() - 1;
   std::vector<double> avgCalcs(numFuncs, 0.);
-  int solvedCounter = 0;
-  int maxIters = 0;
+  unsigned solvedCounter = 0;
+  unsigned maxIters = 0;
 
   for(const auto& elem : stat)
   {
@@ -129,8 +129,8 @@ void saveStatistics(const std::vector<std::vector<int>>& stat, const cmdline::pa
   if(parser.exist("saveStat"))
   {
     std::vector<std::pair<int, int>> operationCharacteristic;
-    const int opStep = maxIters / 150;
-    for(int i = 0; i < maxIters + opStep; i+= opStep)
+    const unsigned opStep = maxIters / 150;
+    for(unsigned i = 0; i < maxIters + opStep; i+= opStep)
     {
       int solvedProblemsCnt = 0;
       for(const auto& elem : stat)

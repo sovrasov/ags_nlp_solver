@@ -23,10 +23,13 @@ struct Interval
   Interval(const Trial& _pl, const Trial& _pr) : pl(_pl), pr(_pr) {}
 };
 
-inline bool operator<(const Interval& i1, const Interval& i2)
+struct CompareIntervals
 {
-  return i1.pl.x < i2.pl.x;
-}
+  bool operator() (const Interval* i1, const Interval* i2)
+  {
+    return i1->pl.x < i2->pl.x;
+  }
+};
 
 class CompareByR
 {

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
+#include <iostream>
 
 namespace
 {
@@ -75,7 +76,7 @@ Trial NLPSolver::Solve()
       RefillQueue();
     CalculateNextPoints();
     MakeTrials();
-    needStop = true;//mMinDelta < mParameters.eps;
+    needStop = mMinDelta < mParameters.eps;
     mIterationsCounter++;
   } while(mIterationsCounter < mParameters.trialsLimit && !needStop);
 
@@ -109,9 +110,10 @@ void NLPSolver::FirstIteration()
     else
       pNewInterval = new Interval(mNextPoints[i - 1], mNextPoints[i]);
     pNewInterval->delta = pow(pNewInterval->pr.x - pNewInterval->pl.x,
-                               1. / mProblem->GetDimension());
+                              1. / mProblem->GetDimension());
     mMinDelta = std::min(mMinDelta, pNewInterval->delta);
-    mSearchInformation.insert(pNewInterval);
+    auto insRes = mSearchInformation.insert(pNewInterval);
+    UpdateH(insRes.first);
   }
   RefillQueue();
   CalculateNextPoints();
@@ -141,6 +143,7 @@ void NLPSolver::MakeTrials()
       mMaxIdx = idx;
       for(int i = 0; i < mMaxIdx; i++)
         mZEstimations[i] = -mParameters.rEps;
+      mNeedRefillQueue = true;
     }
     if (idx == mProblem->GetConstraintsNumber())
     {
@@ -148,15 +151,18 @@ void NLPSolver::MakeTrials()
       mNextPoints[i].idx = idx;
       mNextPoints[i].g[idx] = mProblem->Calculate(mNextPoints[i].y, idx);
     }
-    if(mNextPoints[i].idx == mMaxIdx)
-      mZEstimations[mMaxIdx] = fmin(mZEstimations[mMaxIdx],
-                                    mNextPoints[i].g[mMaxIdx]);
+    if(mNextPoints[i].idx == mMaxIdx &&
+       mNextPoints[i].g[mMaxIdx] < mZEstimations[mMaxIdx])
+    {
+      mZEstimations[mMaxIdx] = mNextPoints[i].g[mMaxIdx];
+      mNeedRefillQueue = true;
+    }
   }
 }
 
 void NLPSolver::InsertIntervals()
 {
-  for (size_t i = 0; i < mNextIntervals.size(); i++)
+  for (size_t i = 0; i < mParameters.numThreads; i++)
   {
     Interval* pOldInterval = mNextIntervals[i];
     Interval* pNewInterval = new Interval(mNextPoints[i], pOldInterval->pr);
@@ -165,15 +171,16 @@ void NLPSolver::InsertIntervals()
                               1. / mProblem->GetDimension());
     pNewInterval->delta = pow(pNewInterval->pr.x - pNewInterval->pl.x,
                               1. / mProblem->GetDimension());
+    mMinDelta = std::min(mMinDelta, pNewInterval->delta);
+    mMinDelta = std::min(mMinDelta, pOldInterval->delta);
 
     auto insResult = mSearchInformation.insert(pNewInterval);
     bool wasInserted = insResult.second;
     if(!wasInserted)
       throw std::runtime_error("Error during interval insertion.");
 
-    std::set<Interval*>::iterator insIt = insResult.first;
-    UpdateH(insIt);
-    UpdateH(--insIt);
+    UpdateH(insResult.first);
+    UpdateH(--insResult.first);
 
     if(!mNeedRefillQueue)
     {
@@ -208,6 +215,7 @@ void NLPSolver::RefillQueue()
     pInterval->R = CalculateR(pInterval);
     mQueue.push(pInterval);
   }
+  mNeedRefillQueue = false;
 }
 
 void NLPSolver::EstimateOptimum()
@@ -223,9 +231,35 @@ void NLPSolver::EstimateOptimum()
   }
 }
 
-void NLPSolver::UpdateH(std::set<Interval*>::iterator) const
+void NLPSolver::UpdateH(std::set<Interval*, CompareIntervals>::iterator it_iter)
 {
-  ;
+  /*
+  Trial& currentPoint = mSearchData[idx];
+  int left_idx = idx - 1;
+  while(left_idx > 0 && mSearchData[left_idx].v != currentPoint.v)
+    left_idx--;
+  if(left_idx != (int)idx && mSearchData[left_idx].v == mSearchData[idx].v)
+    UpdateMu(mSearchData[left_idx], mSearchData[idx]);
+
+  size_t right_idx = idx + 1;
+  while(right_idx < mSearchData.size() - 1 && mSearchData[right_idx].v != currentPoint.v)
+    right_idx++;
+  if(right_idx != idx && mSearchData[right_idx].v == mSearchData[idx].v)
+    UpdateMu(mSearchData[idx], mSearchData[right_idx]);
+  }
+  */
+  Interval* it = *it_iter;
+  if (it->pr.idx != it->pl.idx)
+    return;
+  double oldMu = mHEstimations[it->pl.idx];
+  double newMu = fabs(it->pr.g[it->pr.idx] - it->pl.g[it->pl.idx]) /
+    pow(it->pr.x - it->pl.x, 1. / mProblem->GetDimension());
+
+  if (newMu > oldMu || (oldMu == 1.0 && newMu > zeroHLevel))
+  {
+    mHEstimations[it->pr.idx] = newMu;
+    mNeedRefillQueue = true;
+  }
 }
 
 double NLPSolver::CalculateR(Interval* i) const

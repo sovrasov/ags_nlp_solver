@@ -39,7 +39,7 @@ protected:
   std::vector<double> mZEstimations;
   std::vector<Trial> mNextPoints;
   PriorityQueue mQueue;
-  std::set<Interval*> mSearchInformation;
+  std::set<Interval*, CompareIntervals> mSearchInformation;
   std::vector<Interval*> mNextIntervals;
   Trial mOptimumEstimation;
 
@@ -59,7 +59,7 @@ protected:
   void InitDataStructures();
   void ClearDataStructures();
 
-  void UpdateH(std::set<Interval*>::iterator) const;
+  void UpdateH(std::set<Interval*, CompareIntervals>::iterator);
   double CalculateR(Interval*) const;
   double GetNextPointCoordinate(Interval*) const;
 
