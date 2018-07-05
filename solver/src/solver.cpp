@@ -25,6 +25,8 @@ namespace
         mFunctions = functions;
         mConstraintsNumber = mFunctions.size() - 1;
         mDimension = leftBound.size();
+        mLeftBound = leftBound;
+        mRightBound = rightBound;
       }
 
       double Calculate(const double* y, int fNumber) const
