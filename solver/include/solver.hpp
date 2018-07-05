@@ -65,10 +65,13 @@ protected:
   double GetNextPointCoordinate(Interval*) const;
 
 public:
+  using FuncPtr = double(*)(const double*);
   NLPSolver();
 
   void SetParameters(const SolverParameters& params);
   void SetProblem(std::shared_ptr<IGOProblem<double>> problem);
+  void SetProblem(const std::vector<FuncPtr>& functions,
+                  const std::vector<double>& leftBound, const std::vector<double>& rightBound);
 
   Trial Solve();
   std::vector<unsigned> GetCalculationsStatistics() const;

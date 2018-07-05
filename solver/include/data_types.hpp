@@ -1,5 +1,11 @@
 #pragma once
 
+#include <stdexcept>
+#include <string>
+
+#define NLP_SOLVER_ERROR(msg) throw std::runtime_error(std::string(msg))
+#define NLP_SOLVER_ASSERT(expr, msg) if(!(expr)) NLP_SOLVER_ERROR(msg)
+
 const unsigned solverMaxDim = 5;
 const unsigned solverMaxConstraints = 5;
 

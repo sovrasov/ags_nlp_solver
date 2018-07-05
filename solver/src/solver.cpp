@@ -7,6 +7,49 @@
 namespace
 {
     const double zeroHLevel = 1e-12;
+
+    class ProblemInternal : public IGOProblem<double>
+    {
+    private:
+      std::vector<NLPSolver::FuncPtr> mFunctions;
+      std::vector<double> mLeftBound;
+      std::vector<double> mRightBound;
+
+      unsigned mDimension;
+      unsigned mConstraintsNumber;
+
+    public:
+      ProblemInternal(const std::vector<NLPSolver::FuncPtr>& functions,
+                      const std::vector<double>& leftBound, const std::vector<double>& rightBound)
+      {
+        mFunctions = functions;
+        mConstraintsNumber = mFunctions.size() - 1;
+        mDimension = leftBound.size();
+      }
+
+      double Calculate(const double* y, int fNumber) const
+      {
+        return mFunctions[fNumber](y);
+      }
+      int GetConstraintsNumber() const
+      {
+        return mConstraintsNumber;
+      }
+      int GetDimension() const
+      {
+        return mDimension;
+      }
+      void GetBounds(double* left, double* right) const
+      {
+        for(size_t i = 0; i < mDimension; i++)
+        {
+          left[i] = mLeftBound[i];
+          right[i] = mRightBound[i];
+        }
+      }
+      int GetOptimumPoint(double* y) const {return 0;}
+      double GetOptimumValue() const {return 0;}
+    };
 }
 
 NLPSolver::NLPSolver() {}
@@ -19,6 +62,14 @@ void NLPSolver::SetParameters(const SolverParameters& params)
 void NLPSolver::SetProblem(std::shared_ptr<IGOProblem<double>> problem)
 {
   mProblem = problem;
+}
+
+void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
+                const std::vector<double>& leftBound, const std::vector<double>& rightBound)
+{
+  NLP_SOLVER_ASSERT(leftBound.size() == rightBound.size(), "Inconsistent dimensions of bounds");
+  NLP_SOLVER_ASSERT(leftBound.size() > 0, "Zero problem dimension");
+  mProblem = std::make_shared<ProblemInternal>(functions, leftBound, rightBound);
 }
 
 std::vector<unsigned> NLPSolver::GetCalculationsStatistics() const
