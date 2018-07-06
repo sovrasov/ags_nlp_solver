@@ -42,8 +42,13 @@ int main(int argc, char* argv[])
     std::cout << "Estimation of Holder constant of function # " << i << ": " << holderConstEstimations[i] << "\n";
   std::cout << "Estimation of Holder constant of objective: " << holderConstEstimations.back() << "\n";
 
-  std::cout << "Optimal value: " << optimalPoint.g[optimalPoint.idx] << "\n";
-  std::cout << "x = " << optimalPoint.y[0] << " y = " << optimalPoint.y[1] << "\n";
+  if (optimalPoint.idx < 3)
+    std::cout << "Feasible point not found" << "\n";
+  else
+  {
+    std::cout << "Optimal value: " << optimalPoint.g[optimalPoint.idx] << "\n";
+    std::cout << "x = " << optimalPoint.y[0] << " y = " << optimalPoint.y[1] << "\n";
+  }
 
   return 0;
 }
