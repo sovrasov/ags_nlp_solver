@@ -4,4 +4,23 @@ An implementation of the algorithm AGS to solve constrained nonlinear programmin
 
 AGS is proven to converge to a global optima if all objectives and constraints satisfy Lipschitz condition in a given hyperrectangle, the reliability parameter `r` is large enough and accuracy parameter `eps` is zero.
 
+## Clone & build
+- on Linux:
+```bash
+git clone --recursive https://github.com/sovrasov/glob_search_nlp_solver.git
+cd multicriterial-go
+mkdir build
+cd build
+cmake ..
+make -j 4
+```
+- on Windows:
+```batch
+git clone --recursive https://github.com/sovrasov/glob_search_nlp_solver.git
+cd multicriterial-go
+mkdir build
+cd build
+cmake .. -G "NMake Makefiles"
+nmake
+```
 [paper]: https://www.tandfonline.com/doi/abs/10.1080/17442508908833568?journalCode=gssr19
