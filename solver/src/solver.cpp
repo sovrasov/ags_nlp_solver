@@ -183,11 +183,9 @@ void NLPSolver::MakeTrials()
       mNextPoints[i].idx = idx;
       double val = mProblem->Calculate(mNextPoints[i].y, idx);
       mCalculationsCounters[idx]++;
+      mNextPoints[i].g[idx] = val;
       if (val > 0)
-      {
-        mNextPoints[i].g[idx] = val;
         break;
-      }
       idx++;
     }
 
@@ -195,7 +193,7 @@ void NLPSolver::MakeTrials()
     {
       mMaxIdx = idx;
       for(int i = 0; i < mMaxIdx; i++)
-        mZEstimations[i] = -mParameters.rEps;
+        mZEstimations[i] = -mParameters.rEps*mHEstimations[i];
       mNeedRefillQueue = true;
     }
     if (idx == mProblem->GetConstraintsNumber())
@@ -312,9 +310,9 @@ void NLPSolver::UpdateAllH(std::set<Interval*>::iterator iterator)
       ++rightIterator;
     if (rightIterator != mSearchInformation.end() && (*rightIterator)->pl.idx >= pInterval->pl.idx)
     {
-      int idx = (*rightIterator)->pl.idx;
+      int idx = pInterval->pl.idx;
       UpdateH(fabs((*rightIterator)->pl.g[idx] - pInterval->pl.g[idx]) /
-              pow((*rightIterator)->pl.x - pInterval->pl.x, 1. / mProblem->GetDimension()), pInterval->pl.idx);
+              pow((*rightIterator)->pl.x - pInterval->pl.x, 1. / mProblem->GetDimension()), idx);
     }
 
     //left lookup
@@ -323,9 +321,9 @@ void NLPSolver::UpdateAllH(std::set<Interval*>::iterator iterator)
       --leftIterator;
     if (leftIterator != mSearchInformation.begin() && (*leftIterator)->pl.idx >= pInterval->pl.idx)
     {
-      int idx = (*leftIterator)->pl.idx;
+      int idx = pInterval->pl.idx;
       UpdateH(fabs((*leftIterator)->pl.g[idx] - pInterval->pl.g[idx]) /
-              pow(pInterval->pl.x - (*leftIterator)->pl.x, 1. / mProblem->GetDimension()), pInterval->pl.idx);
+              pow(pInterval->pl.x - (*leftIterator)->pl.x, 1. / mProblem->GetDimension()), idx);
     }
   }
 }
