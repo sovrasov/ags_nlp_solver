@@ -1,5 +1,4 @@
 #include "solver.hpp"
-#include "local_optimizer.hpp"
 
 #include <algorithm>
 #include <limits>
@@ -66,6 +65,7 @@ void NLPSolver::SetParameters(const SolverParameters& params)
 void NLPSolver::SetProblem(std::shared_ptr<IGOProblem<double>> problem)
 {
   mProblem = problem;
+  mLocalOptimizer.SetParameters(0.001, 0.01, 2);
 }
 
 void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
@@ -74,6 +74,7 @@ void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
   NLP_SOLVER_ASSERT(leftBound.size() == rightBound.size(), "Inconsistent dimensions of bounds");
   NLP_SOLVER_ASSERT(leftBound.size() > 0, "Zero problem dimension");
   mProblem = std::make_shared<ProblemInternal>(functions, leftBound, rightBound);
+  mLocalOptimizer.SetParameters(0.001, 0.01, 2);
 }
 
 std::vector<unsigned> NLPSolver::GetCalculationsStatistics() const
@@ -125,8 +126,8 @@ Trial NLPSolver::Solve()
   FirstIteration();
 
   do {
-    EstimateOptimum();
     InsertIntervals();
+    EstimateOptimum();
     if (mNeedRefillQueue || mQueue.size() < mParameters.numThreads)
       RefillQueue();
     CalculateNextPoints();
@@ -280,20 +281,19 @@ void NLPSolver::EstimateOptimum()
         mOptimumEstimation.g[mOptimumEstimation.idx] > mNextPoints[i].g[mNextPoints[i].idx])
     {
       mOptimumEstimation = mNextPoints[i];
-      if (true)  {
-        HookeJeevesOptimizer localOptimizer;
-        localOptimizer.SetParameters(0.001, 0.01, 2);
-        auto localTrial = localOptimizer.Optimize(mProblem, mOptimumEstimation);
-        if (localTrial.idx == mOptimumEstimation.idx && localTrial.g[localTrial.idx] < mOptimumEstimation.g[mOptimumEstimation.idx])
+      mNeedRefillQueue = true;
+      if (mOptimumEstimation.idx == mProblem->GetConstraintsNumber() && mSearchInformation.size() > 2)  {
+        auto localTrial = mLocalOptimizer.Optimize(mProblem, mOptimumEstimation, mCalculationsCounters);
+        int idx = mOptimumEstimation.idx;
+        if (localTrial.idx == idx && localTrial.g[idx] < mOptimumEstimation.g[idx])
         {
           mOptimumEstimation = localTrial;
           mEvolvent.GetAllPreimages(localTrial.y, &localTrial.x);
           Interval* tmpInterval = new Interval(localTrial, Trial());
           auto ins_it = mSearchInformation.upper_bound(tmpInterval);
           --ins_it;
-          std::cout << localTrial.x << " " << (*ins_it)->pl.x << " " << (*ins_it)->pr.x << "\n";
-          NLP_SOLVER_ASSERT(localTrial.x <= (*ins_it)->pr.x && localTrial.x >= (*ins_it)->pl.x);
-          if(0 &&(*ins_it)->pl.x != localTrial.x)
+          NLP_SOLVER_ASSERT(localTrial.x <= (*ins_it)->pr.x && localTrial.x >= (*ins_it)->pl.x, "");
+          if((*ins_it)->pl.x != localTrial.x)
           {
             tmpInterval->pr = (*ins_it)->pr;
             tmpInterval->delta = pow(tmpInterval->pr.x - tmpInterval->pl.x, 1. / mProblem->GetDimension());
@@ -301,13 +301,13 @@ void NLPSolver::EstimateOptimum()
             (*ins_it)->pr = localTrial;
             (*ins_it)->delta = pow((*ins_it)->pr.x - (*ins_it)->pl.x, 1. / mProblem->GetDimension());
             mMinDelta = std::min(mMinDelta, (*ins_it)->delta);
-            mSearchInformation.insert(tmpInterval);
-            mNeedRefillQueue = true;
+            auto insResult = mSearchInformation.insert(tmpInterval);
+            UpdateAllH(insResult.first);
+            UpdateAllH(ins_it);
           }
+          else
+            delete tmpInterval;
         }
-
-        std::cout << "Refined: " << localTrial.g[localTrial.idx] << " " << localTrial.idx << "\n";
-        std::cout << "Original: " << mOptimumEstimation.g[mOptimumEstimation.idx] << " " << mOptimumEstimation.idx << "\n";
       }
     }
   }
@@ -390,4 +390,15 @@ double NLPSolver::GetNextPointCoordinate(Interval* i) const
     throw std::runtime_error("Point is outside of interval\n");
 
   return x;
+}
+
+bool solver_utils::checkVectorsDiff(const double* y1, const double* y2, size_t dim, double eps)
+{
+  for (size_t i = 0; i < dim; i++)
+  {
+    if (fabs(y1[i] - y2[i]) > eps)
+      return true;
+  }
+
+  return false;
 }

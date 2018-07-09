@@ -3,6 +3,7 @@
 #include "data_types.hpp"
 #include "evolvent.hpp"
 #include "problem_interface.hpp"
+#include "local_optimizer.hpp"
 
 #include <vector>
 #include <memory>
@@ -30,6 +31,8 @@ class NLPSolver
 protected:
   using PriorityQueue =
     std::priority_queue<Interval*, std::vector<Interval*>, CompareByR>;
+
+  HookeJeevesOptimizer mLocalOptimizer;
 
   SolverParameters mParameters;
   std::shared_ptr<IGOProblem<double>> mProblem;
@@ -80,14 +83,5 @@ public:
 
 namespace solver_utils
 {
-  inline bool checkVectorsDiff(const double* y1, const double* y2, size_t dim, double eps)
-  {
-    for (size_t i = 0; i < dim; i++)
-    {
-      if (fabs(y1[i] - y2[i]) > eps)
-        return true;
-    }
-
-    return false;
-  }
+  bool checkVectorsDiff(const double* y1, const double* y2, size_t dim, double eps);
 }

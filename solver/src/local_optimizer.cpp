@@ -3,8 +3,9 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include<iostream>
 
-#define MAX_LOCAL_ITERATIONS_NUMBER 10000
+#define MAX_LOCAL_ITERATIONS_NUMBER 20
 
 void HookeJeevesOptimizer::SetParameters(double eps, double step, double stepMult)
 {
@@ -14,52 +15,55 @@ void HookeJeevesOptimizer::SetParameters(double eps, double step, double stepMul
   mStepMultiplier = stepMult;
 }
 
-Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem, const Trial& startPoint)
+Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem,
+                                    const Trial& startPoint, std::vector<unsigned>& trialsCounters)
 {
   mProblem = problem;
   mStartPoint = startPoint;
+  mTrialsCounters = std::vector<unsigned>(mProblem->GetConstraintsNumber() + 1, 0);
 
   int k = 0, i=0;
-	bool needRestart = true;
-	double currentFValue, nextFValue;
+  bool needRestart = true;
+  double currentFValue, nextFValue;
 
-	while (i < MAX_LOCAL_ITERATIONS_NUMBER)	{
-		i++;
-		if (needRestart)	{
-			k = 0;
+  while (i < MAX_LOCAL_ITERATIONS_NUMBER)	{
+    i++;
+    if (needRestart)	{
+      k = 0;
       mCurrentPoint = mStartPoint;
       mCurrentResearchDirection = mStartPoint;
-			//std::memcpy(mCurrentPoint, mStartPoint, sizeof(double)*mDimension);
-			//std::memcpy(mCurrentResearchDirection, mStartPoint, sizeof(double)*mDimension);
-			currentFValue = ComputeObjective(mCurrentPoint.y);
-			needRestart = false;
-		}
+      //std::memcpy(mCurrentPoint, mStartPoint, sizeof(double)*mDimension);
+      //std::memcpy(mCurrentResearchDirection, mStartPoint, sizeof(double)*mDimension);
+      currentFValue = ComputeObjective(mCurrentPoint.y);
+      needRestart = false;
+    }
 
-		std::swap(mPreviousResearchDirection, mCurrentResearchDirection);
+    std::swap(mPreviousResearchDirection, mCurrentResearchDirection);
     mCurrentResearchDirection = mCurrentPoint;
-		//std::memcpy(mCurrentResearchDirection, mCurrentPoint, sizeof(double)*mDimension);
-		nextFValue = MakeResearch(mCurrentResearchDirection.y);
+    //std::memcpy(mCurrentResearchDirection, mCurrentPoint, sizeof(double)*mDimension);
+    nextFValue = MakeResearch(mCurrentResearchDirection.y);
 
-		if (currentFValue > nextFValue)	{
-			DoStep();
-			k++;
-			currentFValue = nextFValue;
-		}
-		else if (mStep > mEps)	{
-			if (k != 0)
-				std::swap(mStartPoint, mPreviousResearchDirection);
-			else
-				mStep /= mStepMultiplier;
-			needRestart = true;
-		}
-		else
-			break;
-	}
+    if (currentFValue > nextFValue)	{
+      DoStep();
+      k++;
+      currentFValue = nextFValue;
+    }
+    else if (mStep > mEps)	{
+      if (k != 0)
+        std::swap(mStartPoint, mPreviousResearchDirection);
+      else
+        mStep /= mStepMultiplier;
+      needRestart = true;
+    }
+    else
+      break;
+  }
 
-	//std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimension);
+  //std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimension);
   mPreviousResearchDirection.idx = 0;
   while (mPreviousResearchDirection.idx < mProblem->GetConstraintsNumber())
   {
+    mTrialsCounters[mPreviousResearchDirection.idx]++;
     mPreviousResearchDirection.g[mPreviousResearchDirection.idx] =
       mProblem->Calculate(mPreviousResearchDirection.y, mPreviousResearchDirection.idx);
     if (mPreviousResearchDirection.g[mPreviousResearchDirection.idx] > 0)
@@ -68,58 +72,65 @@ Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem
   }
 
   if (mPreviousResearchDirection.idx == mProblem->GetConstraintsNumber())
+  {
     mPreviousResearchDirection.g[mPreviousResearchDirection.idx] =
       mProblem->Calculate(mPreviousResearchDirection.y, mPreviousResearchDirection.idx);
+    mTrialsCounters[mPreviousResearchDirection.idx]++;
+  }
+
+  for(size_t i = 0; i < mTrialsCounters.size(); i++)
+    trialsCounters[i] += mTrialsCounters[i];
 
   return mPreviousResearchDirection;
 }
 
 void HookeJeevesOptimizer::DoStep()
 {
-	for (int i = 0; i < mProblem->GetDimension(); i++)
-		mCurrentPoint.y[i] = (1 + mStepMultiplier)*mCurrentResearchDirection.y[i] -
-			mStepMultiplier*mPreviousResearchDirection.y[i];
+  for (int i = 0; i < mProblem->GetDimension(); i++)
+    mCurrentPoint.y[i] = (1 + mStepMultiplier)*mCurrentResearchDirection.y[i] -
+      mStepMultiplier*mPreviousResearchDirection.y[i];
 }
 
 double HookeJeevesOptimizer::ComputeObjective(const double* x) const
 {
-	for (int i = 0; i <= mProblem->GetConstraintsNumber(); i++)
-	{
-		double value = mProblem->Calculate(x, i);
-		if (i < mProblem->GetConstraintsNumber() && value > 0)
-			return std::numeric_limits<double>::max();
-		else if (i == mProblem->GetConstraintsNumber())
-			return value;
-	}
-	return std::numeric_limits<double>::max();
+  for (int i = 0; i <= mProblem->GetConstraintsNumber(); i++)
+  {
+    double value = mProblem->Calculate(x, i);
+    mTrialsCounters[i]++;
+    if (i < mProblem->GetConstraintsNumber() && value > 0)
+      return std::numeric_limits<double>::max();
+    else if (i == mProblem->GetConstraintsNumber())
+      return value;
+  }
+  return std::numeric_limits<double>::max();
 }
 
 double HookeJeevesOptimizer::MakeResearch(double* startPoint)
 {
-	double bestValue = ComputeObjective(startPoint);
+  double bestValue = ComputeObjective(startPoint);
 
-	for (int i = 0; i < mProblem->GetDimension(); i++)
-	{
-		startPoint[i] += mStep;
-		double rightFvalue = ComputeObjective(startPoint);
+  for (int i = 0; i < mProblem->GetDimension(); i++)
+  {
+    startPoint[i] += mStep;
+    double rightFvalue = ComputeObjective(startPoint);
 
-		if (rightFvalue > bestValue)
-		{
-			startPoint[i] -= 2 * mStep;
-			double leftFValue = ComputeObjective(startPoint);
-			if (leftFValue > bestValue)
-				startPoint[i] += mStep;
-			else
-				bestValue = leftFValue;
-		}
-		else
-			bestValue = rightFvalue;
-	}
+    if (rightFvalue > bestValue)
+    {
+      startPoint[i] -= 2 * mStep;
+      double leftFValue = ComputeObjective(startPoint);
+      if (leftFValue > bestValue)
+        startPoint[i] += mStep;
+      else
+        bestValue = leftFValue;
+    }
+    else
+      bestValue = rightFvalue;
+  }
 
-	return bestValue;
+  return bestValue;
 }
 /*
-	mEps = 0.001;
-	mStep = 0.01;
-	mStepMultiplier = 2;
+  mEps = 0.001;
+  mStep = 0.01;
+  mStepMultiplier = 2;
 */

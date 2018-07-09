@@ -13,6 +13,8 @@ private:
   double mStep;
   double mStepMultiplier;
 
+  mutable std::vector<unsigned> mTrialsCounters;
+
   std::shared_ptr<IGOProblem<double>> mProblem;
 
   Trial mCurrentPoint;
@@ -26,5 +28,6 @@ private:
 
 public:
   void SetParameters(double eps, double step, double stepMult);
-	Trial Optimize(std::shared_ptr<IGOProblem<double>> problem, const Trial& startPoint);
+  Trial Optimize(std::shared_ptr<IGOProblem<double>> problem,
+                 const Trial& startPoint, std::vector<unsigned>& trialsCounters);
 };
