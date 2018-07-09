@@ -23,9 +23,7 @@ private:
   void DoStep();
   double ComputeObjective(const double* x) const;
   double MakeResearch(double*);
-/*
-  double *mStartPoint;
-*/
+
 public:
   void SetParameters(double eps, double step, double stepMult);
 	Trial Optimize(std::shared_ptr<IGOProblem<double>> problem, const Trial& startPoint);

@@ -1,4 +1,6 @@
 #include "solver.hpp"
+#include "local_optimizer.hpp"
+
 #include <algorithm>
 #include <limits>
 #include <cmath>
@@ -278,6 +280,35 @@ void NLPSolver::EstimateOptimum()
         mOptimumEstimation.g[mOptimumEstimation.idx] > mNextPoints[i].g[mNextPoints[i].idx])
     {
       mOptimumEstimation = mNextPoints[i];
+      if (true)  {
+        HookeJeevesOptimizer localOptimizer;
+        localOptimizer.SetParameters(0.001, 0.01, 2);
+        auto localTrial = localOptimizer.Optimize(mProblem, mOptimumEstimation);
+        if (localTrial.idx == mOptimumEstimation.idx && localTrial.g[localTrial.idx] < mOptimumEstimation.g[mOptimumEstimation.idx])
+        {
+          mOptimumEstimation = localTrial;
+          mEvolvent.GetAllPreimages(localTrial.y, &localTrial.x);
+          Interval* tmpInterval = new Interval(localTrial, Trial());
+          auto ins_it = mSearchInformation.upper_bound(tmpInterval);
+          --ins_it;
+          std::cout << localTrial.x << " " << (*ins_it)->pl.x << " " << (*ins_it)->pr.x << "\n";
+          NLP_SOLVER_ASSERT(localTrial.x <= (*ins_it)->pr.x && localTrial.x >= (*ins_it)->pl.x);
+          if(0 &&(*ins_it)->pl.x != localTrial.x)
+          {
+            tmpInterval->pr = (*ins_it)->pr;
+            tmpInterval->delta = pow(tmpInterval->pr.x - tmpInterval->pl.x, 1. / mProblem->GetDimension());
+            mMinDelta = std::min(mMinDelta, tmpInterval->delta);
+            (*ins_it)->pr = localTrial;
+            (*ins_it)->delta = pow((*ins_it)->pr.x - (*ins_it)->pl.x, 1. / mProblem->GetDimension());
+            mMinDelta = std::min(mMinDelta, (*ins_it)->delta);
+            mSearchInformation.insert(tmpInterval);
+            mNeedRefillQueue = true;
+          }
+        }
+
+        std::cout << "Refined: " << localTrial.g[localTrial.idx] << " " << localTrial.idx << "\n";
+        std::cout << "Original: " << mOptimumEstimation.g[mOptimumEstimation.idx] << " " << mOptimumEstimation.idx << "\n";
+      }
     }
   }
 }

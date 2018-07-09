@@ -31,7 +31,7 @@ struct Interval
 
 struct CompareIntervals
 {
-  bool operator() (const Interval* i1, const Interval* i2)
+  bool operator() (const Interval* i1, const Interval* i2) const
   {
     return i1->pl.x < i2->pl.x;
   }
@@ -40,7 +40,7 @@ struct CompareIntervals
 class CompareByR
 {
 public:
-  bool operator() (const Interval* i1, const Interval* i2)
+  bool operator() (const Interval* i1, const Interval* i2) const
   {
     return i1->R < i2->R;
   }

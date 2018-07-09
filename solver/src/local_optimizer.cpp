@@ -57,6 +57,19 @@ Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem
 	}
 
 	//std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimension);
+  mPreviousResearchDirection.idx = 0;
+  while (mPreviousResearchDirection.idx < mProblem->GetConstraintsNumber())
+  {
+    mPreviousResearchDirection.g[mPreviousResearchDirection.idx] =
+      mProblem->Calculate(mPreviousResearchDirection.y, mPreviousResearchDirection.idx);
+    if (mPreviousResearchDirection.g[mPreviousResearchDirection.idx] > 0)
+      break;
+    mPreviousResearchDirection.idx++;
+  }
+
+  if (mPreviousResearchDirection.idx == mProblem->GetConstraintsNumber())
+    mPreviousResearchDirection.g[mPreviousResearchDirection.idx] =
+      mProblem->Calculate(mPreviousResearchDirection.y, mPreviousResearchDirection.idx);
 
   return mPreviousResearchDirection;
 }
