@@ -137,6 +137,14 @@ Trial NLPSolver::Solve()
   } while(mIterationsCounter < mParameters.trialsLimit && !needStop);
 
   ClearDataStructures();
+
+  if (mParameters.refineSolution && mOptimumEstimation.idx == mProblem->GetConstraintsNumber())  {
+    auto localTrial = mLocalOptimizer.Optimize(mProblem, mOptimumEstimation, mCalculationsCounters);
+    int idx = mOptimumEstimation.idx;
+    if (localTrial.idx == idx && localTrial.g[idx] < mOptimumEstimation.g[idx])
+      mOptimumEstimation = localTrial;
+  }
+
   return mOptimumEstimation;
 }
 
@@ -282,33 +290,6 @@ void NLPSolver::EstimateOptimum()
     {
       mOptimumEstimation = mNextPoints[i];
       mNeedRefillQueue = true;
-      if (mOptimumEstimation.idx == mProblem->GetConstraintsNumber() && mSearchInformation.size() > 2)  {
-        auto localTrial = mLocalOptimizer.Optimize(mProblem, mOptimumEstimation, mCalculationsCounters);
-        int idx = mOptimumEstimation.idx;
-        if (localTrial.idx == idx && localTrial.g[idx] < mOptimumEstimation.g[idx])
-        {
-          mOptimumEstimation = localTrial;
-          mEvolvent.GetAllPreimages(localTrial.y, &localTrial.x);
-          Interval* tmpInterval = new Interval(localTrial, Trial());
-          auto ins_it = mSearchInformation.upper_bound(tmpInterval);
-          --ins_it;
-          NLP_SOLVER_ASSERT(localTrial.x <= (*ins_it)->pr.x && localTrial.x >= (*ins_it)->pl.x, "");
-          if((*ins_it)->pl.x != localTrial.x)
-          {
-            tmpInterval->pr = (*ins_it)->pr;
-            tmpInterval->delta = pow(tmpInterval->pr.x - tmpInterval->pl.x, 1. / mProblem->GetDimension());
-            mMinDelta = std::min(mMinDelta, tmpInterval->delta);
-            (*ins_it)->pr = localTrial;
-            (*ins_it)->delta = pow((*ins_it)->pr.x - (*ins_it)->pl.x, 1. / mProblem->GetDimension());
-            mMinDelta = std::min(mMinDelta, (*ins_it)->delta);
-            auto insResult = mSearchInformation.insert(tmpInterval);
-            UpdateAllH(insResult.first);
-            UpdateAllH(ins_it);
-          }
-          else
-            delete tmpInterval;
-        }
-      }
     }
   }
 }

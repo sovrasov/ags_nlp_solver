@@ -25,6 +25,7 @@ int main(int argc, char** argv)
   1,
   parser.get<int>("itersLimit"));
   parameters.evolventTightness = parser.get<int>("evolventTightness");
+  parameters.refineSolution = parser.exist("refineLoc");
 
   std::string problemClass = parser.get<std::string>("problemsClass");
 
@@ -174,4 +175,5 @@ void initParser(cmdline::parser& parser)
   parser.add<std::string>("outFile", 'f', "Name of the output .csv file with statistics", false,
     "");
   parser.add("saveStat", 's', "Save statistics in a .csv file");
+  parser.add("refineLoc", 'l', "Refine the global solution using a local optimizer");
 }

@@ -32,15 +32,12 @@ Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem
       k = 0;
       mCurrentPoint = mStartPoint;
       mCurrentResearchDirection = mStartPoint;
-      //std::memcpy(mCurrentPoint, mStartPoint, sizeof(double)*mDimension);
-      //std::memcpy(mCurrentResearchDirection, mStartPoint, sizeof(double)*mDimension);
       currentFValue = ComputeObjective(mCurrentPoint.y);
       needRestart = false;
     }
 
     std::swap(mPreviousResearchDirection, mCurrentResearchDirection);
     mCurrentResearchDirection = mCurrentPoint;
-    //std::memcpy(mCurrentResearchDirection, mCurrentPoint, sizeof(double)*mDimension);
     nextFValue = MakeResearch(mCurrentResearchDirection.y);
 
     if (currentFValue > nextFValue)	{
@@ -59,7 +56,6 @@ Trial HookeJeevesOptimizer::Optimize(std::shared_ptr<IGOProblem<double>> problem
       break;
   }
 
-  //std::memcpy(optimumPointEvaluation, mPreviousResearchDirection, sizeof(double)*mDimension);
   mPreviousResearchDirection.idx = 0;
   while (mPreviousResearchDirection.idx < mProblem->GetConstraintsNumber())
   {
@@ -129,8 +125,3 @@ double HookeJeevesOptimizer::MakeResearch(double* startPoint)
 
   return bestValue;
 }
-/*
-  mEps = 0.001;
-  mStep = 0.01;
-  mStepMultiplier = 2;
-*/

@@ -18,6 +18,7 @@ struct SolverParameters
   unsigned trialsLimit;
   unsigned evolventTightness = 12;
   double rEps = 0.;
+  bool refineSolution = false;
 
   SolverParameters() {}
   SolverParameters(double _eps, double _r,

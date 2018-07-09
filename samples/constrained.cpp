@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
                                      parser.get<int>("itersLimit"));
   parameters.rEps = parser.get<double>("reserves");
   parameters.evolventTightness = parser.get<int>("evolventTightness");
+  parameters.refineSolution = parser.exist("refineLoc");
 
   NLPSolver solver;
   solver.SetParameters(parameters);
@@ -26,8 +27,8 @@ int main(int argc, char* argv[])
     [](const double* x) {return 100 * (1 - pow(x[0] - 2, 2) / 1.44 - pow(0.5*x[1], 2));},
     [](const double* x) {return 10 * (x[1] - 1.5 - 1.5*sin(2*M_PI*(x[0] - 1.75)));},
     [](const double* x) {return -1.5*pow(x[0], 2) * exp(1 - pow(x[0], 2)
-				- 20.25*pow(x[0] - x[1], 2)) - pow(0.5 * (x[1] - 1)*(x[0]- 1), 4)
-				* exp(2 - pow(0.5 * (x[0] - 1), 4) - pow(x[1] - 1, 4));}
+        - 20.25*pow(x[0] - x[1], 2)) - pow(0.5 * (x[1] - 1)*(x[0]- 1), 4)
+        * exp(2 - pow(0.5 * (x[0] - 1), 4) - pow(x[1] - 1, 4));}
   }, {0, -1}, {4, 3});
 
   auto optimalPoint = solver.Solve();
@@ -62,4 +63,5 @@ void initParser(cmdline::parser& parser)
   parser.add<double>("accuracy", 'e', "accuracy of the method", false, 0.001);
   parser.add<double>("reserves", 'E', "eps-reserves for all constraints", false, 0.01);
   parser.add<int>("itersLimit", 'i', "limit of iterations for the method", false, 10000);
+  parser.add("refineLoc", 'l', "Refine the global solution using a local optimizer");
 }
