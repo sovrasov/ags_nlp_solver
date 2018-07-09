@@ -1,6 +1,7 @@
 #include "evolvent.hpp"
 #include <cassert>
 #include <cmath>
+#include <algorithm>
 
 void mapd(double x, int m, double* y, int n, int key = 1);    /* map x to y         */
 void invmad(int, double [], int, int *, double [], int, int);  /* map y to x         */
@@ -16,7 +17,7 @@ Evolvent::~Evolvent()
 {
 }
 
-Evolvent::Evolvent(int dimension, int tightness, double* lb, double* ub, MapType type)
+Evolvent::Evolvent(int dimension, int tightness, const double* lb, const double* ub, MapType type)
 {
   assert(tightness > 2);
 
@@ -24,6 +25,7 @@ Evolvent::Evolvent(int dimension, int tightness, double* lb, double* ub, MapType
   mTightness = tightness;
   mMapType = type;
 
+  p2.resize(mDimension);
   mShiftScalars.resize(mDimension);
   mRho.resize(mDimension);
   for (int i = 0; i < mDimension; i++)
@@ -48,41 +50,51 @@ Evolvent::Evolvent(int dimension, int tightness, double* lb, double* ub, MapType
   mIsInitialized = true;
 }
 
-void Evolvent::GetImage(double x, double y[]) const
+void Evolvent::TransformToStandardCube(const double *y, double *z)
+{
+  for (int i = 0; i < mDimension; i++)
+    z[i] = (y[i] - mShiftScalars[i]) / mRho[i];
+}
+
+void Evolvent::TransformToSearchDomain(const double *y, double *z)
+{
+  for (int i = 0; i < mDimension; i++)
+    z[i] = mRho[i]*y[i] + mShiftScalars[i];
+}
+
+void Evolvent::GetImage(double x, double y[])
 {
   if(mDimension != 1)
     mapd(x, mTightness, y, mDimension, mMapKey);
   else
     y[0] = x - 0.5;
 
-  for (int i = 0; i < mDimension; i++)
-    y[i] = mRho[i]*y[i] + mShiftScalars[i];
+  TransformToSearchDomain(y, y);
 }
 
-int Evolvent::GetAllPreimages(double * p, double xp[])
+int Evolvent::GetAllPreimages(const double *p, double xp[])
 {
   int preimNumber = 1;
+  TransformToStandardCube(p, p2.data());
   if(mMapType == Noninjective)
-    invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p, mDimension, 4);
+    invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p2.data(), mDimension, 4);
   else
-    xyd(xp, mTightness, p, mDimension);
+    xyd(xp, mTightness, p2.data(), mDimension);
 
   return preimNumber;
 }
-
-
-int n1, nexp, l, iq, iu[10], iv[10];
 
 void xyd(double *xx, int m, double y[], int n)
 {
   /* calculate preimage x  for nearest level  m center to y */
   /* (x - left boundary point of level m interval)          */
+  int n1, nexp, l, iq, iu[10], iv[10];
 
   double x, r1;
   double r;
   int iw[11];
   int i, j, it, is;
-  void numbr(int *);
+  void numbr(int *, const int, const int, int&, int*, int*);
 
   n1 = n - 1;
   for (nexp = 1, i = 0; i<n; i++) {
@@ -102,7 +114,7 @@ void xyd(double *xx, int m, double y[], int n)
     i = iu[0];
     iu[0] = iu[it];
     iu[it] = i;
-    numbr(&is);
+    numbr(&is, n1, nexp, l, iu, iv);
     i = iv[0];
     iv[0] = iv[it];
     iv[it] = i;
@@ -116,7 +128,7 @@ void xyd(double *xx, int m, double y[], int n)
   }
   *xx = x;
 }
-void numbr(int *iss)
+void numbr(int *iss, const int n1, const int nexp, int& l, int* iu, int* iv)
 {
   /* calculate s(u)=is,l(u)=l,v(u)=iv by u=iu */
 
