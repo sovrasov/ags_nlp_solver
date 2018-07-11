@@ -65,7 +65,7 @@ void NLPSolver::SetParameters(const SolverParameters& params)
 void NLPSolver::SetProblem(std::shared_ptr<IGOProblem<double>> problem)
 {
   mProblem = problem;
-  mLocalOptimizer.SetParameters(0.001, 0.01, 2);
+  InitLocalOptimizer();
 }
 
 void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
@@ -74,7 +74,7 @@ void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
   NLP_SOLVER_ASSERT(leftBound.size() == rightBound.size(), "Inconsistent dimensions of bounds");
   NLP_SOLVER_ASSERT(leftBound.size() > 0, "Zero problem dimension");
   mProblem = std::make_shared<ProblemInternal>(functions, leftBound, rightBound);
-  mLocalOptimizer.SetParameters(0.001, 0.01, 2);
+  InitLocalOptimizer();
 }
 
 std::vector<unsigned> NLPSolver::GetCalculationsStatistics() const
@@ -87,20 +87,35 @@ std::vector<double> NLPSolver::GetHolderConstantsEstimations() const
   return mHEstimations;
 }
 
+void NLPSolver::InitLocalOptimizer()
+{
+  std::vector<double> leftBound(mProblem->GetDimension());
+  std::vector<double> rightBound(mProblem->GetDimension());
+  mProblem->GetBounds(leftBound.data(), rightBound.data());
+
+  double maxSize = 0;
+  for(size_t i = 0; i < leftBound.size(); i++)
+    maxSize = std::max(rightBound[i] - leftBound[i], maxSize);
+
+  NLP_SOLVER_ASSERT(maxSize > 0, "Empty search domain");
+
+  mLocalOptimizer.SetParameters(maxSize / 1000, maxSize / 100, 2);
+}
+
 void NLPSolver::InitDataStructures()
 {
   double leftDomainBound[solverMaxDim], rightDomainBound[solverMaxDim];
   mProblem->GetBounds(leftDomainBound, rightDomainBound);
-  mEvolvent = Evolvent(mProblem->GetDimension(), mParameters.evolventTightness,
+  mEvolvent = Evolvent(mProblem->GetDimension(), mParameters.evolventDensity,
     leftDomainBound, rightDomainBound);
 
-  mNextPoints.resize(mParameters.numThreads);
+  mNextPoints.resize(mParameters.numPoints);
   mOptimumEstimation.idx = -1;
 
   mZEstimations.resize(mProblem->GetConstraintsNumber() + 1);
   std::fill(mZEstimations.begin(), mZEstimations.end(),
             std::numeric_limits<double>::max());
-  mNextIntervals.resize(mParameters.numThreads);
+  mNextIntervals.resize(mParameters.numPoints);
   mHEstimations.resize(mProblem->GetConstraintsNumber() + 1);
   std::fill(mHEstimations.begin(), mHEstimations.end(), 1.0);
   mCalculationsCounters.resize(mProblem->GetConstraintsNumber() + 1);
@@ -128,13 +143,13 @@ Trial NLPSolver::Solve()
   do {
     InsertIntervals();
     EstimateOptimum();
-    if (mNeedRefillQueue || mQueue.size() < mParameters.numThreads)
+    if (mNeedRefillQueue || mQueue.size() < mParameters.numPoints)
       RefillQueue();
     CalculateNextPoints();
     MakeTrials();
     needStop = mMinDelta < mParameters.eps;
     mIterationsCounter++;
-  } while(mIterationsCounter < mParameters.trialsLimit && !needStop);
+  } while(mIterationsCounter < mParameters.itersLimit && !needStop);
 
   ClearDataStructures();
 
@@ -155,21 +170,21 @@ void NLPSolver::FirstIteration()
   Trial rightBound = Trial(1.);
   rightBound.idx = -1;
 
-  for (size_t i = 1; i <= mParameters.numThreads; i++)
+  for (size_t i = 1; i <= mParameters.numPoints; i++)
   {
-    mNextPoints[i - 1] = Trial((double)i / (mParameters.numThreads + 1));
+    mNextPoints[i - 1] = Trial((double)i / (mParameters.numPoints + 1));
     mEvolvent.GetImage(mNextPoints[i - 1].x, mNextPoints[i - 1].y);
   }
 
   MakeTrials();
   EstimateOptimum();
 
-  for (size_t i = 0; i <= mParameters.numThreads; i++)
+  for (size_t i = 0; i <= mParameters.numPoints; i++)
   {
     Interval* pNewInterval;
     if (i == 0)
       pNewInterval = new Interval(leftBound, mNextPoints[i]);
-    else if (i == mParameters.numThreads)
+    else if (i == mParameters.numPoints)
       pNewInterval = new Interval(mNextPoints[i - 1], rightBound);
     else
       pNewInterval = new Interval(mNextPoints[i - 1], mNextPoints[i]);
@@ -204,7 +219,7 @@ void NLPSolver::MakeTrials()
     {
       mMaxIdx = idx;
       for(int i = 0; i < mMaxIdx; i++)
-        mZEstimations[i] = -mParameters.rEps*mHEstimations[i];
+        mZEstimations[i] = -mParameters.epsR*mHEstimations[i];
       mNeedRefillQueue = true;
     }
     if (idx == mProblem->GetConstraintsNumber())
@@ -224,7 +239,7 @@ void NLPSolver::MakeTrials()
 
 void NLPSolver::InsertIntervals()
 {
-  for (size_t i = 0; i < mParameters.numThreads; i++)
+  for (size_t i = 0; i < mParameters.numPoints; i++)
   {
     Interval* pOldInterval = mNextIntervals[i];
     Interval* pNewInterval = new Interval(mNextPoints[i], pOldInterval->pr);
@@ -256,7 +271,7 @@ void NLPSolver::InsertIntervals()
 
 void NLPSolver::CalculateNextPoints()
 {
-  for(size_t i = 0; i < mParameters.numThreads; i++)
+  for(size_t i = 0; i < mParameters.numPoints; i++)
   {
     mNextIntervals[i] = mQueue.top();
     mQueue.pop();

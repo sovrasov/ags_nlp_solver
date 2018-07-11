@@ -31,14 +31,11 @@ nmake
 
 /*.............................*/
 
-auto parameters = SolverParameters(0.001, //tolerance parameter eps
-                                   0.01, //reliability parameter r
-                                   1, //number of new points per iteration
-                                   5000); //max number of iterations
-parameters.rEps = 0.01; //
+auto parameters = SolverParameters()
+parameters.refineSolution = true; // refine solution with a local optimizer
 
 NLPSolver solver;
-solver.SetParameters(parameters);
+solver.SetParameters(SolverParameters());
 solver.SetProblem({
   [](const double* x) {return 0.01*(pow(x[0] - 2.2, 2) + pow(x[1] - 1.2, 2) - 2.25);},
   [](const double* x) {return 100 * (1 - pow(x[0] - 2, 2) / 1.44 - pow(0.5*x[1], 2));},

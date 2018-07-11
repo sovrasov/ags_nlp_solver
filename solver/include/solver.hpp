@@ -12,18 +12,20 @@
 
 struct SolverParameters
 {
-  double eps;
-  double r;
-  unsigned numThreads;
-  unsigned trialsLimit;
-  unsigned evolventTightness = 12;
-  double rEps = 0.;
-  bool refineSolution = false;
+  double eps = 0.01; //method tolerance. Less value -- better search precision, less probability of early stop.
+  double r = 3; //reliability parameter. Higher value of r -- slower convergence, higher chance to cache the global minima.
+  unsigned numPoints = 1; //number of new points per iteration. > 1 is useless in current implementation.
+  unsigned itersLimit = 20000; // max number of iterations.
+  unsigned evolventDensity = 12; // density of evolvent. By default density is 2^-12 on hybercube [0,1]^N,
+  // which means that maximum search accuracyis 2^-12. If search hypercube is large the density can be increased accordingly to achieve better accuracy.
+  double epsR = 0.001; // parameter which prevents method from paying too much attention to constraints. Greater values of this parameter speed up convergence,
+  // but global minima can be lost.
+  bool refineSolution = false; //if true, the fibal solution will be refined with the HookJeves method.
 
   SolverParameters() {}
   SolverParameters(double _eps, double _r,
-      unsigned _numThreads, unsigned _trialsLimit) :
-        eps(_eps), r(_r), numThreads(_numThreads), trialsLimit(_trialsLimit)
+      double epsR_, unsigned _trialsLimit) :
+        eps(_eps), r(_r), itersLimit(_trialsLimit), epsR(epsR_)
   {}
 };
 
@@ -53,6 +55,7 @@ protected:
   double mMinDelta;
   int mMaxIdx;
 
+  void InitLocalOptimizer();
   void FirstIteration();
   void MakeTrials();
   void InsertIntervals();

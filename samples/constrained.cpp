@@ -13,11 +13,12 @@ int main(int argc, char* argv[])
   initParser(parser);
   parser.parse_check(argc, argv);
 
-  auto parameters = SolverParameters(parser.get<double>("accuracy"),
-                                     parser.get<double>("reliability"), 1,
-                                     parser.get<int>("itersLimit"));
-  parameters.rEps = parser.get<double>("reserves");
-  parameters.evolventTightness = parser.get<int>("evolventTightness");
+  SolverParameters parameters;
+  parameters.eps = parser.get<double>("accuracy");
+  parameters.r = parser.get<double>("reliability");
+  parameters.itersLimit = parser.get<int>("itersLimit");
+  parameters.epsR = parser.get<double>("reserves");
+  parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
 
   NLPSolver solver;
@@ -56,7 +57,7 @@ int main(int argc, char* argv[])
 
 void initParser(cmdline::parser& parser)
 {
-  parser.add<int>("evolventTightness", 'm', "", false, 12,
+  parser.add<int>("evolventDensity", 'm', "", false, 12,
     cmdline::range(9, 16));
   parser.add<double>("reliability", 'r', "reliability parameter for the method",
     false, 3, cmdline::range(1., 1000.));
