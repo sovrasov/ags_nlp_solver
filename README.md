@@ -27,41 +27,54 @@ nmake
 
 ## Example of usage
 ```C++
+#define _USE_MATH_DEFINES
+#include <iostream>
+#include <cmath>
+
 #include "solver.hpp"
 
-/*.............................*/
-
-auto parameters = SolverParameters()
-parameters.refineSolution = true; // refine solution with a local optimizer
-
-NLPSolver solver;
-solver.SetParameters(SolverParameters());
-solver.SetProblem({
-  [](const double* x) {return 0.01*(pow(x[0] - 2.2, 2) + pow(x[1] - 1.2, 2) - 2.25);},
-  [](const double* x) {return 100 * (1 - pow(x[0] - 2, 2) / 1.44 - pow(0.5*x[1], 2));},
-  [](const double* x) {return 10 * (x[1] - 1.5 - 1.5*sin(2*M_PI*(x[0] - 1.75)));},
-  [](const double* x) {return -1.5*pow(x[0], 2) * exp(1 - pow(x[0], 2)
-      - 20.25*pow(x[0] - x[1], 2)) - pow(0.5 * (x[1] - 1)*(x[0]- 1), 4)
-      * exp(2 - pow(0.5 * (x[0] - 1), 4) - pow(x[1] - 1, 4));}
-}, {0, -1}, {4, 3});
-
-auto optimalPoint = solver.Solve();
-auto calcCounters = solver.GetCalculationsStatistics();
-auto holderConstEstimations = solver.GetHolderConstantsEstimations();
-
-for (size_t i = 0; i < calcCounters.size() - 1; i++)
-  std::cout << "Number of calculations of constraint # " << i << ": " << calcCounters[i] << "\n";
-std::cout << "Number of calculations of objective: " << calcCounters.back() << "\n";
-
-for (size_t i = 0; i < holderConstEstimations.size() - 1; i++)
-  std::cout << "Estimation of Holder constant of function # " << i << ": " << holderConstEstimations[i] << "\n";
-std::cout << "Estimation of Holder constant of objective: " << holderConstEstimations.back() << "\n";
-
-if (optimalPoint.idx < 3)
-  std::cout << "Feasible point not found" << "\n";
-else
+int main(int argc, char** argv)
 {
-  std::cout << "Optimal value: " << optimalPoint.g[optimalPoint.idx] << "\n";
-  std::cout << "x = " << optimalPoint.y[0] << " y = " << optimalPoint.y[1] << "\n";
+  auto parameters = SolverParameters();
+  parameters.refineSolution = true; // refine solution with a local optimizer
+
+  NLPSolver solver;
+  solver.SetParameters(parameters);
+  //First 3 functions -- nonlinear inequality constraints g_i(y)<=0
+  //Last function -- objective
+  solver.SetProblem({
+    [](const double* x) {return 0.01*(pow(x[0] - 2.2, 2) + pow(x[1] - 1.2, 2) - 2.25);},
+    [](const double* x) {return 100 * (1 - pow(x[0] - 2, 2) / 1.44 - pow(0.5*x[1], 2));},
+    [](const double* x) {return 10 * (x[1] - 1.5 - 1.5*sin(2*M_PI*(x[0] - 1.75)));},
+    [](const double* x) {return -1.5*pow(x[0], 2) * exp(1 - pow(x[0], 2)
+        - 20.25*pow(x[0] - x[1], 2)) - pow(0.5 * (x[1] - 1)*(x[0]- 1), 4)
+        * exp(2 - pow(0.5 * (x[0] - 1), 4) - pow(x[1] - 1, 4));}
+  }, {0, -1}, {4, 3});
+
+  auto optimalPoint = solver.Solve();
+  auto calcCounters = solver.GetCalculationsStatistics();
+  auto holderConstEstimations = solver.GetHolderConstantsEstimations();
+
+  for (size_t i = 0; i < calcCounters.size() - 1; i++)
+    std::cout << "Number of calculations of constraint # " << i << ": " << calcCounters[i] << "\n";
+  std::cout << "Number of calculations of objective: " << calcCounters.back() << "\n";
+
+  for (size_t i = 0; i < holderConstEstimations.size() - 1; i++)
+    std::cout << "Estimation of Holder constant of function # " << i << ": " << holderConstEstimations[i] << "\n";
+  std::cout << "Estimation of Holder constant of objective: " << holderConstEstimations.back() << "\n";
+
+
+  //Optimal point has it's index -- number of the first broken constraint
+  //If index equals to the number of constraints, then the point if feasible and
+  //objective was evaluated at this point. If the solver returned unfeasible
+  //optimal point, the set of feasible points is most likely to be empty.
+  if (optimalPoint.idx < 3)
+    std::cout << "Feasible point not found" << "\n";
+  else
+  {
+    std::cout << "Optimal value: " << optimalPoint.g[optimalPoint.idx] << "\n";
+    std::cout << "x = " << optimalPoint.y[0] << " y = " << optimalPoint.y[1] << "\n";
+  }
+  return 0;
 }
 ```
