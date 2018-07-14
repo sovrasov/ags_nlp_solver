@@ -65,6 +65,9 @@ void NLPSolver::SetParameters(const SolverParameters& params)
 void NLPSolver::SetProblem(std::shared_ptr<IGOProblem<double>> problem)
 {
   mProblem = problem;
+  NLP_SOLVER_ASSERT(mProblem->GetConstraintsNumber() <= solverMaxConstraints,
+                    "Current implementation supports up to " + std::to_string(solverMaxConstraints) +
+                    " nonlinear inequality constraints");
   InitLocalOptimizer();
 }
 
@@ -74,6 +77,9 @@ void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
   NLP_SOLVER_ASSERT(leftBound.size() == rightBound.size(), "Inconsistent dimensions of bounds");
   NLP_SOLVER_ASSERT(leftBound.size() > 0, "Zero problem dimension");
   mProblem = std::make_shared<ProblemInternal>(functions, leftBound, rightBound);
+  NLP_SOLVER_ASSERT(mProblem->GetConstraintsNumber() <= solverMaxConstraints,
+                    "Current implementation supports up to " + std::to_string(solverMaxConstraints) +
+                    " nonlinear inequality constraints");
   InitLocalOptimizer();
 }
 

@@ -7,7 +7,7 @@
 #define NLP_SOLVER_ASSERT(expr, msg) if(!(expr)) NLP_SOLVER_ERROR(msg)
 
 const unsigned solverMaxDim = 5;
-const unsigned solverMaxConstraints = 5;
+const unsigned solverMaxConstraints = 10;
 
 struct Trial
 {

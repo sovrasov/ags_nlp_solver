@@ -4,7 +4,7 @@ An implementation of the algorithm AGS to solve constrained nonlinear programmin
 
 AGS is proven to converge to a global optima if all objectives and constraints satisfy Lipschitz condition in a given hyperrectangle, the reliability parameter `r` is large enough and accuracy parameter `eps` is zero.
 
-## Clone & build
+## Clone & build, run samples
 - on Linux:
 ```bash
 git clone --recursive https://github.com/sovrasov/glob_search_nlp_solver.git
@@ -13,6 +13,8 @@ mkdir build
 cd build
 cmake ..
 make -j 4
+./bin/solve_constrained
+./bin/solve_set
 ```
 - on Windows:
 ```batch
@@ -22,6 +24,8 @@ mkdir build
 cd build
 cmake .. -G "NMake Makefiles"
 nmake
+.\bin\solve_constrained.exe
+.\bin\solve_set.exe
 ```
 [paper]: https://www.tandfonline.com/doi/abs/10.1080/17442508908833568?journalCode=gssr19
 
@@ -42,6 +46,7 @@ int main(int argc, char** argv)
   solver.SetParameters(parameters);
   //First 3 functions -- nonlinear inequality constraints g_i(y)<=0
   //Last function -- objective
+  //Last 2 arguments -- bounds of the search hyperrectangle
   solver.SetProblem({
     [](const double* x) {return 0.01*(pow(x[0] - 2.2, 2) + pow(x[1] - 1.2, 2) - 2.25);},
     [](const double* x) {return 100 * (1 - pow(x[0] - 2, 2) / 1.44 - pow(0.5*x[1], 2));},
