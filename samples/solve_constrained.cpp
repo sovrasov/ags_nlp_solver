@@ -5,6 +5,8 @@
 
 #include "solver.hpp"
 
+using namespace ags;
+
 void initParser(cmdline::parser& parser);
 
 int main(int argc, char* argv[])

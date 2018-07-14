@@ -1,11 +1,22 @@
+/*
+Copyright (C) 2018 Sovrasov V. - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+*/
 #pragma once
+
 #include <vector>
 
-#define MAX_PREIMAGES 32
+namespace ags
+{
 
 enum MapType {
   Simple = 1, Linear = 2, Noninjective = 3
 };
+
+constexpr int noninjectiveMaxPreimages = 32;
 
 class Evolvent
 {
@@ -33,3 +44,5 @@ public:
   virtual void GetImage(double x, double y[]);
   virtual int GetAllPreimages(const double* p, double xp[]);
 };
+
+}

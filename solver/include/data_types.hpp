@@ -1,3 +1,10 @@
+/*
+Copyright (C) 2018 Sovrasov V. - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+*/
 #pragma once
 
 #include <stdexcept>
@@ -5,6 +12,9 @@
 
 #define NLP_SOLVER_ERROR(msg) throw std::runtime_error(std::string(msg))
 #define NLP_SOLVER_ASSERT(expr, msg) if(!(expr)) NLP_SOLVER_ERROR(msg)
+
+namespace ags
+{
 
 const unsigned solverMaxDim = 5;
 const unsigned solverMaxConstraints = 10;
@@ -45,3 +55,5 @@ public:
     return i1->R < i2->R;
   }
 };
+
+}

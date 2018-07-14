@@ -10,6 +10,8 @@
 
 #include "solver.hpp"
 
+using namespace ags;
+
 void saveStatistics(const std::vector<std::vector<unsigned>>& stat, const cmdline::parser& parser);
 void initParser(cmdline::parser& parser);
 

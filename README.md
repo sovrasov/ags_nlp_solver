@@ -37,6 +37,8 @@ nmake
 
 #include "solver.hpp"
 
+using namespace ags;
+
 int main(int argc, char** argv)
 {
   auto parameters = SolverParameters();

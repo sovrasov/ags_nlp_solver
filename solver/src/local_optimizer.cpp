@@ -1,9 +1,17 @@
+/*
+Copyright (C) 2018 Sovrasov V. - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+*/
 #include "local_optimizer.hpp"
 
 #include <cmath>
 #include <algorithm>
 #include <limits>
-#include<iostream>
+
+using namespace ags;
 
 #define MAX_LOCAL_ITERATIONS_NUMBER 20
 

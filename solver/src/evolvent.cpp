@@ -1,12 +1,20 @@
+/*
+Copyright (C) 2018 Sovrasov V. - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+*/
 #include "evolvent.hpp"
 #include <cassert>
 #include <cmath>
 #include <algorithm>
 
+using namespace ags;
+
 void mapd(double x, int m, double* y, int n, int key = 1);    /* map x to y         */
 void invmad(int, double [], int, int *, double [], int, int);  /* map y to x         */
 void xyd(double *xx, int m, double y[], int n);        /* get preimage       */
-
 
 Evolvent::Evolvent()
 {
@@ -77,7 +85,7 @@ int Evolvent::GetAllPreimages(const double *p, double xp[])
   int preimNumber = 1;
   TransformToStandardCube(p, p2.data());
   if(mMapType == Noninjective)
-    invmad(mTightness, xp, MAX_PREIMAGES, &preimNumber, p2.data(), mDimension, 4);
+    invmad(mTightness, xp, noninjectiveMaxPreimages, &preimNumber, p2.data(), mDimension, 4);
   else
     xyd(xp, mTightness, p2.data(), mDimension);
 
@@ -88,7 +96,7 @@ void xyd(double *xx, int m, double y[], int n)
 {
   /* calculate preimage x  for nearest level  m center to y */
   /* (x - left boundary point of level m interval)          */
-  int n1, nexp, l, iq, iu[10], iv[10];
+  int n1, nexp, l, iu[10], iv[10];
 
   double x, r1;
   double r;

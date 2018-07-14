@@ -1,3 +1,10 @@
+/*
+Copyright (C) 2018 Sovrasov V. - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+*/
 #pragma once
 
 #include "data_types.hpp"
@@ -5,6 +12,9 @@
 
 #include <memory>
 #include <vector>
+
+namespace ags
+{
 
 class HookeJeevesOptimizer
 {
@@ -31,3 +41,5 @@ public:
   Trial Optimize(std::shared_ptr<IGOProblem<double>> problem,
                  const Trial& startPoint, std::vector<unsigned>& trialsCounters);
 };
+
+}
