@@ -36,7 +36,7 @@ int main(int argc, char** argv)
   double objectiveAvgConst = 0.;
   double solutionCheckAcc = 3*parser.get<double>("accuracy");
 
-//#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < 100; i++)
   {
     std::shared_ptr<IGOProblem<double>> problem;
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     {
       std::cout << "Exception in solver! " << std::string(err.what()) << "\n";
     }
-//#pragma omp critical
+#pragma omp critical
     {
       allStatistics.push_back(solver.GetCalculationsStatistics());
       objectiveAvgConst += solver.GetHolderConstantsEstimations().back();
