@@ -212,6 +212,7 @@ void NLPSolver::FirstIteration()
   RefillQueue();
   CalculateNextPoints();
   MakeTrials();
+  mIterationsCounter += 2;
 }
 
 void NLPSolver::MakeTrials()
