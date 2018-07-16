@@ -19,4 +19,5 @@ target_link_libraries(solve_constrained nlp_solver gkls_functions grishagin_func
 
 if (${OPENMP_FOUND})
   set_target_properties(solve_set PROPERTIES COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
+  target_link_libraries(solve_set ${OpenMP_CXX_LIBRARIES})
 endif()
