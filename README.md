@@ -8,7 +8,7 @@ AGS is proven to converge to a global optima if all objectives and constraints s
 - on Linux:
 ```bash
 git clone --recursive https://github.com/sovrasov/glob_search_nlp_solver.git
-cd multicriterial-go
+cd glob_search_nlp_solver
 mkdir build
 cd build
 cmake ..
@@ -19,7 +19,7 @@ make -j 4
 - on Windows:
 ```batch
 git clone --recursive https://github.com/sovrasov/glob_search_nlp_solver.git
-cd multicriterial-go
+cd glob_search_nlp_solver
 mkdir build
 cd build
 cmake .. -G "NMake Makefiles"
