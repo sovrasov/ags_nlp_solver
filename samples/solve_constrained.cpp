@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
   parameters.epsR = parser.get<double>("reserves");
   parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
-  parameters.stopVal = -1.45;
 
   NLPSolver solver;
   solver.SetParameters(parameters);
