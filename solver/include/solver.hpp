@@ -17,6 +17,7 @@ Copyright (C) 2018 Sovrasov V. - All Rights Reserved
 #include <queue>
 #include <set>
 #include <limits>
+#include <functional>
 
 namespace ags
 {
@@ -93,6 +94,7 @@ public:
   void SetProblem(const std::vector<FuncPtr>& functions,
                   const std::vector<double>& leftBound, const std::vector<double>& rightBound);
 
+  Trial Solve(std::function<bool(const Trial&)> external_stop);
   Trial Solve();
   std::vector<unsigned> GetCalculationsStatistics() const;
   std::vector<double> GetHolderConstantsEstimations() const;

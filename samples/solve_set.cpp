@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include <memory>
+#include <cmath>
 
 #include <gkls_function.hpp>
 #include <grishagin_function.hpp>
@@ -22,11 +23,13 @@ int main(int argc, char** argv)
   parser.parse_check(argc, argv);
 
   SolverParameters parameters;
-  parameters.eps = parser.get<double>("accuracy");
+  double eps = parser.get<double>("accuracy");
   parameters.r = parser.get<double>("reliability");
   parameters.itersLimit = parser.get<int>("itersLimit");
   parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
+  bool stop_by_acc = parser.exist("accuracyStop");
+  parameters.eps = stop_by_acc ? eps : 0.;
 
   std::string problemClass = parser.get<std::string>("problemsClass");
 
@@ -34,7 +37,7 @@ int main(int argc, char** argv)
   std::vector<std::vector<unsigned>> allStatistics;
 
   double objectiveAvgConst = 0.;
-  double solutionCheckAcc = 3*parser.get<double>("accuracy");
+  double solutionCheckAcc = 0.01;
 
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < 100; i++)
@@ -65,7 +68,21 @@ int main(int argc, char** argv)
     Trial optimalPoint;
     try
     {
-      optimalPoint = solver.Solve();
+      if (stop_by_acc)
+        optimalPoint = solver.Solve();
+      else
+      {
+        std::vector<double> opt(problem->GetDimension());
+        problem->GetOptimumPoint(opt.data());
+        auto stop_criterion = [&opt, eps](const Trial& estimation)
+        {
+          for(size_t i = 0; i < opt.size(); i++)
+            if (fabs(opt[i] - estimation.y[i]) > eps)
+              return false;
+          return true;
+        };
+        optimalPoint = solver.Solve(stop_criterion);
+      }
     }
     catch (const std::runtime_error& err)
     {
@@ -175,6 +192,7 @@ void initParser(cmdline::parser& parser)
     "gklsS", cmdline::oneof<std::string>("gklsS", "gklsH", "grish"));
   parser.add<std::string>("outFile", 'f', "Name of the output .csv file with statistics", false,
     "");
+  parser.add("accuracyStop", 'a', "Use native stop criterion instead of checking known optimum");
   parser.add("saveStat", 's', "Save statistics in a .csv file");
   parser.add("refineLoc", 'l', "Refine the global solution using a local optimizer");
 }
