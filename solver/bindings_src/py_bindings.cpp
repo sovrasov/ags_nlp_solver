@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 
 #include "solver.hpp"
+#include "problem_wrapper.hpp"
 
 namespace py = pybind11;
 
@@ -17,6 +18,22 @@ public:
   void SetParameters(const ags::SolverParameters& params)
   {
     mSolver.SetParameters(params);
+  }
+
+  void SetProblem(const GOTestProblemWrapper<double>& problem)
+  {
+    std::vector<ags::NLPSolver::FuncPtr> functions;
+    for (int i = 0; i < problem.GetConstraintsNumber() + 1; i++)
+    {
+      functions.push_back([&problem, i](const double* y)
+      {
+        return problem.GetSourcePtr()->Calculate(y, i);
+      }
+      );
+    }
+    mDimension = problem.GetDimension();
+    auto bounds = problem.GetBounds();
+    mSolver.SetProblem(functions, bounds.first, bounds.second);
   }
 
   void SetProblem(const std::vector<py::function> py_functions,
@@ -91,6 +108,8 @@ PYBIND11_MODULE(ags_solver, m)
       .def("SetParameters", &AGSPyWrapper::SetParameters)
       .def("Solve", (std::tuple<std::vector<double>, double, int> (AGSPyWrapper::*)()) &AGSPyWrapper::Solve)
       .def("Solve", (std::tuple<std::vector<double>, double, int> (AGSPyWrapper::*)(py::function)) &AGSPyWrapper::Solve)
-      .def("SetProblem", &AGSPyWrapper::SetProblem)
+      .def("SetProblem", (void (AGSPyWrapper::*)(const std::vector<py::function> py_functions,
+                      const std::vector<double> leftBound, const std::vector<double> rightBound)) &AGSPyWrapper::SetProblem)
+                      .def("SetProblem", (void (AGSPyWrapper::*)(const GOTestProblemWrapper<double>&)) &AGSPyWrapper::SetProblem)
       ;
 }
