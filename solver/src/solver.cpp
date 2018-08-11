@@ -85,6 +85,7 @@ void NLPSolver::SetProblem(const std::vector<FuncPtr>& functions,
 {
   NLP_SOLVER_ASSERT(leftBound.size() == rightBound.size(), "Inconsistent dimensions of bounds");
   NLP_SOLVER_ASSERT(leftBound.size() > 0, "Zero problem dimension");
+  NLP_SOLVER_ASSERT(functions.size() > 0, "Missing objective function");
   mProblem = std::make_shared<ProblemInternal>(functions, leftBound, rightBound);
   NLP_SOLVER_ASSERT(mProblem->GetConstraintsNumber() <= solverMaxConstraints,
                     "Current implementation supports up to " + std::to_string(solverMaxConstraints) +

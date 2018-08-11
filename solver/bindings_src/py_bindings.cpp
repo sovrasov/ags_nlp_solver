@@ -5,37 +5,44 @@
 
 namespace py = pybind11;
 
-void call_python_func(py::function func)
-{
-  std::vector<double> x = {0, .25};
-  py::object result_py = func(x);
-  double result = result_py.cast<double>();
-  std::cout << result << '\n';
-}
-
 class AGSPyWrapper
 {
 private:
   ags::NLPSolver mSolver;
+  int mDimension;
 
 public:
-  AGSPyWrapper() {}
+  AGSPyWrapper() : mDimension(0) {}
 
   void SetParameters(const ags::SolverParameters& params)
   {
     mSolver.SetParameters(params);
   }
 
-  void SetProblem(const std::vector<py::function> functions,
+  void SetProblem(const std::vector<py::function> py_functions,
                   const std::vector<double> leftBound, const std::vector<double> rightBound)
   {
-
+    std::vector<ags::NLPSolver::FuncPtr> functions;
+    size_t dim = leftBound.size();
+    for (const auto& py_f : py_functions)
+    {
+      functions.push_back([py_f, dim](const double* y)
+      {
+        std::vector<double> y_vec(y, y + dim);
+        py::object result_py = py_f(y_vec);
+        return result_py.cast<double>();
+      }
+      );
+    }
+    mDimension = static_cast<int>(dim);
+    mSolver.SetProblem(functions, leftBound, rightBound);
   }
 
   std::tuple<std::vector<double>, double, int> Solve()
   {
     ags::Trial result = mSolver.Solve();
-
+    std::vector<double> point(result.y, result.y + mDimension);
+    return std::make_tuple(point, result.g[result.idx], result.idx);
   }
 
   std::vector<unsigned> GetCalculationsStatistics() const
@@ -51,9 +58,7 @@ public:
 
 PYBIND11_MODULE(ags_solver, m)
 {
-  m.def("call_python_func", &call_python_func);
-
-  py::class_<ags::SolverParameters>(m, "AGSParameters")
+  py::class_<ags::SolverParameters>(m, "Parameters")
     .def(py::init<>())
     .def_readwrite("eps", &ags::SolverParameters::eps)
     .def_readwrite("stopVal", &ags::SolverParameters::stopVal)
@@ -68,5 +73,9 @@ PYBIND11_MODULE(ags_solver, m)
     py::class_<AGSPyWrapper>(m, "Solver")
       .def(py::init<>())
       .def("GetHolderConstantsEstimations", &AGSPyWrapper::GetHolderConstantsEstimations)
+      .def("GetCalculationsStatistics", &AGSPyWrapper::GetCalculationsStatistics)
+      .def("SetParameters", &AGSPyWrapper::SetParameters)
+      .def("Solve", &AGSPyWrapper::Solve)
+      .def("SetProblem", &AGSPyWrapper::SetProblem)
       ;
 }

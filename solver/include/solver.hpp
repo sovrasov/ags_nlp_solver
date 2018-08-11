@@ -86,7 +86,7 @@ protected:
   double GetNextPointCoordinate(Interval*) const;
 
 public:
-  using FuncPtr = double(*)(const double*);
+  using FuncPtr = std::function<double(const double*)>;
   NLPSolver();
 
   void SetParameters(const SolverParameters& params);
