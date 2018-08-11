@@ -31,7 +31,22 @@ nmake
 ```
 [paper]: https://www.tandfonline.com/doi/abs/10.1080/17442508908833568?journalCode=gssr19
 
-## Example of usage
+## Python bindings
+
+AGS is also available from Python. To build the bindings add the following commands to cmake call:
+```bash
+ cmake .. -DBUILD_BINDINGS=ON -DPYBIND11_PYTHON_VERSION=<required python version>
+```
+If `PYBIND11_PYTHON_VERSION` is not specified, bindings would be built for the latest found Python version.
+Running python example (on Linux):
+```bash
+cd build
+export PYTHONPATH=./bin
+python ../samples/python/solve_constrained.py
+```
+
+
+## Example of usage (C++)
 ```C++
 #define _USE_MATH_DEFINES
 #include <iostream>
