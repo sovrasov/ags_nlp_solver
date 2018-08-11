@@ -15,7 +15,6 @@ def obj_f(x):
 
 bounds = [[0, -1], [4, 3]]
 
-
 def main(args):
     params = ags_solver.Parameters()
     params.eps = args.eps

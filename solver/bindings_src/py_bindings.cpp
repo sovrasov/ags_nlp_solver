@@ -45,6 +45,20 @@ public:
     return std::make_tuple(point, result.g[result.idx], result.idx);
   }
 
+  std::tuple<std::vector<double>, double, int> Solve(py::function custom_stop)
+  {
+    auto stop_criterion = [&custom_stop, this](const ags::Trial& estimation)
+    {
+      std::vector<double> point(estimation.y, estimation.y + this->mDimension);
+      py::object result_py = custom_stop(point);
+      return result_py.cast<bool>();
+    };
+
+    ags::Trial result = mSolver.Solve(stop_criterion);
+    std::vector<double> point(result.y, result.y + mDimension);
+    return std::make_tuple(point, result.g[result.idx], result.idx);
+  }
+
   std::vector<unsigned> GetCalculationsStatistics() const
   {
     return mSolver.GetCalculationsStatistics();
@@ -75,7 +89,8 @@ PYBIND11_MODULE(ags_solver, m)
       .def("GetHolderConstantsEstimations", &AGSPyWrapper::GetHolderConstantsEstimations)
       .def("GetCalculationsStatistics", &AGSPyWrapper::GetCalculationsStatistics)
       .def("SetParameters", &AGSPyWrapper::SetParameters)
-      .def("Solve", &AGSPyWrapper::Solve)
+      .def("Solve", (std::tuple<std::vector<double>, double, int> (AGSPyWrapper::*)()) &AGSPyWrapper::Solve)
+      .def("Solve", (std::tuple<std::vector<double>, double, int> (AGSPyWrapper::*)(py::function)) &AGSPyWrapper::Solve)
       .def("SetProblem", &AGSPyWrapper::SetProblem)
       ;
 }
