@@ -4,8 +4,6 @@ from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
 from benchmark_tools.stats import save_stats, compute_stats
 
-import numpy as np
-
 class AGSWrapper(Solver):
     def __init__(self, solver):
         self.solver = solver
@@ -19,14 +17,21 @@ class AGSWrapper(Solver):
 def main():
 
     params = ags_solver.Parameters()
+    params.eps = 0.001
     solver = ags_solver.Solver()
     solver.SetParameters(params)
 
     problems = GrishClass()
-    calc_stats, num_solved = solve_class(problems, AGSWrapper(solver))
-    cmc_curve, avg_calculations = compute_stats(calc_stats)
-    plot_cmc(cmc_curve)
-    save_stats(cmc_curve, avg_calculations)
+    calc_stats, solved_status = solve_class(problems, AGSWrapper(solver))
+    cmc_curve, avg_calculations, num_solved = compute_stats(calc_stats, solved_status)
+
+    print('Problems solved: {}'.format(num_solved))
+    for i, avg in enumerate(avg_calculations[:-1]):
+        print('Average number of calculations of constraint #{}: {}'.format(i, avg))
+    print('Average number of calculations of objective: {}'.format(avg_calculations[-1]))
+
+    plot_cmcs([cmc_curve], show=True, filename='')
+    #save_stats(cmc_curve, avg_calculations)
 
 if __name__ == '__main__':
     main()
