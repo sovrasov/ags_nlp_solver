@@ -60,6 +60,7 @@ int main(int argc, char** argv)
 {
   auto parameters = SolverParameters();
   parameters.refineSolution = true; // refine solution with a local optimizer
+  parameters.epsR = 0.1
 
   NLPSolver solver;
   solver.SetParameters(parameters);
@@ -102,3 +103,6 @@ int main(int argc, char** argv)
   return 0;
 }
 ```
+
+Visualization of the obtained solution:
+![contours](samples/pics/contours.png)
