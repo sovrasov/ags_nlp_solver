@@ -44,15 +44,15 @@ def main(args):
             problems = GKLSClass(args.problems_dim, go_problems.GKLSClass.Hard)
 
     calc_stats, solved_status = solve_class(problems, AGSWrapper(solver, args.dist_stop), verbose=args.verbose)
-    cmc_curve, avg_calculations, num_solved = compute_stats(calc_stats, solved_status)
+    stats = compute_stats(calc_stats, solved_status)
 
-    print('Problems solved: {}'.format(num_solved))
-    for i, avg in enumerate(avg_calculations[:-1]):
+    print('Problems solved: {}'.format(stats['num_solved']))
+    for i, avg in enumerate(stats['avg_calcs'][:-1]):
         print('Average number of calculations of constraint #{}: {}'.format(i, avg))
-    print('Average number of calculations of objective: {}'.format(avg_calculations[-1]))
+    print('Average number of calculations of objective: {}'.format(stats['avg_calcs'][-1]))
 
-    plot_cmcs([cmc_curve], captures=['AGS'], show=False, filename=args.stats_fname)
-    save_stats(cmc_curve, avg_calculations, args.cmc_fname, capture='AGS')
+    plot_cmcs([stats['cmc']], captures=['AGS'], show=False, filename=args.stats_fname)
+    save_stats(stats, args.cmc_fname, capture='AGS')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sample for AGS solver')
