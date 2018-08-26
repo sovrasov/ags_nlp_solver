@@ -28,7 +28,8 @@ class _Simplex:
         return self.acquisitionValue < other.acquisitionValue
 
 class SimpleTuner:
-    def __init__(self, startSimplices, objectiveFunction, exploration_preference=0.15):
+    def __init__(self, startSimplices, objectiveFunction, exploration_preference=0.15, \
+                 stop_criterion=lambda x: False):
         self.__startSimplices = numpy.array(startSimplices)
         self.__numberOfStartSimplices = startSimplices.shape[0]
         self.__numberOfVertices = startSimplices.shape[1]
@@ -41,9 +42,11 @@ class SimpleTuner:
         self.minValue = None
         self.bestCoords = []
         self.opportunityCostFactor = exploration_preference #/ self.__numberOfVertices
+        self.stop_criterion = stop_criterion
 
 
     def optimize(self, maxSteps=10):
+        self.stop = False
         for i, simplex in enumerate(self.__startSimplices):
             for j in range(self.__numberOfVertices):
                 testPoint = list(simplex[j])
@@ -56,6 +59,8 @@ class SimpleTuner:
             heappush(self.queue, initialSimplex)
 
         for step in range(maxSteps - self.iterations):
+            if self.stop:
+                break
             #print(self.maxValue, self.iterations, self.bestCoords)
             if len(self.queue) > self.__numberOfStartSimplices - 1:
                 targetSimplex = self.__getNextSimplex()
@@ -102,6 +107,10 @@ class SimpleTuner:
     def __makeSimplex(self, pointIndices, contentFraction):
         vertexMatrix = self.testPoints[pointIndices]
         coordMatrix = vertexMatrix[:, 0:-1]
+
+        for point in coordMatrix:
+            self.stop = self.stop_criterion(point)
+
         barycenterLocation = numpy.sum(vertexMatrix, axis=0) / self.__numberOfVertices
 
         differences = coordMatrix - barycenterLocation[0:-1]

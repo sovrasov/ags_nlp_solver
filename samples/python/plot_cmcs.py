@@ -5,7 +5,7 @@ from benchmark_tools.plot import plot_cmcs
 from benchmark_tools.stats import load_stats, compute_stats
 
 def main(args):
-    source_files = glob.glob(os.path.join(args.stats_folder, '*.json'))
+    source_files = sorted(glob.glob(os.path.join(args.stats_folder, '*.json')))
     all_stats = [load_stats(file) for file in source_files]
     captures = [item['capture'] for item in all_stats]
     iters = [item['calc_counters'][-1] for item in all_stats]

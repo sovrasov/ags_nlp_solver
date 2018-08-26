@@ -5,11 +5,10 @@ import ags_solver
 import go_problems
 import nlopt
 import sys
-sys.path.append('./')
+sys.path.append('../samples/python')
 from Simple import SimpleTuner
 import itertools
 from scipy.spatial import Delaunay
-
 from scipy.optimize import differential_evolution
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
@@ -17,53 +16,70 @@ from benchmark_tools.plot import plot_cmcs
 from benchmark_tools.stats import save_stats, compute_stats
 
 class AGSWrapper(Solver):
-    def __init__(self, dist_stop, eps=0.01):
-        params = ags_solver.Parameters()
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        params = self.class_name2params(class_name)
         if dist_stop:
             params.eps = 0
-            params.r = 4.4
-            params.itersLimit = 40000
+            params.itersLimit = max_iters
         self.solver = ags_solver.Solver()
         self.solver.SetParameters(params)
         self.dist_stop = dist_stop
         self.eps = eps
 
+    def class_name2params(self, name):
+        params = ags_solver.Parameters()
+        if 'grish' in name:
+            params.r = 3
+        elif 'gklss2' in name:
+            params.r = 4.6
+        elif 'gklsh2' in name:
+            params.r = 6.5
+        elif 'gklss3' in name:
+            params.r = 3.7
+        elif 'gklsh3' in name:
+            params.r = 4.4
+        elif 'gklss4' in name:
+            params.r = 4.7
+        elif 'gklsh4' in name:
+            params.r = 4.4
+        return params
+
     def Solve(self, problem):
-        self.solver.SetProblem(problem)
+        self.solver.SetProblem([lambda x: problem.Calculate(x)], *problem.GetBounds())
+        #self.solver.SetProblem(problem)
         if not self.dist_stop:
             point, val, idx = self.solver.Solve()
         else:
             opt_pt = np.array(problem.GetOptimumPoint())
-            point, val, idx = self.solver.Solve(lambda x: np.linalg.norm(x-opt_pt, np.inf) < self.eps)
-        calcCounters = self.solver.GetCalculationsStatistics()
+            point, val, idx = self.solver.Solve(lambda x: np.linalg.norm(np.array(x)-opt_pt, np.inf) < self.eps)
+        #calcCounters = self.solver.GetCalculationsStatistics()
+        calcCounters = problem.GetCalculationsStatistics()
         return point, val, calcCounters
 
 class SCDEWrapper(Solver):
-    def __init__(self, dist_stop, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
         self.dist_stop = dist_stop
         self.eps = eps
+        self.max_iters = max_iters
 
     def Solve(self, problem):
-        if self.dist_stop:
-            problem.SetEps(self.eps)
         lb, ub = problem.GetBounds()
         bounds = [(l, u) for l, u in zip(lb, ub)]
+        pop_size = 60
         result = \
             differential_evolution(
             lambda x: problem.Calculate(x), bounds, mutation=(1.1,1.9),
-            tol=1e-3, maxiter=3000, popsize=60, disp=False, seed=100)
+            tol=1e-12, maxiter=int(float(self.max_iters) / (pop_size*problem.GetDimension())), popsize=pop_size, disp=False, seed=100)
 
         n_evals = problem.GetCalculationsStatistics()
         return result.x, result.fun, n_evals
 
 class PyEvolveWrapper(Solver):
-    def __init__(self, dist_stop, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
         self.dist_stop = dist_stop
         self.eps = eps
 
     def Solve(self, problem):
-        if self.dist_stop:
-            problem.SetEps(self.eps)
         lb, ub = problem.GetBounds()
 
         # Genome instance
@@ -95,7 +111,7 @@ class PyEvolveWrapper(Solver):
 
 from bayes_opt import BayesianOptimization
 class BOptWrapper:
-    def __init__(self, dist_stop, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
         self.dist_stop = dist_stop
         self.eps = eps
 
@@ -110,52 +126,84 @@ class BOptWrapper:
         return opt_point, opt_val, n_evals
 
 class SimpleWrapper:
-    def __init__(self, dist_stop, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
         self.dist_stop = dist_stop
         self.eps = eps
+        self.max_iters = max_iters
+        self.exploration = self.class_name2params(class_name)
+
+    def class_name2params(self, name):
+        if 'grish' in name:
+            return 0.1
+        elif 'gklss2' in name:
+            return 0.15
+        elif 'gklsh2' in name:
+            return 0.15
+        elif 'gklss3' in name:
+            return 0.15
+        elif 'gklsh3' in name:
+            return 0.25
+        elif 'gklss4' in name:
+            return 0.2
+        elif 'gklsh4' in name:
+            return 0.25
 
     def Solve(self, problem):
-        if self.dist_stop:
-            problem.SetEps(self.eps)
         objective_function = lambda x: -problem.Calculate(x)
         lb, ub = problem.GetBounds()
+        opt_pt = problem.GetOptimumPoint()
         bounds = [[l, u] for l, u in zip(lb, ub)]
         points = np.array([point for point in itertools.product(*bounds)])
         tri = Delaunay(points)
         optimization_domain_vertices = points[tri.simplices]
-        number_of_iterations = 40000
-        exploration = 0.1 # optional, default 0.15
-        tuner = SimpleTuner(optimization_domain_vertices, objective_function, exploration_preference=exploration)
-        tuner.optimize(number_of_iterations)
+        exploration = self.exploration # optional, default 0.15
+        tuner = SimpleTuner(optimization_domain_vertices, objective_function, \
+                exploration_preference=exploration,
+                stop_criterion=lambda x:np.linalg.norm(np.array(x)-opt_pt, np.inf) < self.eps)
+        tuner.optimize(self.max_iters)
         opt_val, opt_point = tuner.get_best()
-        print(-opt_val)
         #tuner.plot() # only works in 2D
         n_evals = problem.GetCalculationsStatistics()
         return opt_point, -opt_val, n_evals
 
 class NLOptWrapper:
-    def __init__(self, dist_stop, method=nlopt.GD_STOGO, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, method=nlopt.GD_STOGO, eps=0.01):
         self.dist_stop = dist_stop
         self.eps = eps
         self.method = method
+        self.max_iters = max_iters
+        self.pop_size = self.class_name2params(class_name)
+
+    def class_name2params(self, name):
+        if 'grish' in name:
+            popsize = 150
+        elif 'gklss2' in name:
+            popsize = 200
+        elif 'gklsh2' in name:
+            popsize = 400
+        elif 'gklss3' in name:
+            popsize = 1000
+        elif 'gklsh3' in name:
+            popsize = 2000
+        elif 'gklss4' in name:
+            popsize = 8000
+        elif 'gklsh4' in name:
+            popsize = 10000
+        return popsize
 
     def Solve(self, problem):
-        if self.dist_stop:
-            problem.SetEps(self.eps)
         lb, ub = problem.GetBounds()
-
         self.opt = nlopt.opt(self.method, problem.GetDimension())
         self.opt.set_local_optimizer(nlopt.opt(nlopt.LN_SBPLX, problem.GetDimension()))
         self.opt.set_lower_bounds(lb)
         self.opt.set_upper_bounds(ub)
         self.opt.set_min_objective(lambda x, grad: problem.Calculate(x))
-        self.opt.set_maxeval(60000)
+        self.opt.set_maxeval(self.max_iters)
         self.opt.set_xtol_rel(1e-13)
-        #self.opt.set_population(5000)
-
+        if self.method == nlopt.GN_CRS2_LM:
+            self.opt.set_population(self.pop_size)
         x = self.opt.optimize([.5]*problem.GetDimension())
         minf = self.opt.last_optimum_value()
-
         n_evals = problem.GetCalculationsStatistics()
         return x, minf, n_evals
 
@@ -187,7 +235,7 @@ def algo2cature(algo):
 
 def main(args):
 
-    wrapper = algos[args.algo]
+    wrapper_class = algos[args.algo]
 
     if args.problems_class == 'grish':
         problems = GrishClass()
@@ -198,7 +246,8 @@ def main(args):
         else:
             problems = GKLSClass(args.problems_dim, go_problems.GKLSClass.Hard)
 
-    calc_stats, solved_status = solve_class(problems, wrapper(args.dist_stop), verbose=args.verbose, eps_check=0.01)
+    wrapper = wrapper_class(args.dist_stop, args.max_iters, args.problems_class+str(args.problems_dim), eps=0.01)
+    calc_stats, solved_status = solve_class(problems, wrapper, verbose=args.verbose, eps_check=0.01)
     stats = compute_stats(calc_stats, solved_status)
 
     print('Problems solved: {}'.format(stats['num_solved']))
@@ -206,7 +255,7 @@ def main(args):
         print('Average number of calculations of constraint #{}: {}'.format(i, avg))
     print('Average number of calculations of objective: {}'.format(stats['avg_calcs'][-1]))
 
-    plot_cmcs([stats['cmc']], captures=[algo2cature(args.algo)], show=True, filename='')
+    #plot_cmcs([stats['cmc']], captures=[algo2cature(args.algo)], show=True, filename='')
     save_stats(stats, args.stats_fname, capture=algo2cature(args.algo))
 
 if __name__ == '__main__':
