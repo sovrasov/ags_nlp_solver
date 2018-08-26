@@ -41,7 +41,7 @@ class AGSWrapper(Solver):
         elif 'gklss4' in name:
             params.r = 4.7
         elif 'gklsh4' in name:
-            params.r = 4.4
+            params.r = 4.9
         return params
 
     def Solve(self, problem):
@@ -188,7 +188,7 @@ class NLOptWrapper:
         elif 'gklss4' in name:
             popsize = 8000
         elif 'gklsh4' in name:
-            popsize = 10000
+            popsize = 16000
         return popsize
 
     def Solve(self, problem):
