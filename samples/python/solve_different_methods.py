@@ -42,6 +42,10 @@ class AGSWrapper(Solver):
             params.r = 4.7
         elif 'gklsh4' in name:
             params.r = 4.9
+        elif 'gklss5' in name:
+            params.r = 4.7
+        elif 'gklsh5' in name:
+            params.r = 4.9
         return params
 
     def Solve(self, problem):
@@ -61,11 +65,33 @@ class SCDEWrapper(Solver):
         self.dist_stop = dist_stop
         self.eps = eps
         self.max_iters = max_iters
+        self.class_name = class_name
+
+    def class_name2params(self, name):
+        if 'grish' in name:
+            popsize = 60
+        elif 'gklss2' in name:
+            popsize = 60
+        elif 'gklsh2' in name:
+            popsize = 60
+        elif 'gklss3' in name:
+            popsize = 60
+        elif 'gklsh3' in name:
+            popsize = 60
+        elif 'gklss4' in name:
+            popsize = 60
+        elif 'gklsh4' in name:
+            popsize = 60
+        elif 'gklss5' in name:
+            popsize = 120
+        elif 'gklsh5' in name:
+            popsize = 140
+        return popsize
 
     def Solve(self, problem):
         lb, ub = problem.GetBounds()
         bounds = [(l, u) for l, u in zip(lb, ub)]
-        pop_size = 60
+        pop_size = class_name2params(self.class_name)
         result = \
             differential_evolution(
             lambda x: problem.Calculate(x), bounds, mutation=(1.1,1.9),
@@ -189,6 +215,10 @@ class NLOptWrapper:
             popsize = 8000
         elif 'gklsh4' in name:
             popsize = 16000
+        elif 'gklss5' in name:
+            popsize = 25000
+        elif 'gklsh5' in name:
+            popsize = 30000
         return popsize
 
     def Solve(self, problem):
@@ -215,23 +245,9 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
          'simple': SimpleWrapper}
 
-def algo2cature(algo):
-    if algo == 'scd':
-        return 'Scipy DE'
-    if algo == 'ags':
-        return 'AGS'
-    if algo == 'direct':
-        return 'DIRECT'
-    if algo == 'directl':
-        return 'DIRECTl'
-    if algo == 'simple':
-        return 'Simple'
-    if algo == 'stogo':
-        return 'StoGO'
-    if algo == 'mlsl':
-        return 'MLSL'
-    if algo == 'crs':
-        return 'CRS'
+algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
+               'directl': 'DIRECTl', 'simple': 'Simple',
+               'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS'}
 
 def main(args):
 
@@ -256,7 +272,7 @@ def main(args):
     print('Average number of calculations of objective: {}'.format(stats['avg_calcs'][-1]))
 
     #plot_cmcs([stats['cmc']], captures=[algo2cature(args.algo)], show=True, filename='')
-    save_stats(stats, args.stats_fname, capture=algo2cature(args.algo))
+    save_stats(stats, args.stats_fname, capture=algo2cature[args.algo])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sample for AGS solver')
