@@ -43,9 +43,11 @@ class AGSWrapper(Solver):
         elif 'gklsh4' in name:
             params.r = 4.9
         elif 'gklss5' in name:
-            params.r = 4.7
+            params.r = 4
+            params.evolventDensity = 10
         elif 'gklsh5' in name:
-            params.r = 4.9
+            params.r = 4
+            params.evolventDensity = 10
         return params
 
     def Solve(self, problem):
@@ -91,7 +93,7 @@ class SCDEWrapper(Solver):
     def Solve(self, problem):
         lb, ub = problem.GetBounds()
         bounds = [(l, u) for l, u in zip(lb, ub)]
-        pop_size = class_name2params(self.class_name)
+        pop_size = self.class_name2params(self.class_name)
         result = \
             differential_evolution(
             lambda x: problem.Calculate(x), bounds, mutation=(1.1,1.9),
