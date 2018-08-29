@@ -1,5 +1,6 @@
 import functools
 import numpy as np
+import math
 import argparse
 import ags_solver
 import go_problems
@@ -251,10 +252,12 @@ algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS'}
 
+serg_eps = {4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
+
 def main(args):
 
     wrapper_class = algos[args.algo]
-
+    print(serg_eps)
     if args.problems_class == 'grish':
         problems = GrishClass()
     else:
@@ -264,8 +267,11 @@ def main(args):
         else:
             problems = GKLSClass(args.problems_dim, go_problems.GKLSClass.Hard)
 
+    eps = 0.01
+    if args.serg_eps:
+        eps = serg_eps[args.problems_dim]
     wrapper = wrapper_class(args.dist_stop, args.max_iters, args.problems_class+str(args.problems_dim), eps=0.01)
-    calc_stats, solved_status = solve_class(problems, wrapper, verbose=args.verbose, eps_check=0.01)
+    calc_stats, solved_status = solve_class(problems, wrapper, verbose=args.verbose, eps_check=eps)
     stats = compute_stats(calc_stats, solved_status)
 
     print('Problems solved: {}'.format(stats['num_solved']))
@@ -284,6 +290,7 @@ if __name__ == '__main__':
     parser.add_argument('--problems_dim', type=int, default=2)
     parser.add_argument('--verbose', action='store_true', help='Print additional info to console')
     parser.add_argument('--dist_stop', action='store_true', help='Stop algorithm then the next point is close enough to the optimum')
+    parser.add_argument('--serg_eps', action='store_true')
     parser.add_argument('--stats_fname', type=str, default='')
 
     main(parser.parse_args())
