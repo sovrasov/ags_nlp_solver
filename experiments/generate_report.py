@@ -26,7 +26,7 @@ def main(args):
             for method_results in class_results:
                 writer.writerow([class_name, method_results['capture'],
                     method_results['num_solved'], round(method_results['calc_counters'][0])])
-            writer.writerow([' '])
+            writer.writerow([])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
