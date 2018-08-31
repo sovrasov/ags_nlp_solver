@@ -78,13 +78,13 @@ class SCDEWrapper(Solver):
         elif 'gklsh2' in name:
             popsize = 60
         elif 'gklss3' in name:
-            popsize = 60
+            popsize = 70
         elif 'gklsh3' in name:
-            popsize = 60
+            popsize = 80
         elif 'gklss4' in name:
-            popsize = 60
+            popsize = 90
         elif 'gklsh4' in name:
-            popsize = 60
+            popsize = 100
         elif 'gklss5' in name:
             popsize = 120
         elif 'gklsh5' in name:
@@ -252,12 +252,11 @@ algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS'}
 
-serg_eps = {4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
+serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
 def main(args):
 
     wrapper_class = algos[args.algo]
-    print(serg_eps)
     if args.problems_class == 'grish':
         problems = GrishClass()
     else:
