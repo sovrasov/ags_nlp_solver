@@ -11,6 +11,7 @@ from Simple import SimpleTuner
 import itertools
 from scipy.spatial import Delaunay
 from scipy.optimize import differential_evolution
+from scipy.optimize import basinhopping
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -62,6 +63,33 @@ class AGSWrapper(Solver):
         #calcCounters = self.solver.GetCalculationsStatistics()
         calcCounters = problem.GetCalculationsStatistics()
         return point, val, calcCounters
+
+class SCBasinhoppingWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+        self.class_name = class_name
+
+    def Solve(self, problem):
+        lb, ub = problem.GetBounds()
+        #pop_size = self.class_name2params(self.class_name)
+        class MyBounds(object):
+            def __init__(self, xmax=[1.1,1.1], xmin=[-1.1,-1.1] ):
+                self.xmax = np.array(xmax)
+                self.xmin = np.array(xmin)
+            def __call__(self, **kwargs):
+                x = kwargs["x_new"]
+                tmax = bool(np.all(x <= self.xmax))
+                tmin = bool(np.all(x >= self.xmin))
+                return tmax and tmin
+
+        x0 = [.5]*problem.GetDimension()
+        result = \
+            basinhopping(lambda x: problem.Calculate(x), x0, accept_test=MyBounds(ub, lb), seed=100, T=10, stepsize=0.3)
+
+        n_evals = problem.GetCalculationsStatistics()
+        return result.x, result.fun, n_evals
 
 class SCDEWrapper(Solver):
     def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
@@ -246,11 +274,11 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'stogo': functools.partial(NLOptWrapper, method=nlopt.GD_STOGO),
          'mlsl': functools.partial(NLOptWrapper, method=nlopt.G_MLSL_LDS),
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
-         'simple': SimpleWrapper}
+         'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
-               'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS'}
+               'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
