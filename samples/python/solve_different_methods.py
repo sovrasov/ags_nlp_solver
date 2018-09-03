@@ -12,6 +12,7 @@ import itertools
 from scipy.spatial import Delaunay
 from scipy.optimize import differential_evolution
 from scipy.optimize import basinhopping
+from sdaopt import sda
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -63,6 +64,18 @@ class AGSWrapper(Solver):
         #calcCounters = self.solver.GetCalculationsStatistics()
         calcCounters = problem.GetCalculationsStatistics()
         return point, val, calcCounters
+
+class SDAWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+        self.class_name = class_name
+    def Solve(self, problem):
+        lb, ub = problem.GetBounds()
+        ret = sda(lambda x: problem.Calculate(x), None, bounds=list(zip(lb, ub)), seed=100)
+        n_evals = problem.GetCalculationsStatistics()
+        return ret.x, ret.fun, n_evals
 
 class SCBasinhoppingWrapper:
     def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
@@ -274,11 +287,13 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'stogo': functools.partial(NLOptWrapper, method=nlopt.GD_STOGO),
          'mlsl': functools.partial(NLOptWrapper, method=nlopt.G_MLSL_LDS),
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
-         'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper}
+         'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper,
+         'sda': SDAWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
-               'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H'}
+               'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
+               'sda': 'Simulated annealing'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
