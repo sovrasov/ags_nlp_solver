@@ -11,6 +11,7 @@ Copyright (C) 2018 Sovrasov V. - All Rights Reserved
 #include "evolvent.hpp"
 #include "problem_interface.hpp"
 #include "local_optimizer.hpp"
+#include "intervals_queue.hpp"
 
 #include <vector>
 #include <memory>
@@ -46,9 +47,6 @@ struct SolverParameters
 class NLPSolver
 {
 protected:
-  using PriorityQueue =
-    std::priority_queue<Interval*, std::vector<Interval*>, CompareByR>;
-
   HookeJeevesOptimizer mLocalOptimizer;
 
   SolverParameters mParameters;
@@ -58,7 +56,7 @@ protected:
   std::vector<double> mHEstimations;
   std::vector<double> mZEstimations;
   std::vector<Trial> mNextPoints;
-  PriorityQueue mQueue;
+  std::shared_ptr<IIntervalsQueue> mQueue;
   std::set<Interval*, CompareIntervals> mSearchInformation;
   std::vector<Interval*> mNextIntervals;
   Trial mOptimumEstimation;

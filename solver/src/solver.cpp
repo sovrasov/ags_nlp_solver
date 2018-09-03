@@ -136,7 +136,10 @@ void NLPSolver::InitDataStructures()
   std::fill(mHEstimations.begin(), mHEstimations.end(), 1.0);
   mCalculationsCounters.resize(mProblem->GetConstraintsNumber() + 1);
   std::fill(mCalculationsCounters.begin(), mCalculationsCounters.end(), 0);
-  mQueue = PriorityQueue();
+  if (mParameters.localMix == 0)
+    mQueue = std::make_shared<SingleIntervalsQueue>();
+  else
+    NLP_SOLVER_ASSERT(false, "Not implemented");
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
@@ -147,7 +150,7 @@ void NLPSolver::ClearDataStructures()
   for (const auto& ptr : mSearchInformation)
     delete ptr;
   mSearchInformation.clear();
-  mQueue = PriorityQueue();
+  mQueue->clear();
 }
 
 Trial NLPSolver::Solve()
@@ -164,7 +167,7 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
   do {
     InsertIntervals();
     EstimateOptimum();
-    if (mNeedRefillQueue || mQueue.size() < mParameters.numPoints)
+    if (mNeedRefillQueue)
       RefillQueue();
     CalculateNextPoints();
     MakeTrials();
@@ -287,8 +290,8 @@ void NLPSolver::InsertIntervals()
       pNewInterval->local_R = CalculateLocalR(pNewInterval);
       mNextIntervals[i]->R = CalculateR(mNextIntervals[i]);
       mNextIntervals[i]->local_R = CalculateLocalR(mNextIntervals[i]);
-      mQueue.push(pNewInterval);
-      mQueue.push(pOldInterval);
+      mQueue->push(pNewInterval);
+      mQueue->push(pOldInterval);
     }
   }
 }
@@ -297,8 +300,9 @@ void NLPSolver::CalculateNextPoints()
 {
   for(size_t i = 0; i < mParameters.numPoints; i++)
   {
-    mNextIntervals[i] = mQueue.top();
-    mQueue.pop();IsLocalIteration();
+    if (mQueue->empty())
+      RefillQueue();
+    mNextIntervals[i] = mQueue->pop(IsLocalIteration());
     mNextPoints[i].x = GetNextPointCoordinate(mNextIntervals[i]);
 
     if (mNextPoints[i].x > mNextIntervals[i]->pr.x || mNextPoints[i].x < mNextIntervals[i]->pl.x)
@@ -314,12 +318,12 @@ void NLPSolver::CalculateNextPoints()
 
 void NLPSolver::RefillQueue()
 {
-  mQueue = PriorityQueue();
+  mQueue->clear();
   for (const auto& pInterval : mSearchInformation)
   {
     pInterval->R = CalculateR(pInterval);
     pInterval->local_R = CalculateLocalR(pInterval);
-    mQueue.push(pInterval);
+    mQueue->push(pInterval);
   }
   mNeedRefillQueue = false;
 }
