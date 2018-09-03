@@ -10,6 +10,11 @@ Copyright (C) 2018 Sovrasov V. - All Rights Reserved
 
 using namespace ags;
 
+bool SingleIntervalsQueue::CompareByR::operator() (const Interval* i1, const Interval* i2) const
+{
+  return i1->R < i2->R;
+}
+
 SingleIntervalsQueue::SingleIntervalsQueue() {}
 
 bool SingleIntervalsQueue::empty() const
@@ -31,6 +36,33 @@ void SingleIntervalsQueue::push(Interval* i)
 }
 
 void SingleIntervalsQueue::clear()
+{
+  mQueue = std::priority_queue<Interval*, std::vector<Interval*>, CompareByR>();
+}
+
+/* Dual queue */
+
+DualIntervalsQueue::DualIntervalsQueue() {}
+
+bool DualIntervalsQueue::empty() const
+{
+  return mQueue.empty();
+}
+
+Interval* DualIntervalsQueue::pop(bool is_local)
+{
+  NLP_SOLVER_ASSERT(!is_local, "Trying to get local R from the single queue");
+  auto ret_val = mQueue.top();
+  mQueue.pop();
+  return ret_val;
+}
+
+void DualIntervalsQueue::push(Interval* i)
+{
+  mQueue.push(i);
+}
+
+void DualIntervalsQueue::clear()
 {
   mQueue = std::priority_queue<Interval*, std::vector<Interval*>, CompareByR>();
 }

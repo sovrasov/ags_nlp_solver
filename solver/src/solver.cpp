@@ -139,7 +139,7 @@ void NLPSolver::InitDataStructures()
   if (mParameters.localMix == 0)
     mQueue = std::make_shared<SingleIntervalsQueue>();
   else
-    NLP_SOLVER_ASSERT(false, "Not implemented");
+    mQueue = std::make_shared<DualIntervalsQueue>();
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
@@ -298,11 +298,12 @@ void NLPSolver::InsertIntervals()
 
 void NLPSolver::CalculateNextPoints()
 {
+  const bool is_local = IsLocalIteration();
   for(size_t i = 0; i < mParameters.numPoints; i++)
   {
     if (mQueue->empty())
       RefillQueue();
-    mNextIntervals[i] = mQueue->pop(IsLocalIteration());
+    mNextIntervals[i] = mQueue->pop(is_local);
     mNextPoints[i].x = GetNextPointCoordinate(mNextIntervals[i]);
 
     if (mNextPoints[i].x > mNextIntervals[i]->pr.x || mNextPoints[i].x < mNextIntervals[i]->pl.x)

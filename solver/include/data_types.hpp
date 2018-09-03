@@ -47,14 +47,4 @@ struct CompareIntervals
     return i1->pl.x < i2->pl.x;
   }
 };
-
-class CompareByR
-{
-public:
-  bool operator() (const Interval* i1, const Interval* i2) const
-  {
-    return i1->R < i2->R;
-  }
-};
-
 }
