@@ -33,6 +33,7 @@ struct SolverParameters
   // which means that maximum search accuracyis 2^-12. If search hypercube is large the density can be increased accordingly to achieve better accuracy.
   double epsR = 0.001; // parameter which prevents method from paying too much attention to constraints. Greater values of this parameter speed up convergence,
   // but global minima can be lost.
+  int localMix = 0;
   bool refineSolution = false; //if true, the fibal solution will be refined with the HookJeves method.
 
   SolverParameters() {}
@@ -68,6 +69,7 @@ protected:
   bool mNeedStop;
   double mMinDelta;
   int mMaxIdx;
+  const double mLocalOffset;
 
   void InitLocalOptimizer();
   void FirstIteration();
@@ -80,9 +82,11 @@ protected:
   void InitDataStructures();
   void ClearDataStructures();
 
+  bool IsLocalIteration() const;
   void UpdateAllH(std::set<Interval*>::iterator);
   void UpdateH(double newValue, int index);
   double CalculateR(Interval*) const;
+  double CalculateLocalR(Interval* i) const;
   double GetNextPointCoordinate(Interval*) const;
 
 public:

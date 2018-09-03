@@ -64,7 +64,7 @@ namespace
     };
 }
 
-NLPSolver::NLPSolver() {}
+NLPSolver::NLPSolver() : mLocalOffset(pow(1.5, -15)) {}
 
 void NLPSolver::SetParameters(const SolverParameters& params)
 {
@@ -284,7 +284,9 @@ void NLPSolver::InsertIntervals()
     if(!mNeedRefillQueue)
     {
       pNewInterval->R = CalculateR(pNewInterval);
+      pNewInterval->local_R = CalculateLocalR(pNewInterval);
       mNextIntervals[i]->R = CalculateR(mNextIntervals[i]);
+      mNextIntervals[i]->local_R = CalculateLocalR(mNextIntervals[i]);
       mQueue.push(pNewInterval);
       mQueue.push(pOldInterval);
     }
@@ -296,7 +298,7 @@ void NLPSolver::CalculateNextPoints()
   for(size_t i = 0; i < mParameters.numPoints; i++)
   {
     mNextIntervals[i] = mQueue.top();
-    mQueue.pop();
+    mQueue.pop();IsLocalIteration();
     mNextPoints[i].x = GetNextPointCoordinate(mNextIntervals[i]);
 
     if (mNextPoints[i].x > mNextIntervals[i]->pr.x || mNextPoints[i].x < mNextIntervals[i]->pl.x)
@@ -316,6 +318,7 @@ void NLPSolver::RefillQueue()
   for (const auto& pInterval : mSearchInformation)
   {
     pInterval->R = CalculateR(pInterval);
+    pInterval->local_R = CalculateLocalR(pInterval);
     mQueue.push(pInterval);
   }
   mNeedRefillQueue = false;
@@ -396,6 +399,57 @@ double NLPSolver::CalculateR(Interval* i) const
     return 2*i->delta - 4*(i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx]) / (mParameters.r * mHEstimations[i->pr.idx]);
   else
     return 2*i->delta - 4*(i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx]) / (mParameters.r * mHEstimations[i->pl.idx]);
+}
+
+double NLPSolver::CalculateLocalR(Interval* i) const
+{
+  if(mParameters.localMix == 0)
+    return 0;
+
+  double value;
+  if(i->pl.idx == i->pr.idx)
+  {
+    const int v = i->pr.idx;
+    value = i->R / (sqrt((i->pr.g[v] - mZEstimations[v])*
+        (i->pl.g[v] - mZEstimations[v])) + mLocalOffset);
+  }
+  else if(i->pl.idx < i->pr.idx)
+    value = i->R / (i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx] + mLocalOffset);
+  else
+    value = i->R / (i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx] + mLocalOffset);
+
+  NLP_SOLVER_ASSERT(std::isfinite(value), "Infinite R!");
+  return value;
+}
+
+bool NLPSolver::IsLocalIteration() const
+{
+  if(mIterationsCounter < 100)
+    return false;
+
+  bool isLocal = false;
+
+  if (mParameters.localMix > 0) {
+    int localMixParameter = mParameters.localMix + 1;
+
+    if (mIterationsCounter % localMixParameter != 0)
+      isLocal = false;
+    else
+      isLocal = true;
+  }
+  else if (mParameters.localMix < 0) {
+    int localMixParameter = -mParameters.localMix;
+    localMixParameter++;
+
+    if (mIterationsCounter % localMixParameter != 0)
+      isLocal = true;
+    else
+      isLocal = false;
+  }
+  else //mParameters.localMix == 0
+    isLocal = false;
+
+  return isLocal;
 }
 
 double NLPSolver::GetNextPointCoordinate(Interval* i) const

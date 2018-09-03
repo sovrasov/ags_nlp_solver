@@ -34,6 +34,7 @@ struct Interval
   Trial pl;
   Trial pr;
   double R;
+  double local_R;
   double delta;
   Interval() {}
   Interval(const Trial& _pl, const Trial& _pr) : pl(_pl), pr(_pr) {}
