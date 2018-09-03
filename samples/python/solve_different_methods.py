@@ -73,7 +73,8 @@ class SDAWrapper:
         self.class_name = class_name
     def Solve(self, problem):
         lb, ub = problem.GetBounds()
-        ret = sda(lambda x: problem.Calculate(x), None, bounds=list(zip(lb, ub)), seed=100)
+        ret = sda(lambda x: problem.Calculate(x), None, bounds=list(zip(lb, ub)), \
+                  seed=100, maxfun=self.max_iters, visit=2.72, maxiter=self.max_iters)
         n_evals = problem.GetCalculationsStatistics()
         return ret.x, ret.fun, n_evals
 
