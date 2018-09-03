@@ -249,6 +249,11 @@ public:
     return m_currentheapsize == 0; // проверка на пустоту кучи
   }
 
+  bool full() const
+  {
+    return m_currentheapsize == m_heapsize;
+  }
+
   unsigned int size() const
   {
     return (unsigned int)m_currentheapsize; // количество элементов в куче

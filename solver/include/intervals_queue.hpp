@@ -84,14 +84,6 @@ private:
   MinMaxHeap<QueueElement, _less_global>* mPGlobalHeap;
   MinMaxHeap<QueueElement, _less_local>* mPLocalHeap;
 
-  struct CompareByR
-  {
-    bool operator() (const Interval* i1, const Interval* i2) const
-    {
-      return i1->R < i2->R;
-    }
-  };
-  std::priority_queue<Interval*, std::vector<Interval*>, CompareByR> mQueue;
 public:
   DualIntervalsQueue();
   virtual bool empty() const override;

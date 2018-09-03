@@ -46,23 +46,34 @@ DualIntervalsQueue::DualIntervalsQueue() {}
 
 bool DualIntervalsQueue::empty() const
 {
-  return mQueue.empty();
+  return mPGlobalHeap->empty() || mPLocalHeap->empty();
 }
 
 Interval* DualIntervalsQueue::pop(bool is_local)
 {
-  NLP_SOLVER_ASSERT(!is_local, "Trying to get local R from the single queue");
-  auto ret_val = mQueue.top();
-  mQueue.pop();
-  return ret_val;
+  if (!is_local)
+  {
+    auto element = mPGlobalHeap->popMax();
+    if (element.pLinkedElement != NULL)
+      mPLocalHeap->deleteElement(element.pLinkedElement);
+    return element.pInterval;
+  }
+  else
+  {
+    auto element = mPLocalHeap->popMax();
+    if (element.pLinkedElement != NULL)
+      mPGlobalHeap->deleteElement(element.pLinkedElement);
+    return element.pInterval;
+  }
 }
 
 void DualIntervalsQueue::push(Interval* i)
 {
-  mQueue.push(i);
+
 }
 
 void DualIntervalsQueue::clear()
 {
-  mQueue = std::priority_queue<Interval*, std::vector<Interval*>, CompareByR>();
+  mPGlobalHeap->clear();
+  mPLocalHeap->clear();
 }
