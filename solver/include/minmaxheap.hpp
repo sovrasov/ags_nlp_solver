@@ -9,15 +9,12 @@ inline unsigned int log2(unsigned int val)
 {
   //if (val == 0)
   //	throw exception("log2(0) не определен\n");
-
   unsigned int result = 0;
-
   while (val)
   {
     val >>= 1;
     ++result;
   }
-
   return result - 1;
 }
 
@@ -34,23 +31,10 @@ class MinMaxHeap
   unsigned m_heapsize; // размер кучи
   unsigned m_currentheapsize; // текущее количество элементов в куче
 
-
   static inline unsigned int parent(unsigned int index)
   {
     return (index - 1) / 2; // возвращает индекс родителя узла, заданного index-ом
   }
-
-  /*
-  inline void swapLinkedElems(T& arg1, T& arg2)
-  {
-    if (arg1.pLinkedElement != NULL && arg2.pLinkedElement != NULL)
-      std::swap(arg1.pLinkedElement->pLinkedElement, arg2.pLinkedElement->pLinkedElement);
-    else if (arg1.pLinkedElement != NULL)
-      arg1.pLinkedElement->pLinkedElement = &arg2;
-    else if (arg2.pLinkedElement != NULL)
-      arg2.pLinkedElement->pLinkedElement = &arg1;
-  }
-  */
 
   // ------------------------------------------------------------------------------------------------
   static inline unsigned int leftChild(unsigned int index)
@@ -92,8 +76,7 @@ class MinMaxHeap
 
     if (m_compare(m_heap[index], m_heap[index_grandparent]) ^ MaxLevel) // убедимся, что нужно поменяться местами с прародителем
     {
-      //swapLinkedElems(m_heap[index_grandparent], m_heap[index]);
-      std::swap(m_heap[index_grandparent], m_heap[index]);
+      swap(m_heap[index_grandparent], m_heap[index]);
 
       return trickleUp_<MaxLevel>(index_grandparent);
     }
@@ -113,9 +96,7 @@ class MinMaxHeap
       // убедимся, что нужно поменяться местами с родителем
       if (m_compare(m_heap[index_parent], m_heap[index]))
       {
-        //swapLinkedElems(m_heap[index_parent], m_heap[index]);
-        std::swap(m_heap[index_parent], m_heap[index]);
-
+        swap(m_heap[index_parent], m_heap[index]);
         return trickleUp_<true>(index_parent);
       }
       else
@@ -126,9 +107,7 @@ class MinMaxHeap
       // убедимся, что нужно поменяться местами с родителем
       if (m_compare(m_heap[index], m_heap[index_parent]))
       {
-        //swapLinkedElems(m_heap[index_parent], m_heap[index]);
-        std::swap(m_heap[index_parent], m_heap[index]);
-
+        swap(m_heap[index_parent], m_heap[index]);
         return trickleUp_<false>(index_parent);
       }
       else
@@ -142,7 +121,6 @@ class MinMaxHeap
   {
     //  if ( index >= m_currentheapsize ) // убедимся, что элемент существует
      //     throw exception("Элемент с таким индексом не существует\n");
-
     unsigned int smallestNode = index; // храним индекс наименьшего узла
     unsigned int left = leftChild(index); // получаем правого сына
 
@@ -159,15 +137,13 @@ class MinMaxHeap
     if (index == smallestNode) // если текущий узел наименьший, ничего не делаем и выходим
       return;
 
-    //swapLinkedElems(m_heap[index], m_heap[smallestNode]);
-    std::swap(m_heap[index], m_heap[smallestNode]); // меняем местами текущий узел и наименьший
+    swap(m_heap[index], m_heap[smallestNode]); // меняем местами текущий узел и наименьший
 
     if (smallestNode - left > 1)
     {
       // если родитель наименьшего узла больше, чем сам узел, меняем местами
       if (m_compare(m_heap[parent(smallestNode)], m_heap[smallestNode]) ^ MaxLevel) {
-        //swapLinkedElems(m_heap[parent(smallestNode)], m_heap[smallestNode]);
-        std::swap(m_heap[parent(smallestNode)], m_heap[smallestNode]);
+        swap(m_heap[parent(smallestNode)], m_heap[smallestNode]);
       }
 
       trickleDown_<MaxLevel>(smallestNode);
@@ -216,12 +192,8 @@ class MinMaxHeap
       m_currentheapsize--;
       return;
     }
-
-    //swapLinkedElems(m_heap[index], m_heap[m_currentheapsize - 1]);
-    std::swap(m_heap[index], m_heap[m_currentheapsize - 1]); // меняем местами элемент с последним в куче
-
+    swap(m_heap[index], m_heap[m_currentheapsize - 1]); // меняем местами элемент с последним в куче
     m_currentheapsize--; // удаляем последний элемент из кучи
-
     trickleDown(index); // погружаем тот элемент, который поместили на место index
   }
 

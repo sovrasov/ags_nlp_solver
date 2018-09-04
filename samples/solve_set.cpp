@@ -30,6 +30,7 @@ int main(int argc, char** argv)
   parameters.refineSolution = parser.exist("refineLoc");
   bool stop_by_acc = parser.exist("accuracyStop");
   parameters.eps = stop_by_acc ? eps : 0.;
+  parameters.localMix = parser.get<int>("localMix");
 
   std::string problemClass = parser.get<std::string>("problemsClass");
 

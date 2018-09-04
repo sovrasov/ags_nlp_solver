@@ -10,6 +10,7 @@ Copyright (C) 2018 Sovrasov V. - All Rights Reserved
 #include "data_types.hpp"
 #include "minmaxheap.hpp"
 #include <queue>
+#include <memory>
 
 namespace ags
 {
@@ -37,6 +38,7 @@ public:
   virtual Interval* pop(bool is_local) override;
   virtual void push(Interval*) override;
   virtual void clear() override;
+  virtual ~SingleIntervalsQueue() {}
 };
 
 class DualIntervalsQueue : public IIntervalsQueue
@@ -49,12 +51,11 @@ private:
     QueueElement() {}
     QueueElement(Interval* _pValue) :
       pLinkedElement(nullptr), pInterval(_pValue) {}
-    QueueElement(double _Key, Interval* _pValue, QueueElement* _pLinkedElement) :
+    QueueElement(Interval* _pValue, QueueElement* _pLinkedElement) :
       pLinkedElement(_pLinkedElement), pInterval(_pValue) {}
 
     friend void swap(QueueElement& arg1, QueueElement& arg2)
     {
-      using std::swap;
       if (arg1.pLinkedElement != nullptr && arg2.pLinkedElement != nullptr)
         std::swap(arg1.pLinkedElement->pLinkedElement, arg2.pLinkedElement->pLinkedElement);
       else if (arg1.pLinkedElement != nullptr)
@@ -81,11 +82,11 @@ private:
     }
   };
 
-  MinMaxHeap<QueueElement, _less_global>* mPGlobalHeap;
-  MinMaxHeap<QueueElement, _less_local>* mPLocalHeap;
+  std::shared_ptr<MinMaxHeap<QueueElement, _less_global>> mPGlobalHeap;
+  std::shared_ptr<MinMaxHeap<QueueElement, _less_local>> mPLocalHeap;
 
 public:
-  DualIntervalsQueue();
+  DualIntervalsQueue(size_t size = 2048);
   virtual bool empty() const override;
   virtual Interval* pop(bool is_local) override;
   virtual void push(Interval*) override;

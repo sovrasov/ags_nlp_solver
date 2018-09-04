@@ -42,7 +42,12 @@ void SingleIntervalsQueue::clear()
 
 /* Dual queue */
 
-DualIntervalsQueue::DualIntervalsQueue() {}
+DualIntervalsQueue::DualIntervalsQueue(size_t size)
+{
+  NLP_SOLVER_ASSERT(size > 0, "Zero-sized queue");
+  mPGlobalHeap = std::make_shared<MinMaxHeap<QueueElement, _less_global>>(size);
+  mPLocalHeap = std::make_shared<MinMaxHeap<QueueElement, _less_local>>(size);
+}
 
 bool DualIntervalsQueue::empty() const
 {
@@ -69,7 +74,37 @@ Interval* DualIntervalsQueue::pop(bool is_local)
 
 void DualIntervalsQueue::push(Interval* i)
 {
-
+  QueueElement *pGlobalElem = nullptr, *pLocalElem = nullptr;
+  if (!mPGlobalHeap->full())
+    pGlobalElem = mPGlobalHeap->push(QueueElement(i));
+  else
+  {
+    if(i->R > mPGlobalHeap->findMin().pInterval->R)
+    {
+      QueueElement tmp = mPGlobalHeap->popMin();
+      if (tmp.pLinkedElement != nullptr)
+        tmp.pLinkedElement->pLinkedElement = nullptr;
+      pGlobalElem = mPGlobalHeap->push(QueueElement(i));
+    }
+  }
+  if (!mPLocalHeap->full())
+    pLocalElem = mPLocalHeap->push(QueueElement(i));
+  else
+  {
+    if (i->local_R > mPLocalHeap->findMin().pInterval->local_R)
+    {
+      QueueElement tmp = mPLocalHeap->popMin();
+      if (tmp.pLinkedElement != nullptr)
+        tmp.pLinkedElement->pLinkedElement = nullptr;
+      pLocalElem = mPLocalHeap->push(QueueElement(i));
+    }
+  }
+  //link elements
+  if (pGlobalElem != nullptr && pLocalElem != nullptr)
+  {
+    pGlobalElem->pLinkedElement = pLocalElem;
+    pLocalElem->pLinkedElement = pGlobalElem;
+  }
 }
 
 void DualIntervalsQueue::clear()
