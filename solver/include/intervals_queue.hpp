@@ -11,6 +11,7 @@ Copyright (C) 2018 Sovrasov V. - All Rights Reserved
 #include "minmaxheap.hpp"
 #include <queue>
 #include <memory>
+#include <iostream>
 
 namespace ags
 {
@@ -21,6 +22,7 @@ public:
   virtual bool empty() const = 0;
   virtual Interval* pop(bool is_local) = 0;
   virtual void push(Interval*) = 0;
+  virtual void push_if_better_than_min(Interval*) = 0;
   virtual void clear() = 0;
 };
 
@@ -37,6 +39,7 @@ public:
   virtual bool empty() const override;
   virtual Interval* pop(bool is_local) override;
   virtual void push(Interval*) override;
+  virtual void push_if_better_than_min(Interval*) override;
   virtual void clear() override;
   virtual ~SingleIntervalsQueue() {}
 };
@@ -56,6 +59,7 @@ private:
 
     friend void swap(QueueElement& arg1, QueueElement& arg2)
     {
+      using std::swap;
       if (arg1.pLinkedElement != nullptr && arg2.pLinkedElement != nullptr)
         std::swap(arg1.pLinkedElement->pLinkedElement, arg2.pLinkedElement->pLinkedElement);
       else if (arg1.pLinkedElement != nullptr)
@@ -85,11 +89,15 @@ private:
   std::shared_ptr<MinMaxHeap<QueueElement, _less_global>> mPGlobalHeap;
   std::shared_ptr<MinMaxHeap<QueueElement, _less_local>> mPLocalHeap;
 
+  void pop_min_global();
+  void pop_min_local();
+
 public:
-  DualIntervalsQueue(size_t size = 2048);
+  DualIntervalsQueue(size_t size = 2047);
   virtual bool empty() const override;
   virtual Interval* pop(bool is_local) override;
   virtual void push(Interval*) override;
+  virtual void push_if_better_than_min(Interval*) override;
   virtual void clear() override;
 };
 

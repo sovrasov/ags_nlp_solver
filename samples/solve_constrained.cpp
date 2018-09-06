@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
   parameters.epsR = parser.get<double>("reserves");
   parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
+  parameters.localMix = parser.get<int>("localMix");
 
   NLPSolver solver;
   solver.SetParameters(parameters);
@@ -67,4 +68,5 @@ void initParser(cmdline::parser& parser)
   parser.add<double>("reserves", 'E', "eps-reserves for all constraints", false, 0.01);
   parser.add<int>("itersLimit", 'i', "limit of iterations for the method", false, 10000);
   parser.add("refineLoc", 'l', "Refine the global solution using a local optimizer");
+  parser.add<int>("localMix", 'q', "local mix parameter", false, 0, cmdline::range(-20, 20));
 }

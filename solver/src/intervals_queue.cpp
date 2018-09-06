@@ -30,6 +30,11 @@ Interval* SingleIntervalsQueue::pop(bool is_local)
   return ret_val;
 }
 
+void SingleIntervalsQueue::push_if_better_than_min(Interval* i)
+{
+  mQueue.push(i);
+}
+
 void SingleIntervalsQueue::push(Interval* i)
 {
   mQueue.push(i);
@@ -54,19 +59,32 @@ bool DualIntervalsQueue::empty() const
   return mPGlobalHeap->empty() || mPLocalHeap->empty();
 }
 
+void DualIntervalsQueue::pop_min_global()
+{
+  QueueElement tmp = mPGlobalHeap->popMin();
+  if (tmp.pLinkedElement != nullptr)
+    tmp.pLinkedElement->pLinkedElement = nullptr;
+}
+void DualIntervalsQueue::pop_min_local()
+{
+  QueueElement tmp = mPLocalHeap->popMin();
+  if (tmp.pLinkedElement != nullptr)
+    tmp.pLinkedElement->pLinkedElement = nullptr;
+}
+
 Interval* DualIntervalsQueue::pop(bool is_local)
 {
   if (!is_local)
   {
     auto element = mPGlobalHeap->popMax();
-    if (element.pLinkedElement != NULL)
+    if (element.pLinkedElement != nullptr)
       mPLocalHeap->deleteElement(element.pLinkedElement);
     return element.pInterval;
   }
   else
   {
     auto element = mPLocalHeap->popMax();
-    if (element.pLinkedElement != NULL)
+    if (element.pLinkedElement != nullptr)
       mPGlobalHeap->deleteElement(element.pLinkedElement);
     return element.pInterval;
   }
@@ -81,9 +99,7 @@ void DualIntervalsQueue::push(Interval* i)
   {
     if(i->R > mPGlobalHeap->findMin().pInterval->R)
     {
-      QueueElement tmp = mPGlobalHeap->popMin();
-      if (tmp.pLinkedElement != nullptr)
-        tmp.pLinkedElement->pLinkedElement = nullptr;
+      pop_min_global();
       pGlobalElem = mPGlobalHeap->push(QueueElement(i));
     }
   }
@@ -93,13 +109,43 @@ void DualIntervalsQueue::push(Interval* i)
   {
     if (i->local_R > mPLocalHeap->findMin().pInterval->local_R)
     {
-      QueueElement tmp = mPLocalHeap->popMin();
-      if (tmp.pLinkedElement != nullptr)
-        tmp.pLinkedElement->pLinkedElement = nullptr;
+      pop_min_local();
       pLocalElem = mPLocalHeap->push(QueueElement(i));
     }
   }
-  //link elements
+  if (pGlobalElem != nullptr && pLocalElem != nullptr)
+  {
+    pGlobalElem->pLinkedElement = pLocalElem;
+    pLocalElem->pLinkedElement = pGlobalElem;
+  }
+}
+
+void DualIntervalsQueue::push_if_better_than_min(Interval* i)
+{
+  QueueElement* pGlobalElem = nullptr, *pLocalElem = nullptr;
+  if (!mPGlobalHeap->empty())
+  {
+    if (i->R >= mPGlobalHeap->findMin().pInterval->R)
+    {
+      if (mPGlobalHeap->full())
+        pop_min_global();
+      pGlobalElem = mPGlobalHeap->push(QueueElement(i));
+    }
+  }
+  else
+    pGlobalElem = mPGlobalHeap->push(QueueElement(i));
+
+  if (!mPLocalHeap->empty())
+  {
+    if (i->local_R >= mPLocalHeap->findMin().pInterval->local_R)
+    {
+      if (mPLocalHeap->full())
+        pop_min_local();
+      pLocalElem = mPLocalHeap->push(QueueElement(i));
+    }
+  }
+  else
+    pLocalElem = mPLocalHeap->push(QueueElement(i));
   if (pGlobalElem != nullptr && pLocalElem != nullptr)
   {
     pGlobalElem->pLinkedElement = pLocalElem;

@@ -139,7 +139,7 @@ void NLPSolver::InitDataStructures()
   if (mParameters.localMix == 0)
     mQueue = std::make_shared<SingleIntervalsQueue>();
   else
-    mQueue = std::make_shared<DualIntervalsQueue>();
+    mQueue = std::make_shared<DualIntervalsQueue>(100000);
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
@@ -311,6 +311,7 @@ void NLPSolver::CalculateNextPoints()
     else if (mNextPoints[i].x == mNextIntervals[i]->pr.x || mNextPoints[i].x == mNextIntervals[i]->pl.x) {
       mNeedStop = true;
       std::cout << "Warning: AGS stopped early! Two similar 1d points were generated." << std::endl;
+      std::cout << std::scientific << mNextIntervals[i]->pr.x - mNextIntervals[i]->pl.x << std::defaultfloat << std::endl;
     }
 
     mEvolvent.GetImage(mNextPoints[i].x, mNextPoints[i].y);
