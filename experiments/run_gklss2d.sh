@@ -1,4 +1,4 @@
-declare -a algos=("simple")
+declare -a algos=("ags" "direct" "directl" "mlsl" "crs" "scd" "stogo", "sda")
 
 for algo in "${algos[@]}"
 do
