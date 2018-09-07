@@ -1,77 +1,86 @@
 class,method,solved,avg trials
-gklsh2d,AGS,100,729.0
 gklsh2d,StoGO,77,2532.0
+gklsh2d,Simple,100,898.0
 gklsh2d,Scipy DE,85,1041.0
+gklsh2d,AGS,100,729.0
+gklsh2d,CRS,74,845.0
+gklsh2d,DIRECTl,100,1127.0
 gklsh2d,DIRECT,100,985.0
 gklsh2d,MLSL,100,1043.0
-gklsh2d,CRS,74,845.0
-gklsh2d,Simple,100,898.0
-gklsh2d,DIRECTl,100,1127.0
+gklsh2d,Simulated annealing,93,1638.0
 
-gklsh3d,AGS,100,3636.0
 gklsh3d,StoGO,43,7843.0
 gklsh3d,Scipy DE,77,6914.0
-gklsh3d,DIRECT,100,2299.0
-gklsh3d,MLSL,100,5640.0
+gklsh3d,AGS,100,3636.0
 gklsh3d,CRS,72,6787.0
 gklsh3d,DIRECTl,99,3553.0
+gklsh3d,DIRECT,100,2299.0
+gklsh3d,MLSL,100,5640.0
+gklsh3d,Simulated annealing,88,4708.0
 
-gklsh4d,AGS,100,54537.0
 gklsh4d,StoGO,10,109328.0
 gklsh4d,Scipy DE,32,27466.0
-gklsh4d,DIRECT,99,23204.0
-gklsh4d,MLSL,94,80247.0
+gklsh4d,AGS,100,54537.0
 gklsh4d,CRS,47,73779.0
 gklsh4d,DIRECTl,97,54490.0
+gklsh4d,DIRECT,99,23204.0
+gklsh4d,MLSL,94,80247.0
+gklsh4d,Simulated annealing,72,68816.0
 
-gklsh5d,AGS,97,113129.0
 gklsh5d,StoGO,8,155124.0
 gklsh5d,Scipy DE,48,105497.0
-gklsh5d,DIRECT,100,66327.0
-gklsh5d,MLSL,79,138766.0
+gklsh5d,AGS,97,113129.0
 gklsh5d,CRS,42,165193.0
 gklsh5d,DIRECTl,90,164391.0
+gklsh5d,DIRECT,100,66327.0
+gklsh5d,MLSL,79,138766.0
+gklsh5d,Simulated annealing,84,116973.0
 
-gklss2d,AGS,100,255.0
 gklss2d,StoGO,90,1252.0
+gklss2d,Simple,100,441.0
 gklss2d,Scipy DE,98,952.0
+gklss2d,AGS,100,255.0
+gklss2d,CRS,85,511.0
+gklss2d,DIRECTl,100,255.0
 gklss2d,DIRECT,100,189.0
 gklss2d,MLSL,100,557.0
-gklss2d,CRS,85,511.0
-gklss2d,Simple,100,441.0
-gklss2d,DIRECTl,100,255.0
+gklss2d,Simulated annealing,100,356.0
 
-gklss3d,AGS,100,1372.0
 gklss3d,StoGO,44,3856.0
+gklss3d,Simple,33,7098.0
 gklss3d,Scipy DE,86,5957.0
+gklss3d,AGS,100,1372.0
+gklss3d,CRS,75,4146.0
+gklss3d,DIRECTl,100,1478.0
 gklss3d,DIRECT,100,974.0
 gklss3d,MLSL,100,4609.0
-gklss3d,CRS,75,4146.0
-gklss3d,Simple,33,7098.0
-gklss3d,DIRECTl,100,1478.0
+gklss3d,Simulated annealing,89,2707.0
 
-gklss4d,AGS,100,26654.0
 gklss4d,StoGO,16,59895.0
 gklss4d,Scipy DE,59,19158.0
-gklss4d,DIRECT,100,7824.0
-gklss4d,MLSL,94,41514.0
+gklss4d,AGS,100,26654.0
 gklss4d,CRS,46,37437.0
 gklss4d,DIRECTl,100,15994.0
+gklss4d,DIRECT,100,7824.0
+gklss4d,MLSL,94,41514.0
+gklss4d,Simulated annealing,78,21418.0
 
-gklss5d,AGS,100,29810.0
 gklss5d,StoGO,9,91580.0
 gklss5d,Scipy DE,77,73075.0
-gklss5d,DIRECT,100,7166.0
-gklss5d,MLSL,98,52648.0
+gklss5d,AGS,100,29810.0
 gklss5d,CRS,68,143575.0
 gklss5d,DIRECTl,100,13971.0
+gklss5d,DIRECT,100,7166.0
+gklss5d,MLSL,98,52648.0
+gklss5d,Simulated annealing,100,34255.0
 
-grish,AGS,100,193.0
 grish,StoGO,67,1337.0
+grish,Simple,97,374.0
 grish,Scipy DE,96,1257.0
+grish,AGS,100,193.0
+grish,CRS,76,400.0
+grish,DIRECTl,100,215.0
 grish,DIRECT,100,182.0
 grish,MLSL,97,947.0
-grish,CRS,76,400.0
-grish,Simple,97,374.0
-grish,DIRECTl,100,215.0
+grish,Simulated annealing,96,691.0
 
