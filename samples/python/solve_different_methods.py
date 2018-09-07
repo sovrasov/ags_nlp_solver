@@ -294,7 +294,7 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
-               'sda': 'Simulated annealing'}
+               'sda': 'SDA'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
