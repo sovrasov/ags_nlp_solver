@@ -20,12 +20,12 @@ def main(args):
         if len(directory_stats):
             all_stats.append((directory_stats, os.path.basename(subdir)))
 
+    all_tables = {}
     columns = ['Метод', 'Среднее число испытаний', 'Решено задач']
     with open(os.path.join(args.root_folder, 'report.csv'), 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['class', 'method', 'solved', 'avg trials'])
         for class_results, class_name in all_stats:
-            print('Results on ' + class_name)
             table_rows = []
             for method_results in class_results:
                 table_rows.append((method_results['capture'], method_results['calc_counters'][0], method_results['num_solved']))
@@ -33,10 +33,22 @@ def main(args):
                     method_results['num_solved'], round(method_results['calc_counters'][0])])
             writer.writerow([])
             table = tabulate(sorted(table_rows), headers=columns, tablefmt="latex", floatfmt=".2f")
-            print(table)
+            all_tables[class_name] = table
 
+    #print(all_tables)
+    all_lines = []
+    with open(args.report_tex, 'r') as report_tex:
+        all_lines = report_tex.readlines()
+        for i, line in enumerate(all_lines):
+            if '%table' in line:
+                class_name = line.strip().split(' ')[-1]
+                all_lines[i] = line.replace(line, line + all_tables[class_name])
+        with open(os.path.join(os.path.split(args.report_tex)[0], 'report_generated.tex'), 'w') as generated_report:
+            for line in all_lines:
+                generated_report.write(line)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('root_folder', type=str)
+    parser.add_argument('--report_tex', type=str)
     main(parser.parse_args())
