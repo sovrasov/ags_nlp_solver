@@ -35,7 +35,6 @@ def main(args):
             table = tabulate(sorted(table_rows), headers=columns, tablefmt="latex", floatfmt=".2f")
             all_tables[class_name] = table
 
-    #print(all_tables)
     all_lines = []
     with open(args.report_tex, 'r') as report_tex:
         all_lines = report_tex.readlines()
@@ -43,7 +42,7 @@ def main(args):
             if '%table' in line:
                 class_name = line.strip().split(' ')[-1]
                 all_lines[i] = line.replace(line, line + all_tables[class_name])
-        with open(os.path.join(os.path.split(args.report_tex)[0], 'report_generated.tex'), 'w') as generated_report:
+        with open(os.path.join(os.path.split(args.report_tex)[0], 'report.tex'), 'w') as generated_report:
             for line in all_lines:
                 generated_report.write(line)
 
