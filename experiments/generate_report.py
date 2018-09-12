@@ -32,7 +32,7 @@ def main(args):
                 writer.writerow([class_name, method_results['capture'],
                     method_results['num_solved'], round(method_results['calc_counters'][0])])
             writer.writerow([])
-            table = tabulate(sorted(table_rows), headers=columns, tablefmt="latex", floatfmt=".2f")
+            table = tabulate(sorted(table_rows), headers=columns, tablefmt='latex', floatfmt='.2f', numalign='center')
             all_tables[class_name] = table
 
     all_lines = []
