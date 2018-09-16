@@ -12,7 +12,7 @@ def main(args):
     cmcs = [[item['cmc_iters'], item['cmc_vals']] for item in all_stats]
     print(zip(captures, iters))
 
-    plot_cmcs(cmcs, captures=captures, show=args.show,
+    plot_cmcs(cmcs, captures=captures, show=args.show, log=True,
               filename=args.output if len(args.output) > 0 else os.path.join(args.stats_folder, 'cmc.pdf'))
 
 if __name__ == '__main__':
