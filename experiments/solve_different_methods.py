@@ -6,7 +6,6 @@ import ags_solver
 import go_problems
 import nlopt
 import sys
-sys.path.append('../samples/python')
 from Simple import SimpleTuner
 import itertools
 from scipy.spatial import Delaunay
