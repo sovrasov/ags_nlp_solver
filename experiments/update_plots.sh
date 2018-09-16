@@ -1,0 +1,13 @@
+python2 ../experiments/plot_cmcs.py ../experiments/grish/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh2d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh3d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh4d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh5d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss2d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss3d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss4d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss5d/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh4d_serg/
+python2 ../experiments/plot_cmcs.py ../experiments/gklsh5d_serg/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss4d_serg/
+python2 ../experiments/plot_cmcs.py ../experiments/gklss5d_serg/

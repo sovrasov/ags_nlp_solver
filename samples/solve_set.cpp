@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   std::vector<std::vector<unsigned>> allStatistics;
 
   double objectiveAvgConst = 0.;
-  double solutionCheckAcc = 0.01;
+  double solutionCheckAcc = stop_by_acc ? 0.01 : eps;
 
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < 100; i++)
