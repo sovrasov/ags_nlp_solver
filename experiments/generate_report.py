@@ -21,7 +21,8 @@ def main(args):
             all_stats.append((directory_stats, os.path.basename(subdir)))
 
     all_tables = {}
-    columns = ['Метод', 'Среднее число испытаний', 'Решено задач']
+    #columns = ['Метод', 'Среднее число испытаний', 'Решено задач']
+    columns = ['Method', 'Average number of trials', 'Problems solved']
     with open(os.path.join(args.root_folder, 'report.csv'), 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['class', 'method', 'solved', 'avg trials'])
