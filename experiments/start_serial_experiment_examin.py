@@ -28,7 +28,7 @@ def createStartCommand (namespace):
     string_start_examin += " -Eps " + str(namespace.eps)
     string_start_examin += " -stopCond " + str(namespace.stopCond)
     string_start_examin += " -r " + str(namespace.r)
-    string_start_examin += " -lm " + str(namespace.r)
+    string_start_examin += " -lm " + str(namespace.lm)
     
     return string_start_examin
 
