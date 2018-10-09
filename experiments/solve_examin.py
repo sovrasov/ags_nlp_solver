@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, math
 import re
 import argparse
 from subprocess import Popen, PIPE
@@ -33,7 +33,12 @@ def create_parameters_dict(cl_args):
     parameters['stopCond'] = cl_args.stop_cond
     parameters['r'] = cl_args.r
     parameters['lm'] = cl_args.lm
-    parameters['Eps'] = cl_args.eps
+
+    if cl_args.serg_eps:
+        serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
+        parameters['Eps'] = serg_eps[cl_args.problems_dim]
+    else:
+        parameters['Eps'] = cl_args.eps
 
     if cl_args.problems_class == 'gklss':
         parameters['PC'] = 'Simple'
