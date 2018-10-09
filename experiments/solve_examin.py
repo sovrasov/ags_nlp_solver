@@ -20,6 +20,7 @@ def create_parser():
     parser.add_argument('--lm', type=int, default='0')
     parser.add_argument('--stats_fname', type=str, default='test.json')
     parser.add_argument('--verbose', action='store_true', help='Print additional info to console')
+    parser.add_argument('--algo_capture', type=str, default='AGS-Examin')
 
     return parser
 
@@ -33,6 +34,7 @@ def create_parameters_dict(cl_args):
     parameters['stopCond'] = cl_args.stop_cond
     parameters['r'] = cl_args.r
     parameters['lm'] = cl_args.lm
+    parameters['spm'] = cl_args.max_iters // 10
 
     if cl_args.serg_eps:
         serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
@@ -122,7 +124,7 @@ def start_serial(args):
 
 def main(args):
     stats = start_serial(args)
-    save_stats(stats, args.stats_fname)
+    save_stats(stats, args.stats_fname, args.algo_capture)
 
 if __name__ == '__main__':
     parser = create_parser()
