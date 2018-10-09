@@ -62,6 +62,8 @@ def start_examin(bin_path, parameters_dict):
     proc = Popen(string_start_examin, shell=True, stdout=PIPE, stderr=PIPE)
     proc.wait()
     output_examin = proc.communicate()
+    if len(output_examin[0]) == 0:
+        raise Exception('Examin launch failed: ' + string_start_examin)
 
     return output_examin[0]
 
@@ -111,7 +113,6 @@ def start_serial(args):
                     ' after {} trials'.format(number_of_trials))
         except BaseException as e:
             print(e)
-            print('Examin failed:')
             print(output_examin)
             sys.exit()
     stats = compute_stats(information_about_experiments, problem_status)
