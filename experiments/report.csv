@@ -41,6 +41,7 @@ gklsh4d_serg,MLSL,94,80220
 gklsh4d_serg,SDA,73,68048
 
 gklsh5d,StoGO,8,155124
+gklsh5d,AGSl,99,67653
 gklsh5d,Scipy DE,48,105497
 gklsh5d,AGS,97,113129
 gklsh5d,CRS,42,165193
@@ -102,6 +103,7 @@ gklss4d_serg,MLSL,94,41485
 gklss4d_serg,SDA,82,22066
 
 gklss5d,StoGO,9,91580
+gklss5d,AGSl,100,11529
 gklss5d,Scipy DE,77,73075
 gklss5d,AGS,100,29810
 gklss5d,CRS,68,143575
