@@ -18,6 +18,7 @@ def create_parser():
     parser.add_argument('--eps', type=float, default=0.01)
     parser.add_argument('--r', type=float, default='2.3')
     parser.add_argument('--lm', type=int, default='0')
+    parser.add_argument('--m', type=int, default='10')
     parser.add_argument('--stats_fname', type=str, default='test.json')
     parser.add_argument('--verbose', action='store_true', help='Print additional info to console')
     parser.add_argument('--algo_capture', type=str, default='AGS-Examin')
@@ -34,6 +35,7 @@ def create_parameters_dict(cl_args):
     parameters['stopCond'] = cl_args.stop_cond
     parameters['r'] = cl_args.r
     parameters['lm'] = cl_args.lm
+    parameters['m'] = cl_args.m
     parameters['spm'] = cl_args.max_iters // 10
 
     if cl_args.serg_eps:
