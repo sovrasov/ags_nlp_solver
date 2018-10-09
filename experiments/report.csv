@@ -1,122 +1,133 @@
 class,method,solved,avg trials
 gklsh2d,StoGO,77,2532
-gklsh2d,DIRECT,100,985
-gklsh2d,SDA,93,1638
 gklsh2d,Simple,100,898
+gklsh2d,AGSl,100,488
+gklsh2d,Scipy DE,85,1041
 gklsh2d,AGS,100,729
-gklsh2d,MLSL,100,1043
 gklsh2d,CRS,74,845
 gklsh2d,DIRECTl,100,1127
-gklsh2d,Scipy DE,85,1041
+gklsh2d,DIRECT,100,985
+gklsh2d,MLSL,100,1043
+gklsh2d,SDA,93,1638
 
 gklsh3d,StoGO,43,7843
-gklsh3d,DIRECT,100,2299
-gklsh3d,SDA,88,4708
+gklsh3d,AGSl,99,1930
+gklsh3d,Scipy DE,77,6914
 gklsh3d,AGS,100,3636
-gklsh3d,MLSL,100,5640
 gklsh3d,CRS,72,6787
 gklsh3d,DIRECTl,99,3553
-gklsh3d,Scipy DE,77,6914
+gklsh3d,DIRECT,100,2299
+gklsh3d,MLSL,100,5640
+gklsh3d,SDA,88,4708
 
 gklsh4d,StoGO,10,109328
-gklsh4d,DIRECT,99,23204
-gklsh4d,SDA,72,68816
+gklsh4d,AGSl,100,23168
+gklsh4d,Scipy DE,32,27466
 gklsh4d,AGS,100,54537
-gklsh4d,MLSL,94,80247
 gklsh4d,CRS,47,73779
 gklsh4d,DIRECTl,97,54490
-gklsh4d,Scipy DE,32,27466
+gklsh4d,DIRECT,99,23204
+gklsh4d,MLSL,94,80247
+gklsh4d,SDA,72,68816
 
 gklsh4d_serg,StoGO,69,58926
-gklsh4d_serg,DIRECT,99,22884
-gklsh4d_serg,SDA,73,68048
+gklsh4d_serg,AGSl,100,19826
+gklsh4d_serg,Scipy DE,55,12488
 gklsh4d_serg,AGS,100,13113
-gklsh4d_serg,MLSL,94,80220
 gklsh4d_serg,CRS,60,27137
 gklsh4d_serg,DIRECTl,99,55596
-gklsh4d_serg,Scipy DE,55,12488
+gklsh4d_serg,DIRECT,99,22884
+gklsh4d_serg,MLSL,94,80220
+gklsh4d_serg,SDA,73,68048
 
 gklsh5d,StoGO,8,155124
-gklsh5d,DIRECT,100,66327
-gklsh5d,SDA,84,116973
+gklsh5d,Scipy DE,48,105497
 gklsh5d,AGS,97,113129
-gklsh5d,MLSL,79,138766
 gklsh5d,CRS,42,165193
 gklsh5d,DIRECTl,90,164391
-gklsh5d,Scipy DE,48,105497
+gklsh5d,DIRECT,100,66327
+gklsh5d,MLSL,79,138766
+gklsh5d,SDA,84,116973
 
 gklsh5d_serg,StoGO,78,141886
-gklsh5d_serg,DIRECT,100,61657
-gklsh5d_serg,SDA,86,115635
+gklsh5d_serg,AGSl,100,48514
+gklsh5d_serg,Scipy DE,77,26850
 gklsh5d_serg,AGS,100,17009
-gklsh5d_serg,MLSL,79,138012
 gklsh5d_serg,CRS,77,87564
 gklsh5d_serg,DIRECTl,93,148638
-gklsh5d_serg,Scipy DE,77,26850
+gklsh5d_serg,DIRECT,100,61657
+gklsh5d_serg,MLSL,79,138012
+gklsh5d_serg,SDA,86,115635
 
 gklss2d,StoGO,90,1252
-gklss2d,DIRECT,100,189
-gklss2d,SDA,100,356
 gklss2d,Simple,100,441
+gklss2d,AGSl,100,218
+gklss2d,Scipy DE,98,952
 gklss2d,AGS,100,255
-gklss2d,MLSL,100,557
 gklss2d,CRS,85,511
 gklss2d,DIRECTl,100,255
-gklss2d,Scipy DE,98,952
+gklss2d,DIRECT,100,189
+gklss2d,MLSL,100,557
+gklss2d,SDA,100,356
 
 gklss3d,StoGO,44,3856
-gklss3d,DIRECT,100,974
-gklss3d,SDA,89,2707
 gklss3d,Simple,33,7098
+gklss3d,AGSl,97,1195
+gklss3d,Scipy DE,86,5957
 gklss3d,AGS,100,1372
-gklss3d,MLSL,100,4609
 gklss3d,CRS,75,4146
 gklss3d,DIRECTl,100,1478
-gklss3d,Scipy DE,86,5957
+gklss3d,DIRECT,100,974
+gklss3d,MLSL,100,4609
+gklss3d,SDA,89,2707
 
 gklss4d,StoGO,16,59895
-gklss4d,DIRECT,100,7824
-gklss4d,SDA,78,21418
+gklss4d,AGSl,100,11096
+gklss4d,Scipy DE,59,19158
 gklss4d,AGS,100,26654
-gklss4d,MLSL,94,41514
 gklss4d,CRS,46,37437
 gklss4d,DIRECTl,100,15994
-gklss4d,Scipy DE,59,19158
+gklss4d,DIRECT,100,7824
+gklss4d,MLSL,94,41514
+gklss4d,SDA,78,21418
 
 gklss4d_serg,StoGO,72,29359
-gklss4d_serg,DIRECT,100,7329
-gklss4d_serg,SDA,82,22066
+gklss4d_serg,AGSl,100,8847
+gklss4d_serg,Scipy DE,68,6271
 gklss4d_serg,AGS,100,5730
-gklss4d_serg,MLSL,94,41485
 gklss4d_serg,CRS,74,19884
 gklss4d_serg,DIRECTl,100,15010
-gklss4d_serg,Scipy DE,68,6271
+gklss4d_serg,DIRECT,100,7329
+gklss4d_serg,MLSL,94,41485
+gklss4d_serg,SDA,82,22066
 
 gklss5d,StoGO,9,91580
-gklss5d,DIRECT,100,7166
-gklss5d,SDA,100,34255
+gklss5d,Scipy DE,77,73075
 gklss5d,AGS,100,29810
-gklss5d,MLSL,98,52648
 gklss5d,CRS,68,143575
 gklss5d,DIRECTl,100,13971
-gklss5d,Scipy DE,77,73075
+gklss5d,DIRECT,100,7166
+gklss5d,MLSL,98,52648
+gklss5d,SDA,100,34255
 
 gklss5d_serg,StoGO,82,69207
-gklss5d_serg,DIRECT,100,5966
-gklss5d_serg,SDA,100,34209
+gklss5d_serg,AGSl,100,6314
+gklss5d_serg,Scipy DE,88,20859
 gklss5d_serg,AGS,100,5821
-gklss5d_serg,MLSL,98,52609
 gklss5d_serg,CRS,86,62922
 gklss5d_serg,DIRECTl,100,10795
-gklss5d_serg,Scipy DE,88,20859
+gklss5d_serg,DIRECT,100,5966
+gklss5d_serg,MLSL,98,52609
+gklss5d_serg,SDA,100,34209
 
 grish,StoGO,67,1337
-grish,DIRECT,100,182
-grish,SDA,96,691
 grish,Simple,97,374
+grish,AGSl,100,158
+grish,Scipy DE,96,1257
 grish,AGS,100,193
-grish,MLSL,97,947
 grish,CRS,76,400
 grish,DIRECTl,100,215
-grish,Scipy DE,96,1257
+grish,DIRECT,100,182
+grish,MLSL,97,947
+grish,SDA,96,691
 
