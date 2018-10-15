@@ -12,6 +12,7 @@ from scipy.spatial import Delaunay
 from scipy.optimize import differential_evolution
 from scipy.optimize import basinhopping
 from sdaopt import sda
+from stochopy import Evolutionary
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -281,6 +282,43 @@ class NLOptWrapper:
         n_evals = problem.GetCalculationsStatistics()
         return x, minf, n_evals
 
+class StochOpyWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+        self.popsize = self.class_name2params(class_name)
+
+    def class_name2params(self, name):
+        if 'grish' in name:
+            popsize = 60
+        elif 'gklss2' in name:
+            popsize = 60
+        elif 'gklsh2' in name:
+            popsize = 60
+        elif 'gklss3' in name:
+            popsize = 70
+        elif 'gklsh3' in name:
+            popsize = 80
+        elif 'gklss4' in name:
+            popsize = 90
+        elif 'gklsh4' in name:
+            popsize = 100
+        elif 'gklss5' in name:
+            popsize = 120
+        elif 'gklsh5' in name:
+            popsize = 140
+        return popsize
+
+    def Solve(self, problem):
+        objective_function = lambda x: 50 + problem.Calculate(x)
+        lb, ub = problem.GetBounds()
+        ea = Evolutionary(objective_function, lower=lb, upper=ub, popsize=self.popsize, \
+            max_iter=int(self.max_iters/self.popsize), eps1=1e-16, eps2=1e-16)
+        xopt, gfit = ea.optimize(solver='cpso', sync=False, CR=0.4, F=0.5)
+        n_evals = problem.GetCalculationsStatistics()
+        return xopt, gfit, n_evals
+
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'direct': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT),
          'directl': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT_L),
@@ -288,12 +326,12 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'mlsl': functools.partial(NLOptWrapper, method=nlopt.G_MLSL_LDS),
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
          'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper,
-         'sda': SDAWrapper}
+         'sda': SDAWrapper, 'stochopy': StochOpyWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
-               'sda': 'SDA'}
+               'sda': 'SDA', 'stochopy': 'Stochopy'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
