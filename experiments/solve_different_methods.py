@@ -13,6 +13,8 @@ from scipy.optimize import differential_evolution
 from scipy.optimize import basinhopping
 from sdaopt import sda
 from stochopy import Evolutionary
+from pySOT import *
+from poap.controller import SerialController, BasicWorkerThread, ThreadController
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -319,6 +321,67 @@ class StochOpyWrapper:
         n_evals = problem.GetCalculationsStatistics()
         return xopt, gfit, n_evals
 
+class PySOTWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+        self.popsize = self.class_name2params(class_name)
+
+    def class_name2params(self, name):
+        if 'grish' in name:
+            popsize = 60
+        elif 'gklss2' in name:
+            popsize = 60
+        elif 'gklsh2' in name:
+            popsize = 60
+        elif 'gklss3' in name:
+            popsize = 70
+        elif 'gklsh3' in name:
+            popsize = 80
+        elif 'gklss4' in name:
+            popsize = 90
+        elif 'gklsh4' in name:
+            popsize = 100
+        elif 'gklss5' in name:
+            popsize = 120
+        elif 'gklsh5' in name:
+            popsize = 140
+        return popsize
+
+    def Solve(self, problem):
+        class pysot_function:
+            def __init__(self, problem):
+                self.xlow, self.xup = np.array(problem.GetBounds())
+                self.dim = problem.GetDimension()
+                self.integer = np.array([0])
+                self.continuous = np.arange(1, self.dim)
+            def objfunction(self, x):
+                return problem.Calculate(x)
+        objective = pysot_function(problem)
+        check_opt_prob(objective)
+
+        maxeval = 1000
+        exp_des = SymmetricLatinHypercube(dim=objective.dim, npts=2*objective.dim+1)
+        basisp = basis_TD(3, 2)
+        surrogate = RBFInterpolant(kernel=CubicKernel, tail=LinearTail, maxp=maxeval)
+        adapt_samp = CandidateDYCORS(data=objective, numcand=100*objective.dim)
+        controller = SerialController(objective.objfunction)
+        #controller = ThreadController()
+        nthreads = 1
+        strategy = SyncStrategyNoConstraints(
+                worker_id=0, data=objective, maxeval=maxeval, nsamples=nthreads,
+                exp_design=exp_des, response_surface=surrogate,
+                sampling_method=adapt_samp)
+        controller.strategy = strategy
+        #for _ in range(nthreads):
+        #    worker = BasicWorkerThread(controller, objective.objfunction)
+        #    controller.launch_worker(worker)
+        result = controller.run()
+        print(result.value)
+        n_evals = problem.GetCalculationsStatistics()
+        return result.params[0], result.value, n_evals
+
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'direct': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT),
          'directl': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT_L),
@@ -326,12 +389,12 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'mlsl': functools.partial(NLOptWrapper, method=nlopt.G_MLSL_LDS),
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
          'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper,
-         'sda': SDAWrapper, 'stochopy': StochOpyWrapper}
+         'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'pysot': PySOTWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
-               'sda': 'SDA', 'stochopy': 'Stochopy'}
+               'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
