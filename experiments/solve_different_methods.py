@@ -15,6 +15,9 @@ from sdaopt import sda
 from stochopy import Evolutionary
 from pySOT import *
 from poap.controller import SerialController, BasicWorkerThread, ThreadController
+from pyOpt import Optimization
+from pyOpt import MIDACO
+import pyOpt
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -382,6 +385,30 @@ class PySOTWrapper:
         n_evals = problem.GetCalculationsStatistics()
         return result.params[0], result.value, n_evals
 
+class PyOptWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+
+    def Solve(self, problem):
+        objective_function = lambda x: [problem.Calculate(x), 0, 0]
+        lb, ub = problem.GetBounds()
+
+        opt_prob = pyOpt.Optimization('Problem', objective_function)
+        opt_prob.addObj('f')
+        for i in range(problem.GetDimension()):
+            opt_prob.addVar('x'+str(i),'c',lower=lb[i],upper=ub[i],value=(lb[i] + ub[i])/2.)
+        midaco_none = MIDACO(pll_type=None)
+        midaco_none.setOption('IPRINT',-1)
+        midaco_none.setOption('ISEED', 100)
+        midaco_none.setOption('MAXEVAL',self.max_iters)
+        midaco_none.setOption('FOCUS', -4)
+        fstr, xstr, inform = midaco_none(opt_prob)
+
+        n_evals = problem.GetCalculationsStatistics()
+        return xstr, fstr[0], n_evals
+
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'direct': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT),
          'directl': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT_L),
@@ -389,12 +416,13 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'mlsl': functools.partial(NLOptWrapper, method=nlopt.G_MLSL_LDS),
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
          'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper,
-         'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'pysot': PySOTWrapper}
+         'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'pysot': PySOTWrapper,
+         'pyopt': PyOptWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
-               'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT'}
+               'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT', 'pyopt': 'PyOpt'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
