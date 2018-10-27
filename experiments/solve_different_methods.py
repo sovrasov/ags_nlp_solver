@@ -18,6 +18,7 @@ from poap.controller import SerialController, BasicWorkerThread, ThreadControlle
 from pyOpt import Optimization
 from pyOpt import MIDACO
 import pyOpt
+import pygmo
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -408,6 +409,42 @@ class PyOptWrapper:
 
         n_evals = problem.GetCalculationsStatistics()
         return xstr, fstr[0], n_evals
+    
+class Pygmo_task:
+    func = ''
+    bounds = ()
+    def __init__(self, lambda_func, lb, ub):
+        self.func = lambda_func
+        bounds = []
+        bounds.append(lb)
+        bounds.append(ub)
+        self.bounds = tuple(bounds)
+        
+    def fitness(self, x):
+        return [self.func(x)]
+    
+    def get_bounds(self):
+        return self.bounds
+
+class PygmoWrapper:
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+        self.dist_stop = dist_stop
+        self.eps = eps
+        self.max_iters = max_iters
+
+    def Solve(self, problem):
+        objective_function = lambda x: [problem.Calculate(x), 0, 0]
+        lb, ub = problem.GetBounds()
+
+        opt_prob = pygmo.problem(Pygmo_task(objective_function, lb, ub))
+        algo = pygmo.algorithm(pygmo.bee_colony(gen = 20, limit = 20))
+        pop = pygmo.population(opt_prob,10)
+        pop = algo.evolve(pop)
+
+        xstr = str(pop.champion_x)
+        fstr = str(pop.champion_f)
+        n_evals = problem.GetCalculationsStatistics()
+        return xstr, fstr, n_evals
 
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'direct': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT),
@@ -417,12 +454,13 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'crs': functools.partial(NLOptWrapper, method=nlopt.GN_CRS2_LM),
          'simple': SimpleWrapper, 'scb': SCBasinhoppingWrapper,
          'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'pysot': PySOTWrapper,
-         'pyopt': PyOptWrapper}
+         'pyopt': PyOptWrapper,
+         'pygmo': PygmoWrapper}
 
 algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
-               'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT', 'pyopt': 'PyOpt'}
+               'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT', 'pyopt': 'PyOpt', 'pygmo': 'Pygmo'}
 
 serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
 
