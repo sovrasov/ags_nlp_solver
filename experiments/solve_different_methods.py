@@ -409,23 +409,20 @@ class PyOptWrapper:
 
         n_evals = problem.GetCalculationsStatistics()
         return xstr, fstr[0], n_evals
-    
-class Pygmo_task:
+		
+ class Pygmo_task:
     func = ''
     bounds = ()
     def __init__(self, lambda_func, lb, ub):
         self.func = lambda_func
-        bounds = []
-        bounds.append(lb)
-        bounds.append(ub)
-        self.bounds = tuple(bounds)
+        self.bounds = tuple(lb, ub)
         
     def fitness(self, x):
         return [self.func(x)]
     
     def get_bounds(self):
         return self.bounds
-
+		
 class PygmoWrapper:
     def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
         self.dist_stop = dist_stop
@@ -433,17 +430,24 @@ class PygmoWrapper:
         self.max_iters = max_iters
 
     def Solve(self, problem):
-        objective_function = lambda x: [problem.Calculate(x), 0, 0]
+        objective_function = lambda x: problem.Calculate(x)
         lb, ub = problem.GetBounds()
 
         opt_prob = pygmo.problem(Pygmo_task(objective_function, lb, ub))
-        algo = pygmo.algorithm(pygmo.bee_colony(gen = 20, limit = 20))
-        pop = pygmo.population(opt_prob,10)
-        pop = algo.evolve(pop)
+        
+        algo = pygmo.algorithm(pygmo.sade(gen = 1000, variant = 17, variant_adptv = 1, ftol = 0, xtol = 0))
+        archi = pygmo.archipelago(3, algo=algo, prob=opt_prob, pop_size=10000)
+        archi.evolve()
+        archi.wait()
 
-        xstr = str(pop.champion_x)
-        fstr = str(pop.champion_f)
+        f = [isl.get_population().champion_f for isl in archi]
+        x = [isl.get_population().champion_x for isl in archi]
+        import operator
+        index_min_f, value_min_f = min(enumerate(f), key=operator.itemgetter(1))
+        fstr = str(value_min_f)
+        xstr = str(x[index_min_f])
         n_evals = problem.GetCalculationsStatistics()
+        
         return xstr, fstr, n_evals
 
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
