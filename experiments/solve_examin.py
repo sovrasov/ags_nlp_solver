@@ -19,9 +19,13 @@ def create_parser():
     parser.add_argument('--r', type=float, default='2.3')
     parser.add_argument('--lm', type=int, default='0')
     parser.add_argument('--m', type=int, default='10')
+    parser.add_argument('--p', type=int, default='1', help='Number of OMP threads')
+    parser.add_argument('--ne', type=int, default='1', help='Number of evolvents')
     parser.add_argument('--stats_fname', type=str, default='test.json')
     parser.add_argument('--verbose', action='store_true', help='Print additional info to console')
+    parser.add_argument('--parallel_evolvent', action='store_true', help='Enable parallelism by evolvents')
     parser.add_argument('--algo_capture', type=str, default='AGS-Examin')
+    parser.add_argument('--preffix', type=str, default='')
 
     return parser
 
@@ -37,6 +41,14 @@ def create_parameters_dict(cl_args):
     parameters['lm'] = cl_args.lm
     parameters['m'] = cl_args.m
     parameters['spm'] = cl_args.max_iters // 10
+    parameters['nt'] = cl_args.p
+    parameters['np'] = cl_args.p
+    parameters['ml'] = cl_args.ne
+    if cl_args.ne > 1:
+        parameters['tm'] = 'ParallelMultievolventsMethod'
+        parameters['mt'] = 'mpRotated'
+        if cl_args.parallel_evolvent:
+            parameters['mpl'] = cl_args.ne
 
     if cl_args.serg_eps:
         serg_eps = {2: 0.01, 3: 0.01, 4: math.pow(1e-6, 1./4), 5: math.pow(1e-7, 1./5)}
@@ -59,8 +71,8 @@ def create_start_command(bin_path, parameters_dict):
 
     return string_start_examin
 
-def start_examin(bin_path, parameters_dict):
-    string_start_examin = create_start_command(bin_path, parameters_dict)
+def start_examin(preffix, bin_path, parameters_dict):
+    string_start_examin = preffix + ' ' + create_start_command(bin_path, parameters_dict)
     proc = Popen(string_start_examin, shell=True, stdout=PIPE, stderr=PIPE)
     proc.wait()
     output_examin = proc.communicate()
@@ -95,12 +107,13 @@ def start_serial(args):
     information_about_experiments = []
     problem_status = []
     parameters = create_parameters_dict(args)
+    print('Launch parameters: {}'.format(parameters))
 
     for i in range(1,101):
         output_examin = ''
         try:
             parameters['function_number'] = i
-            output_examin = start_examin(args.bin_path, parameters)
+            output_examin = str(start_examin(args.preffix, args.bin_path, parameters))
 
             number_of_trials = re.search(r'NumberOfTrials = (\d+)', str(output_examin)).group(1)
             information_about_experiments.append([int(number_of_trials)])
