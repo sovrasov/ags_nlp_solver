@@ -105,6 +105,7 @@ def get_platform_executable_name(name):
 
 def start_serial(args):
     information_about_experiments = []
+    exec_times = []
     problem_status = []
     parameters = create_parameters_dict(args)
     print('Launch parameters: {}'.format(parameters))
@@ -115,8 +116,10 @@ def start_serial(args):
             parameters['function_number'] = i
             output_examin = str(start_examin(args.preffix, args.bin_path, parameters))
 
-            number_of_trials = re.search(r'NumberOfTrials = (\d+)', str(output_examin)).group(1)
+            number_of_trials = re.search(r'NumberOfTrials = (\d+)', output_examin).group(1)
             information_about_experiments.append([int(number_of_trials)])
+            time = float(re.search(r'Solve time = (\d+.\d+)', output_examin).group(1))
+            exec_times.append(time)
             result = re.search(r'FOUND!', str(output_examin))
             if result == None:
                 problem_status.append(False)
@@ -130,11 +133,12 @@ def start_serial(args):
             print(e)
             print(output_examin)
             sys.exit()
-    stats = compute_stats(information_about_experiments, problem_status)
+    stats = compute_stats(information_about_experiments, problem_status, exec_times)
     print('Problems solved: {}'.format(stats['num_solved']))
     for i, avg in enumerate(stats['avg_calcs'][:-1]):
         print('Average number of calculations of constraint #{}: {}'.format(i, avg))
     print('Average number of calculations of objective: {}'.format(stats['avg_calcs'][-1]))
+    print('Average solver run time {}'.format(stats['avg_time']))
 
     return stats
 
