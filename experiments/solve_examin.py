@@ -19,6 +19,7 @@ def create_parser():
     parser.add_argument('--r', type=float, default='2.3')
     parser.add_argument('--lm', type=int, default='0')
     parser.add_argument('--m', type=int, default='10')
+    parser.add_argument('--complexity', type=int, default='0')
     parser.add_argument('--p', type=int, default='1', help='Number of OMP threads')
     parser.add_argument('--ne', type=int, default='1', help='Number of evolvents')
     parser.add_argument('--stats_fname', type=str, default='test.json')
@@ -44,6 +45,7 @@ def create_parameters_dict(cl_args):
     parameters['nt'] = cl_args.p
     parameters['np'] = cl_args.p
     parameters['ml'] = cl_args.ne
+    parameters['complexity'] = cl_args.complexity
     if cl_args.ne > 1:
         parameters['tm'] = 'ParallelMultievolventsMethod'
         parameters['mt'] = 'mpRotated'
@@ -120,7 +122,7 @@ def start_serial(args):
             information_about_experiments.append([int(number_of_trials)])
             time = float(re.search(r'Solve time = (\d+.\d+)', output_examin).group(1))
             exec_times.append(time)
-            result = re.search(r'FOUND!', str(output_examin))
+            result = re.search(r'FOUND!', output_examin)
             if result == None:
                 problem_status.append(False)
             else:
