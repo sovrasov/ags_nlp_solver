@@ -46,6 +46,7 @@ def create_parameters_dict(cl_args):
     parameters['np'] = cl_args.p
     parameters['ml'] = cl_args.ne
     parameters['complexity'] = cl_args.complexity
+    parameters['tm'] = 'HybridMethod'
     if cl_args.ne > 1:
         parameters['tm'] = 'ParallelMultievolventsMethod'
         parameters['mt'] = 'mpRotated'
