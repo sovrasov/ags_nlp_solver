@@ -6,8 +6,8 @@ declare -a thr_nums=("1" "16")
 iters=150000
 class="gklss"
 folder="mpi/gklss4d_serg"
-partition="-p cpu"
-complexity="0"
+partition="-p gpu"
+complexity="11000"
 
 for n_num in "${n_nodes[@]}"
 do
