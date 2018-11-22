@@ -6,7 +6,7 @@ declare -a thr_nums=("1" "16")
 iters=250000
 class="gklsh"
 folder="mpi/gklsh4d"
-partition="-p gpu"
+partition="-p gpu --reservation=global_opt"
 complexity="20000"
 
 for n_num in "${n_nodes[@]}"
