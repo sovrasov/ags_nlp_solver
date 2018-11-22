@@ -76,6 +76,7 @@ def create_start_command(bin_path, parameters_dict):
 
 def start_examin(preffix, bin_path, parameters_dict):
     string_start_examin = preffix + ' ' + create_start_command(bin_path, parameters_dict)
+    print(string_start_examin)
     proc = Popen(string_start_examin, shell=True, stdout=PIPE, stderr=PIPE)
     proc.wait()
     output_examin = proc.communicate()
