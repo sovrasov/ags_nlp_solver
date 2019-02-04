@@ -66,6 +66,7 @@ protected:
   unsigned mIterationsCounter;
   bool mNeedRefillQueue;
   bool mNeedStop;
+  bool mRestartFlag;
   double mMinDelta;
   int mMaxIdx;
   double mCurrentR;

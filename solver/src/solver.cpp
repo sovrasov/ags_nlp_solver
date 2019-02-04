@@ -141,6 +141,7 @@ void NLPSolver::InitDataStructures()
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
   mCurrentR = mParameters.r;
+  mRestartFlag = false;
 }
 
 void NLPSolver::ClearDataStructures()
@@ -172,8 +173,9 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
             mCurrentR = mParameters.r;
             mNeedRefillQueue = true;
         }
+        mRestartFlag = false;
     }
-    else if (mCurrentR == mParameters.r) {
+    else if (mCurrentR == mParameters.r && !mRestartFlag) {
         mCurrentR = 3;
         mNeedRefillQueue = true;
     }
@@ -316,8 +318,17 @@ void NLPSolver::CalculateNextPoints()
     if (mNextPoints[i].x > mNextIntervals[i]->pr.x || mNextPoints[i].x < mNextIntervals[i]->pl.x)
       throw std::runtime_error("The next point is outside of the subdivided interval");
     else if (mNextPoints[i].x == mNextIntervals[i]->pr.x || mNextPoints[i].x == mNextIntervals[i]->pl.x) {
-      mNeedStop = true;
-      std::cout << "Warning: AGS stopped early! Two similar 1d points were generated." << std::endl;
+      mRestartFlag = true;
+      mCurrentR = mParameters.r;
+      RefillQueue();
+      mNextIntervals[i] = mQueue.top();
+      mQueue.pop();
+      mNextPoints[i].x = GetNextPointCoordinate(mNextIntervals[i]);
+      std::cout << "Warning: AGS restart." << std::endl;
+      if (mNextPoints[i].x == mNextIntervals[i]->pr.x || mNextPoints[i].x == mNextIntervals[i]->pl.x) {
+        std::cout << "Warning: AGS stopped early! Two similar 1d points were generated." << std::endl;
+        mNeedStop = true;
+      }
     }
 
     mEvolvent.GetImage(mNextPoints[i].x, mNextPoints[i].y);
