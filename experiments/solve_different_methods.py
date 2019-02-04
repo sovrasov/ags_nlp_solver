@@ -11,7 +11,6 @@ import itertools
 from scipy.spatial import Delaunay
 from scipy.optimize import differential_evolution
 from scipy.optimize import basinhopping
-from sdaopt import sda
 from stochopy import Evolutionary
 from pyOpt import Optimization
 from pyOpt import MIDACO
@@ -24,12 +23,10 @@ from benchmark_tools.stats import save_stats, compute_stats
 
 class AGSWrapper(Solver):
     def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
-        params = self.class_name2params(class_name)
+        self.params = self.class_name2params(class_name)
         if dist_stop:
-            params.eps = 0
-            params.itersLimit = max_iters
-        self.solver = ags_solver.Solver()
-        self.solver.SetParameters(params)
+            self.params.eps = 0
+            self.params.itersLimit = max_iters
         self.dist_stop = dist_stop
         self.eps = eps
 
@@ -55,9 +52,12 @@ class AGSWrapper(Solver):
         elif 'gklsh5' in name:
             params.r = 4
             params.evolventDensity = 10
+        params.r = 6
         return params
 
     def Solve(self, problem):
+        self.solver = ags_solver.Solver()
+        self.solver.SetParameters(self.params)
         self.solver.SetProblem([lambda x: problem.Calculate(x)], *problem.GetBounds())
         #self.solver.SetProblem(problem)
         if not self.dist_stop:
