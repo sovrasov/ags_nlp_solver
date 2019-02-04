@@ -134,12 +134,13 @@ void saveStatistics(const std::vector<std::vector<unsigned>>& stat, const cmdlin
   {
     maxIters = std::max(maxIters, elem[0]);
     for(size_t j = 0; j < numFuncs; j++)
-      avgCalcs[j] += elem[j];
+        if(elem.back())
+            avgCalcs[j] += elem[j];
     solvedCounter += elem.back();
   }
   for(size_t j = 0; j < numFuncs; j++)
   {
-    avgCalcs[j] /= stat.size();
+    avgCalcs[j] /= solvedCounter;
     std::cout << "Average calculations number of function # " << j << " = " << avgCalcs[j] << "\n";
   }
   std::cout << "Problems solved: " << solvedCounter << "\n";

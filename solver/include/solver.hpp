@@ -68,6 +68,7 @@ protected:
   bool mNeedStop;
   double mMinDelta;
   int mMaxIdx;
+  double mCurrentR;
 
   void InitLocalOptimizer();
   void FirstIteration();

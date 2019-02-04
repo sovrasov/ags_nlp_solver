@@ -140,6 +140,7 @@ void NLPSolver::InitDataStructures()
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
+  mCurrentR = mParameters.r;
 }
 
 void NLPSolver::ClearDataStructures()
@@ -164,6 +165,19 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
   do {
     InsertIntervals();
     EstimateOptimum();
+
+    int epochs = mIterationsCounter / 1000;
+    if (epochs % 2 == 0) {
+        if (mCurrentR == 3) {
+            mCurrentR = mParameters.r;
+            mNeedRefillQueue = true;
+        }
+    }
+    else if (mCurrentR == mParameters.r) {
+        mCurrentR = 3;
+        mNeedRefillQueue = true;
+    }
+
     if (mNeedRefillQueue || mQueue.size() < mParameters.numPoints)
       RefillQueue();
     CalculateNextPoints();
@@ -389,13 +403,13 @@ double NLPSolver::CalculateR(Interval* i) const
   if(i->pl.idx == i->pr.idx)
   {
     const int v = i->pr.idx;
-    return i->delta + pow((i->pr.g[v] - i->pl.g[v]) / (mParameters.r * mHEstimations[v]), 2) / i->delta -
-      2.*(i->pr.g[v] + i->pl.g[v] - 2*mZEstimations[v]) / (mParameters.r * mHEstimations[v]);
+    return i->delta + pow((i->pr.g[v] - i->pl.g[v]) / (mCurrentR * mHEstimations[v]), 2) / i->delta -
+      2.*(i->pr.g[v] + i->pl.g[v] - 2*mZEstimations[v]) / (mCurrentR * mHEstimations[v]);
   }
   else if(i->pl.idx < i->pr.idx)
-    return 2*i->delta - 4*(i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx]) / (mParameters.r * mHEstimations[i->pr.idx]);
+    return 2*i->delta - 4*(i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx]) / (mCurrentR * mHEstimations[i->pr.idx]);
   else
-    return 2*i->delta - 4*(i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx]) / (mParameters.r * mHEstimations[i->pl.idx]);
+    return 2*i->delta - 4*(i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx]) / (mCurrentR * mHEstimations[i->pl.idx]);
 }
 
 double NLPSolver::GetNextPointCoordinate(Interval* i) const
@@ -406,7 +420,7 @@ double NLPSolver::GetNextPointCoordinate(Interval* i) const
     const int v = i->pr.idx;
     double dg = i->pr.g[v] - i->pl.g[v];
     x = 0.5 * (i->pr.x + i->pl.x) -
-      0.5*((dg > 0.) ? 1. : -1.) * pow(fabs(dg) / mHEstimations[v], mProblem->GetDimension()) / mParameters.r;
+      0.5*((dg > 0.) ? 1. : -1.) * pow(fabs(dg) / mHEstimations[v], mProblem->GetDimension()) / mCurrentR;
   }
   else
     x = 0.5 * (i->pr.x + i->pl.x);
