@@ -33,26 +33,27 @@ class AGSWrapper(Solver):
     def class_name2params(self, name):
         params = ags_solver.Parameters()
         if 'grish' in name:
-            params.r = 3
+            params.maxR = params.minR = 3
         elif 'gklss2' in name:
-            params.r = 4.6
+            params.maxR = params.minR = 4.6
         elif 'gklsh2' in name:
-            params.r = 6.5
+            params.maxR = params.minR = 6.5
         elif 'gklss3' in name:
-            params.r = 3.7
+            params.maxR = params.minR = 3.7
         elif 'gklsh3' in name:
-            params.r = 4.4
+            params.maxR = params.minR = 4.4
         elif 'gklss4' in name:
-            params.r = 4.7
+            params.maxR = params.minR = 4.7
         elif 'gklsh4' in name:
-            params.r = 4.9
+            params.maxR = params.minR = 4.9
         elif 'gklss5' in name:
-            params.r = 4
+            params.maxR = params.minR = 4
             params.evolventDensity = 10
         elif 'gklsh5' in name:
-            params.r = 4
+            params.maxR = params.minR = 4
             params.evolventDensity = 10
-        params.r = 6
+        params.maxR = 6
+        params.minR = 3
         return params
 
     def Solve(self, problem):
