@@ -167,7 +167,7 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
     InsertIntervals();
     EstimateOptimum();
 
-    int epochs = mIterationsCounter / 1000;
+    int epochs = mIterationsCounter / (100 * pow(2, mProblem->GetDimension()));// (250 * mProblem->GetDimension());
     if (epochs % 2 == 0) {
         if (mCurrentR == 3) {
             mCurrentR = mParameters.r;
