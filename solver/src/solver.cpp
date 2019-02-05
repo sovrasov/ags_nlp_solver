@@ -140,7 +140,7 @@ void NLPSolver::InitDataStructures()
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
-  mCurrentR = mParameters.r;
+  mCurrentR = mParameters.maxR;
   mRestartFlag = false;
 }
 
@@ -167,17 +167,19 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
     InsertIntervals();
     EstimateOptimum();
 
-    int epochs = mIterationsCounter / (100 * pow(2, mProblem->GetDimension()));// (250 * mProblem->GetDimension());
-    if (epochs % 2 == 0) {
-        if (mCurrentR == 3) {
-            mCurrentR = mParameters.r;
-            mNeedRefillQueue = true;
+    if (mParameters.maxR != mParameters.minR)  {
+      int epochs = mIterationsCounter / (100 * pow(2, mProblem->GetDimension()));// (250 * mProblem->GetDimension());
+      if (epochs % 2 == 0) {
+        if (mCurrentR == mParameters.minR) {
+          mCurrentR = mParameters.maxR;
+          mNeedRefillQueue = true;
         }
         mRestartFlag = false;
-    }
-    else if (mCurrentR == mParameters.r && !mRestartFlag) {
-        mCurrentR = 3;
+      }
+      else if (mCurrentR == mParameters.maxR && !mRestartFlag) {
+        mCurrentR = mParameters.minR;
         mNeedRefillQueue = true;
+      }
     }
 
     if (mNeedRefillQueue || mQueue.size() < mParameters.numPoints)
@@ -319,7 +321,7 @@ void NLPSolver::CalculateNextPoints()
       throw std::runtime_error("The next point is outside of the subdivided interval");
     else if (mNextPoints[i].x == mNextIntervals[i]->pr.x || mNextPoints[i].x == mNextIntervals[i]->pl.x) {
       mRestartFlag = true;
-      mCurrentR = mParameters.r;
+      mCurrentR = mParameters.maxR;
       RefillQueue();
       mNextIntervals[i] = mQueue.top();
       mQueue.pop();

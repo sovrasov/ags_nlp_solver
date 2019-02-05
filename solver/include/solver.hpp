@@ -26,7 +26,10 @@ struct SolverParameters
 {
   double eps = 0.01; //method tolerance. Less value -- better search precision, less probability of early stop.
   double stopVal = std::numeric_limits<double>::lowest(); //method stops after objective becomes less than this value
-  double r = 3; //reliability parameter. Higher value of r -- slower convergence, higher chance to cache the global minima.
+  double maxR = 3; //maximum value of reliability parameter. Higher value of r -- slower convergence, but higher chance to catch the global minima.
+  double minR = 3; //minimum value of reliability parameter. The solver will cyclically switch between maxR and minR during iterations.
+  //When maxR >> minR, the method more intensivelly explores global minimas and then refines them with minR. This can improve reliability with minimum harm to
+  //the speed of convergence.
   unsigned numPoints = 1; //number of new points per iteration. > 1 is useless in current implementation.
   unsigned itersLimit = 20000; // max number of iterations.
   unsigned evolventDensity = 12; // density of evolvent. By default density is 2^-12 on hybercube [0,1]^N,
@@ -38,7 +41,7 @@ struct SolverParameters
   SolverParameters() {}
   SolverParameters(double _eps, double _r,
       double epsR_, unsigned _trialsLimit) :
-        eps(_eps), r(_r), itersLimit(_trialsLimit), epsR(epsR_)
+        eps(_eps), maxR(_r), minR(_r), itersLimit(_trialsLimit), epsR(epsR_)
   {}
 };
 

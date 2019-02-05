@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
   SolverParameters parameters;
   double eps = parser.get<double>("accuracy");
-  parameters.r = parser.get<double>("reliability");
+  parameters.maxR = parameters.minR = parser.get<double>("reliability");
   parameters.itersLimit = parser.get<int>("itersLimit");
   parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
