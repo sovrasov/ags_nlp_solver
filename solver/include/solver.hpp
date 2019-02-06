@@ -84,6 +84,7 @@ protected:
 
   void InitDataStructures();
   void ClearDataStructures();
+  void SwitchR();
 
   void UpdateAllH(std::set<Interval*>::iterator);
   void UpdateH(double newValue, int index);

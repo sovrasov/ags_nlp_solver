@@ -166,21 +166,7 @@ Trial NLPSolver::Solve(std::function<bool(const Trial&)> external_stop)
   do {
     InsertIntervals();
     EstimateOptimum();
-
-    if (mParameters.maxR != mParameters.minR)  {
-      int epochs = mIterationsCounter / (100 * pow(2, mProblem->GetDimension()));// (250 * mProblem->GetDimension());
-      if (epochs % 2 == 0) {
-        if (mCurrentR == mParameters.minR) {
-          mCurrentR = mParameters.maxR;
-          mNeedRefillQueue = true;
-        }
-        mRestartFlag = false;
-      }
-      else if (mCurrentR == mParameters.maxR && !mRestartFlag) {
-        mCurrentR = mParameters.minR;
-        mNeedRefillQueue = true;
-      }
-    }
+    SwitchR();
 
     if (mNeedRefillQueue || mQueue.size() < mParameters.numPoints)
       RefillQueue();
@@ -407,6 +393,25 @@ void NLPSolver::UpdateAllH(std::set<Interval*>::iterator iterator)
       int idx = pInterval->pl.idx;
       UpdateH(fabs((*leftIterator)->pl.g[idx] - pInterval->pl.g[idx]) /
               pow(pInterval->pl.x - (*leftIterator)->pl.x, 1. / mProblem->GetDimension()), idx);
+    }
+  }
+}
+
+void NLPSolver::SwitchR()
+{
+  if (mParameters.maxR != mParameters.minR)
+  {
+    int epochs = mIterationsCounter / (100 * pow(2, std::min(mProblem->GetDimension(), 7)));
+    if (epochs % 2 == 0) {
+      if (mCurrentR == mParameters.minR) {
+        mCurrentR = mParameters.maxR;
+        mNeedRefillQueue = true;
+      }
+      mRestartFlag = false;
+    }
+    else if (mCurrentR == mParameters.maxR && !mRestartFlag) {
+      mCurrentR = mParameters.minR;
+      mNeedRefillQueue = true;
     }
   }
 }
