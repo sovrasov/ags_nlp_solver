@@ -12,10 +12,10 @@ from scipy.spatial import Delaunay
 from scipy.optimize import differential_evolution
 from scipy.optimize import basinhopping
 from stochopy import Evolutionary
-from pyOpt import Optimization
-from pyOpt import MIDACO
-import pyOpt
-from shgo import shgo
+#from pyOpt import Optimization
+#from pyOpt import MIDACO
+#import pyOpt
+#from shgo import shgo
 
 from benchmark_tools.core import Solver, solve_class, GrishClass, GKLSClass
 from benchmark_tools.plot import plot_cmcs
@@ -372,7 +372,7 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'shgo': SHGOWrapper,
          'pyopt': PyOptWrapper}
 
-algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
+algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS_AR', 'direct': 'DIRECT',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
                'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT', 'pyopt': 'PyOpt', 'shgo': 'SHGO'}

@@ -1,0 +1,13 @@
+bash ../experiments/run_fgrish.sh
+bash ../experiments/run_gklss2d.sh
+bash ../experiments/run_gklsh2d.sh
+bash ../experiments/run_gklss3d.sh
+bash ../experiments/run_gklsh3d.sh
+bash ../experiments/run_gklss4d_serg.sh
+bash ../experiments/run_gklsh4d_serg.sh
+bash ../experiments/run_gklss5d_serg.sh
+bash ../experiments/run_gklsh5d_serg.sh
+bash ../experiments/run_gklss4d.sh
+bash ../experiments/run_gklsh4d.sh
+bash ../experiments/run_gklss5d.sh
+bash ../experiments/run_gklsh5d.sh
