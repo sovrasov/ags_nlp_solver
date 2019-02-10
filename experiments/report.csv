@@ -2,7 +2,7 @@ class,method,solved,avg trials
 gklsh2d,AGSl,100,488
 gklsh2d,StoGO,77,2532
 gklsh2d,DIRECT,100,985
-gklsh2d,AGS_AR,96,692
+gklsh2d,AGS_AR,97,785
 gklsh2d,SDA,93,1638
 gklsh2d,Simple,100,898
 gklsh2d,AGS,100,729
@@ -14,7 +14,7 @@ gklsh2d,Scipy DE,85,1041
 gklsh3d,AGSl,99,1930
 gklsh3d,StoGO,43,7843
 gklsh3d,DIRECT,100,2299
-gklsh3d,AGS_AR,100,2021
+gklsh3d,AGS_AR,100,1952
 gklsh3d,SDA,88,4708
 gklsh3d,AGS,100,3636
 gklsh3d,MLSL,100,5640
@@ -25,7 +25,7 @@ gklsh3d,Scipy DE,77,6914
 gklsh4d,AGSl,100,23168
 gklsh4d,StoGO,10,109328
 gklsh4d,DIRECT,99,23204
-gklsh4d,AGS_AR,100,22912
+gklsh4d,AGS_AR,100,23615
 gklsh4d,SDA,72,68816
 gklsh4d,AGS,100,54537
 gklsh4d,MLSL,94,80247
@@ -36,7 +36,7 @@ gklsh4d,Scipy DE,32,27466
 gklsh4d_serg,AGSl,100,19826
 gklsh4d_serg,StoGO,69,58926
 gklsh4d_serg,DIRECT,99,22884
-gklsh4d_serg,AGS_AR,100,12475
+gklsh4d_serg,AGS_AR,100,12860
 gklsh4d_serg,SDA,73,68048
 gklsh4d_serg,AGS,100,13113
 gklsh4d_serg,MLSL,94,80220
@@ -47,7 +47,7 @@ gklsh4d_serg,Scipy DE,55,12488
 gklsh5d,AGSl,99,67653
 gklsh5d,StoGO,8,155124
 gklsh5d,DIRECT,100,66327
-gklsh5d,AGS_AR,100,77942
+gklsh5d,AGS_AR,100,80762
 gklsh5d,SDA,84,116973
 gklsh5d,AGS,97,113129
 gklsh5d,MLSL,79,138766
@@ -58,7 +58,7 @@ gklsh5d,Scipy DE,48,105497
 gklsh5d_serg,AGSl,100,48514
 gklsh5d_serg,StoGO,78,141886
 gklsh5d_serg,DIRECT,100,61657
-gklsh5d_serg,AGS_AR,100,20311
+gklsh5d_serg,AGS_AR,100,21555
 gklsh5d_serg,SDA,86,115635
 gklsh5d_serg,AGS,100,17009
 gklsh5d_serg,MLSL,79,138012
@@ -69,7 +69,7 @@ gklsh5d_serg,Scipy DE,77,26850
 gklss2d,AGSl,100,218
 gklss2d,StoGO,90,1252
 gklss2d,DIRECT,100,189
-gklss2d,AGS_AR,100,287
+gklss2d,AGS_AR,100,222
 gklss2d,SDA,100,356
 gklss2d,Simple,100,441
 gklss2d,AGS,100,255
@@ -81,7 +81,7 @@ gklss2d,Scipy DE,98,952
 gklss3d,AGSl,97,1195
 gklss3d,StoGO,44,3856
 gklss3d,DIRECT,100,974
-gklss3d,AGS_AR,100,1271
+gklss3d,AGS_AR,100,1170
 gklss3d,SDA,89,2707
 gklss3d,Simple,33,7098
 gklss3d,AGS,100,1372
@@ -93,7 +93,7 @@ gklss3d,Scipy DE,86,5957
 gklss4d,AGSl,100,11096
 gklss4d,StoGO,16,59895
 gklss4d,DIRECT,100,7824
-gklss4d,AGS_AR,100,10987
+gklss4d,AGS_AR,100,10571
 gklss4d,SDA,78,21418
 gklss4d,AGS,100,26654
 gklss4d,MLSL,94,41514
@@ -104,7 +104,7 @@ gklss4d,Scipy DE,59,19158
 gklss4d_serg,AGSl,100,8847
 gklss4d_serg,StoGO,72,29359
 gklss4d_serg,DIRECT,100,7329
-gklss4d_serg,AGS_AR,100,4996
+gklss4d_serg,AGS_AR,100,4919
 gklss4d_serg,SDA,82,22066
 gklss4d_serg,AGS,100,5730
 gklss4d_serg,MLSL,94,41485
@@ -115,7 +115,7 @@ gklss4d_serg,Scipy DE,68,6271
 gklss5d,AGSl,100,11529
 gklss5d,StoGO,9,91580
 gklss5d,DIRECT,100,7166
-gklss5d,AGS_AR,100,19312
+gklss5d,AGS_AR,100,16884
 gklss5d,SDA,100,34255
 gklss5d,AGS,100,29810
 gklss5d,MLSL,98,52648
@@ -126,7 +126,7 @@ gklss5d,Scipy DE,77,73075
 gklss5d_serg,AGSl,100,6314
 gklss5d_serg,StoGO,82,69207
 gklss5d_serg,DIRECT,100,5966
-gklss5d_serg,AGS_AR,100,5930
+gklss5d_serg,AGS_AR,100,6241
 gklss5d_serg,SDA,100,34209
 gklss5d_serg,AGS,100,5821
 gklss5d_serg,MLSL,98,52609
@@ -137,7 +137,7 @@ gklss5d_serg,Scipy DE,88,20859
 grish,AGSl,100,158
 grish,StoGO,67,1337
 grish,DIRECT,100,182
-grish,AGS_AR,100,343
+grish,AGS_AR,100,248
 grish,SDA,96,691
 grish,AGS,100,193
 grish,MLSL,97,947

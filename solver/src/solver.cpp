@@ -401,7 +401,8 @@ void NLPSolver::SwitchR()
 {
   if (mParameters.maxR != mParameters.minR)
   {
-    int epochs = mIterationsCounter / (100 * pow(2, std::min(mProblem->GetDimension(), 7)));
+    int epochs = mIterationsCounter /
+      static_cast<int>(50 * log(mProblem->GetDimension() + 1) * pow(mProblem->GetDimension(), 2));
     if (epochs % 2 == 0) {
       if (mCurrentR == mParameters.minR) {
         mCurrentR = mParameters.maxR;
