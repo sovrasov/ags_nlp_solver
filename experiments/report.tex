@@ -29,7 +29,76 @@
   \item StoGO (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#stogo})
 \end{itemize}
 
-All parameters of the methods can be found in \textit{experiments/solve\_different\_methods.py} script.
+When conducting the comparison, the following parameters for the methods were employed:
+\begin{itemize}
+  \item in the AGS\(l\) method, the parameter of alternation the
+global and local iterations was set to be equal to 5:1;
+  \item in the DIRECT and DIRECT\(l\) methods, the parameter \(\epsilon=10^{-4}\);
+  \item in the SDA method, the parameter \(visit=2.72\).
+\end{itemize}
+
+The rest parameters were varied subject to the problem class (see Table \ref{tab:params}).
+
+\begin{table}
+\begin{center}
+\caption{Class-specific parameters of the optimization algorithms}
+  \begin{tabular}{|l|{c}|{c}|{c}|}
+    \hline
+    & AGS, AGS\(l\) & CRS & DE\\
+  \hline
+  \(F_{GR}\) & \(r=3\) & popsize=150 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Simple & \(r=4.6\) & popsize=200 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Hard & \(r=6.5\) & popsize=400 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 3d Simple & \(r=3.7\) & popsize=1000 & mutation=(1.1,1.9), popsize=70 \\
+  \hline
+  GKLS 3d Hard & \(r=4.4\) & popsize=2000 & mutation=(1.1,1.9), popsize=80 \\
+  \hline
+  GKLS 4d Simple & \(r=4.7\) & popsize=8000 & mutation=(1.1,1.9), popsize=90 \\
+  \hline
+  GKLS 4d Hard & \(r=4.9\) & popsize=16000 & mutation=(1.1,1.9), popsize=100 \\
+  \hline
+  GKLS 5d Simple & \(r=4\) & popsize=25000 & mutation=(1.1,1.9), popsize=120 \\
+  \hline
+  GKLS 5d Hard & \(r=4\) & popsize=30000 & mutation=(1.1,1.9), popsize=140 \\
+  \hline
+\end{tabular}
+  \label{tab:params}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption{Trials limits for the test problem classes}
+  \begin{tabular}{|l|{c}|}
+    \hline
+  Problems class & Trials limit\\
+  \hline
+  \(F_{GR}\) & 5000 \\
+  \hline
+  GKLS 2d Simple & 8000 \\
+  \hline
+  GKLS 2d Hard & 9000 \\
+  \hline
+  GKLS 3d Simple & 15000 \\
+  \hline
+  GKLS 3d Hard & 25000 \\
+  \hline
+  GKLS 4d Simple & 150000 \\
+  \hline
+  GKLS 4d Hard & 250000 \\
+  \hline
+  GKLS 5d Simple & 350000 \\
+  \hline
+  GKLS 5d Hard & 600000 \\
+  \hline
+  \end{tabular}
+  \label{tab:limits}
+\end{center}
+\end{table}
+
 Since NLOpt hasn't an API to control parameters of the algorithms from Python, it was built with $\varepsilon=10^{-4}$ for DIRECT and DIRECT$l$ methods.
 
 \section{List of the test problems}
