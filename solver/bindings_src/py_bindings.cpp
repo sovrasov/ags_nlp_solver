@@ -106,6 +106,7 @@ PYBIND11_MODULE(ags_solver, m)
     .def_readwrite("evolventDensity", &ags::SolverParameters::evolventDensity)
     .def_readwrite("epsR", &ags::SolverParameters::epsR)
     .def_readwrite("refineSolution", &ags::SolverParameters::refineSolution)
+    .def_readwrite("mixedFastMode", &ags::SolverParameters::mixedFastMode)
     ;
 
     py::class_<AGSPyWrapper>(m, "Solver")
