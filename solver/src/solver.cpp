@@ -140,7 +140,10 @@ void NLPSolver::InitDataStructures()
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
-  mLocalR = 1.8;
+  mLocalR = fmax(mParameters.r / 2, 1.);
+  mRho = pow((1. - 1. / mParameters.r) / (1 - 1. / mLocalR), 2);
+  // mLocalR = fmax(mParameters.r / 2, 2.);
+  // mRho = pow((1. - 2. / mParameters.r) / (1 - 2. / mLocalR), 1);
 }
 
 void NLPSolver::ClearDataStructures()
@@ -284,8 +287,6 @@ void NLPSolver::InsertIntervals()
 
     if(!mNeedRefillQueue)
     {
-      //pNewInterval->R = CalculateR(pNewInterval, mParameters.r);
-      //mNextIntervals[i]->R = CalculateR(mNextIntervals[i], mParameters.r);
       UpdateR(pNewInterval);
       UpdateR(mNextIntervals[i]);
       mQueue.push(pNewInterval);
@@ -318,7 +319,6 @@ void NLPSolver::RefillQueue()
   mQueue = PriorityQueue();
   for (const auto& pInterval : mSearchInformation)
   {
-    //pInterval->R = CalculateR(pInterval, mParameters.r);
     UpdateR(pInterval);
     mQueue.push(pInterval);
   }
@@ -393,9 +393,8 @@ void NLPSolver::UpdateR(Interval* i)
   i->R = CalculateR(i, mParameters.r);
   if(mParameters.mixedFastMode)
   {
-    double rho = pow((1. - 1. / mParameters.r) / (1 - 1. / mLocalR), 2);
-    double localR = CalculateR(i, mLocalR);
-    if (rho*localR > i->R)
+    double localR = CalculateR(i, mLocalR)*mRho;
+    if (localR > i->R)
     {
       i->R = localR;
       i->localR = true;

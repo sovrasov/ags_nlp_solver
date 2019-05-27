@@ -71,6 +71,7 @@ protected:
   double mMinDelta;
   int mMaxIdx;
   double mLocalR;
+  double mRho;
 
   void InitLocalOptimizer();
   void FirstIteration();
