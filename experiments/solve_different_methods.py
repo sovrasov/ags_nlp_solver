@@ -23,8 +23,9 @@ from benchmark_tools.plot import plot_cmcs
 from benchmark_tools.stats import save_stats, compute_stats
 
 class AGSWrapper(Solver):
-    def __init__(self, dist_stop, max_iters, class_name, eps=0.01):
+    def __init__(self, dist_stop, max_iters, class_name, eps=0.01, mixedFast=False):
         params = self.class_name2params(class_name)
+        params.mixedFastMode = mixedFast
         if dist_stop:
             params.eps = 0
             params.itersLimit = max_iters
@@ -362,6 +363,7 @@ class SHGOWrapper:
         return result.x, result.fun, n_evals
 
 algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
+         'agsd': functools.partial(AGSWrapper, mixedFast=True),
          'direct': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT),
          'directl': functools.partial(NLOptWrapper, method=nlopt.GN_ORIG_DIRECT_L),
          'stogo': functools.partial(NLOptWrapper, method=nlopt.GD_STOGO),
@@ -371,7 +373,7 @@ algos = {'scd': SCDEWrapper, 'ags': AGSWrapper,
          'sda': SDAWrapper, 'stochopy': StochOpyWrapper, 'shgo': SHGOWrapper,
          'pyopt': PyOptWrapper}
 
-algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT',
+algo2cature = {'scd': 'Scipy DE', 'ags': 'AGS', 'direct': 'DIRECT', 'agsd': 'AGSd',
                'directl': 'DIRECTl', 'simple': 'Simple',
                'stogo': 'StoGO', 'mlsl': 'MLSL', 'crs':'CRS', 'scb': 'Scipy B-H',
                'sda': 'SDA', 'stochopy': 'Stochopy', 'pysot': 'PySOT', 'pyopt': 'PyOpt', 'shgo': 'SHGO'}
