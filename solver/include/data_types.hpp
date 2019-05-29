@@ -35,8 +35,9 @@ struct Interval
   Trial pr;
   double R;
   double delta;
-  Interval() {}
-  Interval(const Trial& _pl, const Trial& _pr) : pl(_pl), pr(_pr) {}
+  bool localR;
+  Interval() : localR(false) {}
+  Interval(const Trial& _pl, const Trial& _pr) : pl(_pl), pr(_pr), localR(false) {}
 };
 
 struct CompareIntervals

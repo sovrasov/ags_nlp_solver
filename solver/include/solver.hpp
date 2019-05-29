@@ -34,6 +34,8 @@ struct SolverParameters
   double epsR = 0.001; // parameter which prevents method from paying too much attention to constraints. Greater values of this parameter speed up convergence,
   // but global minima can be lost.
   bool refineSolution = false; //if true, the fibal solution will be refined with the HookJeves method.
+  bool mixedFastMode = false; //if true, two versions of characteristics with different values of the r parameter are used.
+  //It allows to speedup the method in case of overestimation io r
 
   SolverParameters() {}
   SolverParameters(double _eps, double _r,
@@ -68,6 +70,8 @@ protected:
   bool mNeedStop;
   double mMinDelta;
   int mMaxIdx;
+  double mLocalR;
+  double mRho;
 
   void InitLocalOptimizer();
   void FirstIteration();
@@ -82,8 +86,9 @@ protected:
 
   void UpdateAllH(std::set<Interval*>::iterator);
   void UpdateH(double newValue, int index);
-  double CalculateR(Interval*) const;
-  double GetNextPointCoordinate(Interval*) const;
+  void UpdateR(Interval*);
+  double CalculateR(const Interval*, const double) const;
+  double GetNextPointCoordinate(const Interval*) const;
 
 public:
   using FuncPtr = std::function<double(const double*)>;

@@ -140,6 +140,9 @@ void NLPSolver::InitDataStructures()
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
+  mLocalR = fmax(mParameters.r / 2, 2.);
+  mRho = pow((1. - 1. / mParameters.r) / (1 - 1. / mLocalR), 2);
+  // mRho = pow((1. - 2. / mParameters.r) / (1 - 2. / mLocalR), 1);
 }
 
 void NLPSolver::ClearDataStructures()
@@ -283,8 +286,8 @@ void NLPSolver::InsertIntervals()
 
     if(!mNeedRefillQueue)
     {
-      pNewInterval->R = CalculateR(pNewInterval);
-      mNextIntervals[i]->R = CalculateR(mNextIntervals[i]);
+      UpdateR(pNewInterval);
+      UpdateR(mNextIntervals[i]);
       mQueue.push(pNewInterval);
       mQueue.push(pOldInterval);
     }
@@ -315,7 +318,7 @@ void NLPSolver::RefillQueue()
   mQueue = PriorityQueue();
   for (const auto& pInterval : mSearchInformation)
   {
-    pInterval->R = CalculateR(pInterval);
+    UpdateR(pInterval);
     mQueue.push(pInterval);
   }
   mNeedRefillQueue = false;
@@ -384,29 +387,44 @@ void NLPSolver::UpdateAllH(std::set<Interval*>::iterator iterator)
   }
 }
 
-double NLPSolver::CalculateR(Interval* i) const
+void NLPSolver::UpdateR(Interval* i)
+{
+  i->R = CalculateR(i, mParameters.r);
+  if(mParameters.mixedFastMode)
+  {
+    double localR = CalculateR(i, mLocalR)*mRho;
+    if (localR > i->R)
+    {
+      i->R = localR;
+      i->localR = true;
+    }
+  }
+}
+
+double NLPSolver::CalculateR(const Interval* i, const double r) const
 {
   if(i->pl.idx == i->pr.idx)
   {
     const int v = i->pr.idx;
-    return i->delta + pow((i->pr.g[v] - i->pl.g[v]) / (mParameters.r * mHEstimations[v]), 2) / i->delta -
-      2.*(i->pr.g[v] + i->pl.g[v] - 2*mZEstimations[v]) / (mParameters.r * mHEstimations[v]);
+    return i->delta + pow((i->pr.g[v] - i->pl.g[v]) / (r * mHEstimations[v]), 2) / i->delta -
+      2.*(i->pr.g[v] + i->pl.g[v] - 2*mZEstimations[v]) / (r * mHEstimations[v]);
   }
   else if(i->pl.idx < i->pr.idx)
-    return 2*i->delta - 4*(i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx]) / (mParameters.r * mHEstimations[i->pr.idx]);
+    return 2*i->delta - 4*(i->pr.g[i->pr.idx] - mZEstimations[i->pr.idx]) / (r * mHEstimations[i->pr.idx]);
   else
-    return 2*i->delta - 4*(i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx]) / (mParameters.r * mHEstimations[i->pl.idx]);
+    return 2*i->delta - 4*(i->pl.g[i->pl.idx] - mZEstimations[i->pl.idx]) / (r * mHEstimations[i->pl.idx]);
 }
 
-double NLPSolver::GetNextPointCoordinate(Interval* i) const
+double NLPSolver::GetNextPointCoordinate(const Interval* i) const
 {
   double x;
+  double currentR = !i->localR ? mParameters.r : mLocalR;
   if(i->pr.idx == i->pl.idx)
   {
     const int v = i->pr.idx;
     double dg = i->pr.g[v] - i->pl.g[v];
     x = 0.5 * (i->pr.x + i->pl.x) -
-      0.5*((dg > 0.) ? 1. : -1.) * pow(fabs(dg) / mHEstimations[v], mProblem->GetDimension()) / mParameters.r;
+      0.5*((dg > 0.) ? 1. : -1.) * pow(fabs(dg) / mHEstimations[v], mProblem->GetDimension()) / currentR;
   }
   else
     x = 0.5 * (i->pr.x + i->pl.x);

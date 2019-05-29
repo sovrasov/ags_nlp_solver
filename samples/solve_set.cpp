@@ -28,6 +28,7 @@ int main(int argc, char** argv)
   parameters.itersLimit = parser.get<int>("itersLimit");
   parameters.evolventDensity = parser.get<int>("evolventDensity");
   parameters.refineSolution = parser.exist("refineLoc");
+  parameters.mixedFastMode = parser.exist("mf");
   bool stop_by_acc = parser.exist("accuracyStop");
   parameters.eps = stop_by_acc ? eps : 0.;
 
@@ -187,7 +188,6 @@ void initParser(cmdline::parser& parser)
   parser.add<double>("reserves", 'E', "eps-reserves for all constraints", false, 0);
   parser.add<int>("itersLimit", 'i', "limit of iterations for the method", false, 5000);
   parser.add<int>("dim", 'd', "test problem dimension (will be set if supported)", false, 2);
-  parser.add<int>("localMix", 'q', "local mix parameter", false, 0, cmdline::range(-20, 20));
   parser.add<std::string>("problemsClass", 'c', "Name of the used problems class", false,
     "gklsS", cmdline::oneof<std::string>("gklsS", "gklsH", "grish"));
   parser.add<std::string>("outFile", 'f', "Name of the output .csv file with statistics", false,
@@ -195,4 +195,5 @@ void initParser(cmdline::parser& parser)
   parser.add("accuracyStop", 'a', "Use native stop criterion instead of checking known optimum");
   parser.add("saveStat", 's', "Save statistics in a .csv file");
   parser.add("refineLoc", 'l', "Refine the global solution using a local optimizer");
+  parser.add("mf", ' ', "Use the accelerated method with mixed charactersistics");
 }
