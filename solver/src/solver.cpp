@@ -140,9 +140,8 @@ void NLPSolver::InitDataStructures()
   mIterationsCounter = 0;
   mMinDelta = std::numeric_limits<double>::max();
   mMaxIdx = -1;
-  mLocalR = fmax(mParameters.r / 2, 1.);
+  mLocalR = fmax(mParameters.r / 2, 2.);
   mRho = pow((1. - 1. / mParameters.r) / (1 - 1. / mLocalR), 2);
-  // mLocalR = fmax(mParameters.r / 2, 2.);
   // mRho = pow((1. - 2. / mParameters.r) / (1 - 2. / mLocalR), 1);
 }
 
