@@ -57,7 +57,17 @@ def main(args):
         print('x = ' + str(point[0]) + ' y = ' + str(point[1]))
 
     if plot_found:
-        plot_countours([c1, c2, c3, obj_f], bounds, '', points=trials, show=True)
+        evolvent_points = None
+        if len(args.evolvent_points):
+            evolvent_points = []
+            with open(args.evolvent_points, 'r') as f:
+                for line in f.readlines()[1:]:
+                    coordinates = line.strip().split(',')
+                    point = []
+                    for coord in coordinates:
+                        point.append(float(coord))
+                    evolvent_points.append(point)
+        plot_countours([c1, c2, c3, obj_f], bounds, 'example.pdf', points=trials, show=True, evolvent_points=evolvent_points)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sample for AGS solver')
@@ -67,5 +77,6 @@ if __name__ == '__main__':
     parser.add_argument('--epsR', type=float, default=0.1, help='eps-reserves for all constraints')
     parser.add_argument('--max_iters', type=int, default=10000, help='limit of iterations for the method')
     parser.add_argument('--refine_loc', action='store_true', help='Refine the global solution using a local optimizer')
+    parser.add_argument('--evolvent_points', type=str, default='', help='')
 
     main(parser.parse_args())
