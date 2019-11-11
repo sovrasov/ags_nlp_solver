@@ -333,7 +333,6 @@ void NLPSolver::EstimateOptimum()
         mOptimumEstimation.g[mOptimumEstimation.idx] > mNextPoints[i].g[mNextPoints[i].idx])
     {
       mOptimumEstimation = mNextPoints[i];
-      mNeedRefillQueue = true;
       if (mOptimumEstimation.idx == mProblem->GetConstraintsNumber() &&
           mOptimumEstimation.g[mOptimumEstimation.idx] < mParameters.stopVal)
         mNeedStop = true;
